@@ -22,6 +22,13 @@ uv.lock
 /data/processed/
 *.nb
 
+# 训练/实验产物
+outputs/
+lightning_logs/
+*.onnx
+*.ckpt
+.hydra/
+
 # Env / IDE / OS
 .env
 .idea/

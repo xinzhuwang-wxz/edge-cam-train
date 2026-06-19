@@ -1,0 +1,15 @@
+# 项目专用 conda 环境。建/更新：
+#   conda env create -f environment.yml      # 首次
+#   conda env update -f environment.yml --prune   # deps 变更后
+#   conda activate edge-cam-train
+#
+# 跨平台：macOS → CPU torch（本地 smoke）；Linux+CUDA（AutoDL）→ pip 默认装 CUDA torch。
+# 如需特定 CUDA 版本，先按 pytorch.org 指定 index-url 装 torch，再 pip install -e ".[train,dev]"。
+name: edge-cam-train
+channels:
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+      - -e .[train,dev]

@@ -104,26 +104,32 @@ data/                     DVC 跟踪：训练集 / 校准集 / .nb 产物
 
 ## 6. 命令参考
 
-> W0 阶段 `pyproject.toml` 未建，以下为**目标命令**，落地前以实际工具链为准（pegasus 子命令随 ACUITY 版本变动，见 `plan-v2.md` 附录 B.8）。
+> 环境 = **项目专用 conda env `edge-cam-train`**（`environment.yml`，含 torch/timm/lightning/
+> hydra/onnx 全栈）。`pyproject.toml` 已声明全部依赖（核心 + `[train]` + `[dev]`）。
 
 ```bash
-# 环境（待建 pyproject 后）
-uv sync                          # 或 pip install -e .
+# 环境
+conda env create -f environment.yml          # 首次；deps 变更后 conda env update --prune
+conda activate edge-cam-train
 
-# 提交前必跑
-pytest
-ruff check src tests
-ruff format src tests
+# 提交前必跑（pre-commit 同款；pytest 默认跳 slow → 快）
+pytest                                        # 全量含 torch 端到端：-m "slow or not slow"
+ruff check src tests && ruff format src tests
 
-# W1 spike（最高优先 / 最大不确定性）：一个检测器端到端跑通一帧
-#   NanoDet-Plus → export_onnx → onnxsim 静态化 → pegasus PTQ → .nb → VIPLite/awnn 上板
-#   摸清 ACUITY 算子兼容清单 + INT8 掉点；验收：一帧端到端有合理输出
+# 数据准备（CPU 本地）
+python -m edge_cam.data.prep --config configs/data/birds525.yaml
 
-# 消融（训练侧立起后）
-#   Hydra multirun: backbone × 输入分辨率 × 增强 × quant 档；aim 追踪 + DVC 版本化
+# 训练 smoke（CPU 验证框架）→ 真训改 trainer.accelerator=gpu model.pretrained=true（AutoDL）
+python -m edge_cam.train.classify.train data.manifest=data/processed/birds525/manifest.json \
+  trainer.fast_dev_run=true trainer.accelerator=cpu model.pretrained=false \
+  data.num_workers=0 data.input_size=64 hydra.job.chdir=False
+
+# 消融（plan §B.3）：Hydra multirun
+python -m edge_cam.train.classify.train -m model.name=efficientnet_lite0,mobilenetv3_large_100
 ```
 
-落地节奏见 `engineering.md §7`（W1 spike → 编排骨架 → 训练侧 → 消融 harness → gate+publish）。
+**测试纪律**：torch 端到端（训练/导出）标 `@pytest.mark.slow`，默认与 pre-commit 跳过（保提交快），
+CI/手动用 `pytest -m "slow or not slow"` 全量。落地节奏见 `engineering.md §7`；上板 spike 待有板子。
 
 ---
 
