@@ -26,6 +26,7 @@ def build_envelope(
     regional_mask: RegionalMask | None = None,
     data_root: str | None = None,
     device: str = "cpu",
+    val_only: bool = False,
 ) -> EnvelopeReport:
     """跑各级评估，组装 EnvelopeReport。
 
@@ -34,6 +35,8 @@ def build_envelope(
         int8_onnx: 给定时加 INT8 模拟级（ORT 评估，量化后 ONNX 由 quant_estimate 产出）。
         regional_mask: 给定时加「+地域过滤」级（在干净 test 上消融）。
         data_root: 换机时覆盖 manifest 记录的数据根（见 DatasetManifest.resolve_path）。
+        val_only: 只跑 fp32_val（val 集）。**消融选型用**——int8/field/regional 都触 test，
+            选型阶段不得碰 test（plan §B.0：test 仅最终各跑一次）。final winner 再跑全包络。
     """
     dm = ClassifyDataModule(
         manifest,
@@ -47,6 +50,14 @@ def build_envelope(
     # ① FP32 验证集（干净口径）
     m = evaluate_torch(model, dm.val_dataloader(), device=device)
     levels.append(LevelResult(name="fp32_val", top1=m.top1, top5=m.top5, n=m.n, note="干净验证集"))
+
+    if val_only:  # 消融选型：只看 val，不碰 test（plan §B.0）
+        return EnvelopeReport(
+            model_name=model.hparams.model_name,
+            num_classes=manifest.num_classes,
+            manifest=f"{manifest.name} {manifest.version}",
+            levels=levels,
+        )
 
     # ② 模拟 INT8（ORT-QDQ；方向性，非真实 INT8）
     if int8_onnx is not None:

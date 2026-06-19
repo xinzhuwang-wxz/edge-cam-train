@@ -80,4 +80,6 @@ def test_run_ablation_smoke(flat_imagefolder: Path, tmp_path: Path) -> None:
     rows = run_ablation(base, {"data.input_size": [64]}, manifest)
     assert len(rows) == 1
     assert "fp32_val_top1" in rows[0]
-    assert "field_top1" in rows[0]
+    # 消融默认 val_only：只在 val 选型，不碰 test（plan §B.0）→ 无 field/int8 级
+    assert "field_top1" not in rows[0]
+    assert "int8_sim_top1" not in rows[0]

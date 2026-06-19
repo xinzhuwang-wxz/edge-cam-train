@@ -29,11 +29,13 @@ def run_full_eval(
     regional_mask: RegionalMask | None = None,
     data_root: str | None = None,
     device: str | None = None,
+    val_only: bool = False,
 ) -> EnvelopeReport:
     """跑完整四级包络：fp32_onnx 给定则先 ORT-QDQ 量化出 INT8 级，再 build_envelope。
 
     单一编排点 —— run_envelope 与 ablation 都调它，避免重复拼装与 ablation 漏 INT8 级。
     device=None 自动选 GPU（torch 各级评测大幅提速；int8_sim 的 ORT 仍走 CPU）。
+    val_only=True：只在 val 上评 fp32（消融选型，不碰 test，plan §B.0）；跳过量化。
     """
     if device is None:
         import torch
@@ -41,7 +43,7 @@ def run_full_eval(
         device = "cuda" if torch.cuda.is_available() else "cpu"
 
     int8_onnx: Path | None = None
-    if fp32_onnx:
+    if fp32_onnx and not val_only:
         from edge_cam.eval.quant_estimate import quantize_int8
 
         dm = ClassifyDataModule(
@@ -62,4 +64,5 @@ def run_full_eval(
         regional_mask=regional_mask,
         data_root=data_root,
         device=device,
+        val_only=val_only,
     )

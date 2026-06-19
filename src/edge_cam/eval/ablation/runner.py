@@ -58,6 +58,7 @@ def run_ablation(
             output_dir=cfg.output_dir,
             regional_mask=regional_mask,
             data_root=cfg.data.get("data_root", None),
+            val_only=not quant,  # 消融默认只 val 选型不碰 test（§B.0）；quant 模式才跑全包络
         )
         row: dict = {"label": label_for(overrides), **overrides}
         for lv in report.levels:
