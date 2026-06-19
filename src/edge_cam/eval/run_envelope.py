@@ -41,7 +41,7 @@ def run(cfg: DictConfig) -> tuple[Path, Path]:
         manifest,
         input_size=cfg.input_size,
         batch_size=cfg.batch_size,
-        num_workers=0,
+        num_workers=cfg.get("num_workers", 4),
         fp32_onnx=cfg.get("fp32_onnx"),
         output_dir=cfg.output_dir,
         regional_mask=mask,
