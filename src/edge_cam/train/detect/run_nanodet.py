@@ -31,8 +31,12 @@ def export_nanodet_onnx(
     nanodet_repo: str | Path,
     nanodet_python: str,
     input_shape: tuple[int, int] = (320, 320),
+    verify: bool = True,
 ) -> int:
-    """调 NanoDet 自带 export_onnx.py 导 FP32 ONNX（后处理 decode/NMS 留 CPU，本仓负责）。"""
+    """调 NanoDet 自带 export_onnx.py 导 FP32 ONNX（后处理 decode/NMS 留 CPU，本仓负责）。
+
+    导出成功（returncode 0）后跑结构契约校验（FP32 静态 shape，与 classify 同一契约）。
+    """
     repo = Path(nanodet_repo)
     cmd = [
         nanodet_python,
@@ -47,4 +51,18 @@ def export_nanodet_onnx(
         f"{input_shape[0]},{input_shape[1]}",
     ]
     print(f"[nanodet] $ {' '.join(cmd)}")
-    return subprocess.run(cmd, cwd=str(repo), check=False).returncode
+    code = subprocess.run(cmd, cwd=str(repo), check=False).returncode
+    if code == 0 and verify:
+        _verify_exported(out_onnx)
+    return code
+
+
+def _verify_exported(out_onnx: str | Path) -> None:
+    """子进程导出成功后，跑共用结构契约校验（架构审查 C）。
+
+    detect 在独立环境子进程导出、本进程无 torch 模型对照 → 用 verify_onnx_loadable
+    （与 classify 侧 verify_onnx 同一「FP32·静态·可校验」契约的结构档）。"""
+    from edge_cam.train.classify.export import verify_onnx_loadable
+
+    verify_onnx_loadable(out_onnx)
+    print(f"[nanodet] ONNX 结构契约校验通过: {out_onnx}")

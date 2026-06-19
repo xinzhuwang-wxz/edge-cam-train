@@ -27,7 +27,10 @@ CONFIG_DIR = str(Path(__file__).resolve().parents[4] / "configs" / "train" / "cl
 
 
 def run(cfg: DictConfig) -> Classifier:
-    """执行一次训练（+ 可选导出）；返回训练好的 module。供测试直接调用。"""
+    """执行一次训练，返回训练好的 module（**只训练，不导出**，架构审查 C）。
+
+    导出 ONNX 属发布路职责，移到 export_classifier；消融 harness 只要模型对象、不必每格导出。
+    """
     L.seed_everything(cfg.seed, workers=True)
     manifest = DatasetManifest.load(cfg.data.manifest)
 
@@ -61,19 +64,25 @@ def run(cfg: DictConfig) -> Classifier:
         default_root_dir=cfg.output_dir,
     )
     trainer.fit(model, datamodule)
-
-    if cfg.export.enabled:
-        onnx_path = Path(cfg.output_dir) / f"{cfg.model.name}_fp32.onnx"
-        export_onnx(model, onnx_path, input_size=cfg.data.input_size, opset=cfg.export.opset)
-        ok = verify_onnx(onnx_path, model, input_size=cfg.data.input_size)
-        print(f"[export] {onnx_path} (onnxruntime 对齐: {ok})")
     return model
+
+
+def export_classifier(model: Classifier, cfg: DictConfig) -> Path | None:
+    """发布路：导 FP32 ONNX + onnxruntime 对齐校验（铁律）。cfg.export.enabled=False 则跳过。"""
+    if not cfg.export.enabled:
+        return None
+    onnx_path = Path(cfg.output_dir) / f"{cfg.model.name}_fp32.onnx"
+    export_onnx(model, onnx_path, input_size=cfg.data.input_size, opset=cfg.export.opset)
+    ok = verify_onnx(onnx_path, model, input_size=cfg.data.input_size)
+    print(f"[export] {onnx_path} (onnxruntime 对齐: {ok})")
+    return onnx_path
 
 
 @hydra.main(version_base=None, config_path=CONFIG_DIR, config_name="config")
 def main(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
-    run(cfg)
+    model = run(cfg)
+    export_classifier(model, cfg)
 
 
 if __name__ == "__main__":

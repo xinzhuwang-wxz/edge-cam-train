@@ -11,7 +11,7 @@ from omegaconf import DictConfig, OmegaConf
 
 from edge_cam.data.prep import DataPrepConfig, prepare
 from edge_cam.train.classify.module import Classifier
-from edge_cam.train.classify.train import run
+from edge_cam.train.classify.train import export_classifier, run
 
 
 def _smoke_cfg(manifest_path: Path, output_dir: Path) -> DictConfig:
@@ -57,5 +57,7 @@ def test_train_smoke_exports_onnx(flat_imagefolder: Path, tmp_path: Path) -> Non
     cfg = _smoke_cfg(manifest, tmp_path / "out")
     cfg.export.enabled = True
     cfg.data.input_size = 64
-    run(cfg)
+    model = run(cfg)  # run 只训练
+    out = export_classifier(model, cfg)  # 导出归位到发布路（架构审查 C）
+    assert out is not None and out.exists()
     assert (tmp_path / "out" / "efficientnet_lite0_fp32.onnx").exists()

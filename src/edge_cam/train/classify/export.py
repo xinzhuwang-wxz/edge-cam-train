@@ -58,7 +58,7 @@ def _try_simplify(path: Path) -> None:
 def verify_onnx(
     path: str | Path, model: nn.Module, input_size: int = 224, atol: float = 1e-3
 ) -> bool:
-    """用 onnxruntime 跑一遍，与 PyTorch 输出对齐校验（CPU）。"""
+    """onnxruntime 跑一遍与 PyTorch 输出对齐校验（CPU）。classify 进程内导出用（有 torch 对照）。"""
     import numpy as np
     import onnxruntime as ort
 
@@ -70,3 +70,20 @@ def verify_onnx(
     sess = ort.InferenceSession(str(path), providers=["CPUExecutionProvider"])
     out = np.asarray(sess.run(None, {"input": dummy.numpy()})[0])
     return bool(np.allclose(ref, out, atol=atol))
+
+
+def verify_onnx_loadable(path: str | Path) -> bool:
+    """结构校验：onnx.checker 通过 + 输入为静态 shape（无动态维）。
+
+    「FP32 + 静态 + 可校验」是上 ACUITY 的产物契约（架构审查 C）。无 torch 模型对照时用
+    （如 detect 子进程导出后）；classify 侧另有 verify_onnx 做输出对齐。
+    """
+    import onnx
+
+    model = onnx.load(str(path))
+    onnx.checker.check_model(model)
+    for inp in model.graph.input:
+        for dim in inp.type.tensor_type.shape.dim:
+            if dim.dim_param:  # 动态维（命名符号）→ 违反静态 shape 契约
+                raise ValueError(f"ONNX 含动态维 {dim.dim_param!r}（pegasus 需静态 shape）: {path}")
+    return True
