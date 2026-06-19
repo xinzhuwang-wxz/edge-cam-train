@@ -26,6 +26,22 @@ from edge_cam.train.classify.module import Classifier
 CONFIG_DIR = str(Path(__file__).resolve().parents[4] / "configs" / "train" / "classify")
 
 
+def build_logger(cfg: DictConfig):
+    """可选 aim 实验追踪（track.aim=true 且 aim 可用时）；否则 None → Lightning 用默认。
+
+    惰性 import：未装 [track]（aim）也不报错，只是不追踪。消融对比的可追溯性靠它。
+    """
+    track = cfg.get("track")
+    if not (track and track.get("aim")):
+        return None
+    try:
+        from aim.pytorch_lightning import AimLogger
+    except ImportError:
+        print("[track] aim 未安装（pip install -e '.[track]'）→ 跳过 aim 追踪")
+        return None
+    return AimLogger(experiment=cfg.model.name)
+
+
 def run(cfg: DictConfig) -> Classifier:
     """执行一次训练，返回训练好的 module（**只训练，不导出**，架构审查 C）。
 
@@ -61,6 +77,7 @@ def run(cfg: DictConfig) -> Classifier:
         limit_train_batches=cfg.trainer.limit_train_batches,
         limit_val_batches=cfg.trainer.limit_val_batches,
         log_every_n_steps=cfg.trainer.log_every_n_steps,
+        logger=build_logger(cfg),  # 可选 aim 追踪（track.aim=true）
         default_root_dir=cfg.output_dir,
     )
     trainer.fit(model, datamodule)

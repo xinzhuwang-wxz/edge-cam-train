@@ -11,7 +11,13 @@ from omegaconf import DictConfig, OmegaConf
 
 from edge_cam.data.prep import DataPrepConfig, prepare
 from edge_cam.train.classify.module import Classifier
-from edge_cam.train.classify.train import export_classifier, run
+from edge_cam.train.classify.train import build_logger, export_classifier, run
+
+
+def test_build_logger_off_returns_none() -> None:
+    """track 缺省/关 → None（Lightning 用默认，不依赖 aim）。"""
+    assert build_logger(OmegaConf.create({"model": {"name": "x"}})) is None
+    assert build_logger(OmegaConf.create({"model": {"name": "x"}, "track": {"aim": False}})) is None
 
 
 def _smoke_cfg(manifest_path: Path, output_dir: Path) -> DictConfig:

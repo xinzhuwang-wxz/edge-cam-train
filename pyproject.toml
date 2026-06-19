@@ -28,6 +28,11 @@ train = [
     "onnx>=1.16",
     "onnxruntime>=1.17",
 ]
+# 实验追踪 + 数据版本（engineering §6）：aim 跟踪训练/消融指标、dvc 版本化数据/校准集/.nb。
+track = [
+    "aim>=3.17",
+    "dvc>=3.0",
+]
 # 数据准备（离线 dev 机）：FiftyOne 拉 COCO/OIV7 + 可视化/导出。mongodb 由 fiftyone 自带。
 data = [
     "fiftyone>=1.0",

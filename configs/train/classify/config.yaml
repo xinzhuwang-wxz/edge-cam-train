@@ -33,3 +33,6 @@ trainer:
 export:
   enabled: true # 训完导 FP32 ONNX（engineering 铁律）
   opset: 13
+
+track:
+  aim: false # true=接 aim 实验追踪（需 pip install -e ".[track]"）；消融真跑时开

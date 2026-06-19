@@ -130,6 +130,7 @@ python -m edge_cam.eval.run_envelope manifest=data/processed/birds525/manifest.j
 
 ## 6. 不在本清单内（明确边界）
 
-- DVC 远端 / 实验追踪（aim）接入 —— 见审计工程债，可后续补。
+- 实验追踪：`pip install -e ".[track]"` + 训练加 `track.aim=true` → aim 记录消融 run；
+  数据版本：`dvc` 已 init，`dvc remote add` 配你的对象存储后 `dvc add <artifact>` 跟踪（remote 待配）。
 - 检测框 MegaDetector bootstrap、OIV7 署名清册 —— TODO。
 - 板上 latency/精度回灌 —— 需有板子（engineering §8.1）。
