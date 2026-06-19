@@ -39,21 +39,22 @@
 ```
 src/edge_cam/
 ├── core/                 配置(Hydra)/logging/seed/paths/coords
-├── contracts/schemas/    pydantic: model_card / eval_report（含边侧 Literal + 版本）
-├── registry/             自建薄层 或 MLflow：store/manifest/publish/verify
+├── contracts/schemas/    pydantic: dataset/model_card/eval_report/channel/detection(打标契约)
+├── registry/             自建薄层: store(git-yaml) + promotion(包络+gate→ModelCard→register/promote)
 ├── deploy/
-│   ├── manifest_api/     FastAPI OTA routes
+│   ├── manifest_api/     FastAPI OTA routes (+channel policy)
 │   └── packager/acuity_packager.py   ★ subprocess 调 pegasus PTQ→.nb
-├── data/                 ★ 数据准备 pipeline（离线 dev/GPU 机；FiftyOne/MegaDetector/crop/taxonomy/split/calib）
+├── data/                 ★ 数据准备 pipeline（FiftyOne/crop/taxonomy(eBird)/split/calib/merge_map）
 ├── train/
 │   ├── detect/           ★ NanoDet-Plus 包一层（导 FP32 ONNX）
-│   └── classify/         ★ timm + Lightning + Hydra
-├── eval/
-│   ├── ablation/         ★ Hydra multirun harness + metrics
-│   ├── gates/            ★ fp32+int8 两档 4 维阈值门
+│   └── classify/         ★ timm + Lightning + Hydra（train 只训练，export 归发布路）
+├── eval/                 envelope/full_eval(编排seam)/metrics/regional/detect_metrics
+│   ├── ablation/         ★ Hydra multirun harness
+│   ├── gates/gate.py     ★ fp32+int8 两档 4 维阈值门（+from_yaml）
 │   └── quant_estimate.py ★ ORT-QDQ 本地掉点预估（消融列，不进部署）
 └── edge/viplite_runner/  ★ ctypes 调 VIPLite（借 frigate 蓝本；输出 CHW reshape）
-configs/                  Hydra: ablation/ · eval/gates/ · channels/
+scripts/                  离线工具: setup_nanodet.sh / build_ebird_mapping.py / build_region_list.py
+configs/                  Hydra: ablation/ · eval/gates/ · channels/ · data/
 data/                     DVC 跟踪：训练集 / 校准集 / .nb 产物
 ```
 
