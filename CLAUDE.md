@@ -95,7 +95,10 @@ data/                     DVC 跟踪：训练集 / 校准集 / .nb 产物
 - **不可逆决策先开 ADR**：写进 `docs/decisions/`，再动代码。
 - **每阶段产物可追溯**：消融结果进实验总表，模型/数据进 DVC + registry，提交信息关联 issue。
 
-> ✅ **护栏在位（核对清单）**：`git`（remote=origin 指向上述 GitHub）、`pyproject.toml`（ruff+pytest）、`.pre-commit-config.yaml`（`pre-commit install` 已装，提交前跑 ruff+ruff-format+pytest）、`.claude/`（PreToolUse hook 拦截 `git push`/`reset --hard`/`clean -f`/`branch -D` 等）均已就绪。新会话核对：`pre-commit run --all-files` 三项全过、`echo '{"tool_input":{"command":"git push"}}' | .claude/hooks/block-dangerous-git.sh` 应 exit 2。GitHub 侧 Issues/标签（`ready-for-agent`/`hitl`）已配。
+> ✅ **护栏在位（核对清单）**：`git`（remote=origin 指向上述 GitHub）、`pyproject.toml`（ruff+pytest）、`.pre-commit-config.yaml`（`pre-commit install` 已装，提交前跑 ruff+ruff-format+pytest）、`.claude/`（PreToolUse hook）均已就绪。
+>
+> **危险命令拦截的边界（重要）**：hook **只拦不可逆/破坏性**操作 —— `push --force`/`--force-with-lease`、经 push 删远端分支（`--delete` / `:ref`）、`reset --hard`、`clean -f`、`branch -D`、`checkout .`/`restore .`（丢工作区）。**正常开发流放行** —— 普通 `git push`、`commit`、`fetch`/`pull`、切分支等 AI 可直接执行（护栏不挡日常协作，也不挡开 PR/issue）。被拦的命令如确需执行，请用户用 `! <command>` 亲自运行。
+> 新会话核对：`pre-commit run --all-files` 三项全过；`echo '{"tool_input":{"command":"git push --force"}}' | .claude/hooks/block-dangerous-git.sh` 应 exit 2，而 `"git push"` 应 exit 0。GitHub 侧 Issues/标签（`ready-for-agent`/`hitl`）已配。
 
 ---
 
