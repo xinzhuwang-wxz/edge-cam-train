@@ -19,7 +19,7 @@ from pydantic import BaseModel
 from edge_cam.contracts.schemas.dataset import DatasetManifest, SampleRecord
 from edge_cam.data.ingest import scan_imagefolder
 from edge_cam.data.split import stratified_split
-from edge_cam.data.taxonomy import IdentityTaxonomy, Taxonomy
+from edge_cam.data.taxonomy import EbirdTaxonomy, IdentityTaxonomy, Taxonomy
 
 
 class DataPrepConfig(BaseModel):
@@ -35,15 +35,26 @@ class DataPrepConfig(BaseModel):
     source: str = "unknown"
     license: str = "unknown"
     out_path: str | None = None
+    # taxonomy（ADR-0002）：给定 csv（label,ebird_code 两列）→ EbirdTaxonomy 解析规范键；
+    # 留空 → IdentityTaxonomy 占位（feasibility，非 eBird 键）
+    taxonomy_csv: str | None = None
+    taxonomy_version: str = "ebird-unversioned"
 
     @classmethod
     def from_yaml(cls, path: str | Path) -> DataPrepConfig:
         return cls.model_validate(yaml.safe_load(Path(path).read_text(encoding="utf-8")))
 
 
+def taxonomy_from_config(config: DataPrepConfig) -> Taxonomy:
+    """据 config 选 taxonomy adapter（ADR-0002）：有 csv → EbirdTaxonomy，否则 Identity 占位。"""
+    if config.taxonomy_csv:
+        return EbirdTaxonomy.from_csv(config.taxonomy_csv, version=config.taxonomy_version)
+    return IdentityTaxonomy()
+
+
 def build_manifest(config: DataPrepConfig, taxonomy: Taxonomy | None = None) -> DatasetManifest:
     """扫描 → 分层 split → 归一 taxonomy → 组装 manifest（不落盘）。"""
-    taxonomy = taxonomy or IdentityTaxonomy()
+    taxonomy = taxonomy or taxonomy_from_config(config)
     items = scan_imagefolder(config.root, splits=config.splits)
     if not items:
         raise ValueError(f"prep: {config.root} 未扫到任何图片")
