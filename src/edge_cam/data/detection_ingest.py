@@ -65,28 +65,31 @@ def build_detection_dataset(config: DetectionDataConfig) -> Path:
     out.mkdir(parents=True, exist_ok=True)
     summary: dict[str, int] = {}
 
+    def _try_load(zoo_name: str, labels: list[str], mapping: dict[str, str], split: str, merged):
+        """单源加载容错：网络抖动只丢该源该 split，不整体崩（fiftyone 已下缓存可断点续）。"""
+        if not labels:
+            return
+        try:
+            ds = foz.load_zoo_dataset(
+                zoo_name,
+                split=split,
+                label_types=["detections"],
+                classes=labels,
+                max_samples=config.max_per_class * len(labels),
+            )
+            _relabel_to_unified(ds, mapping)
+            merged.add_samples(ds)
+        except Exception as exc:  # noqa: BLE001 — 下载抖动不应终止整条流水
+            print(f"[detection][WARN] {zoo_name}/{split} 加载失败（重跑可断点续）：{exc!r}")
+
     for split in config.splits:
         merged = fo.Dataset()
-        if coco_labels:
-            ds = foz.load_zoo_dataset(
-                "coco-2017",
-                split=split,
-                label_types=["detections"],
-                classes=coco_labels,
-                max_samples=config.max_per_class * len(coco_labels),
-            )
-            _relabel_to_unified(ds, coco_map)
-            merged.add_samples(ds)
-        if oiv7_labels:
-            ds = foz.load_zoo_dataset(
-                "open-images-v7",
-                split=split,
-                label_types=["detections"],
-                classes=oiv7_labels,
-                max_samples=config.max_per_class * len(oiv7_labels),
-            )
-            _relabel_to_unified(ds, oiv7_map)
-            merged.add_samples(ds)
+        _try_load("coco-2017", coco_labels, coco_map, split, merged)
+        _try_load("open-images-v7", oiv7_labels, oiv7_map, split, merged)
+        if merged.count() == 0:
+            print(f"[detection][WARN] split={split} 无样本，跳过导出")
+            merged.delete()
+            continue
 
         merged.export(
             export_dir=str(out / split),
