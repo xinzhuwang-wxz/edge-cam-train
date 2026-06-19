@@ -39,7 +39,8 @@ def build_logger(cfg: DictConfig):
     except ImportError:
         print("[track] aim 未安装（pip install -e '.[track]'）→ 跳过 aim 追踪")
         return None
-    return AimLogger(experiment=cfg.model.name)
+    # log_system_params=False：关掉系统信息采集（在该 GPU 云上会 hang 住训练启动，实跑踩到）
+    return AimLogger(experiment=cfg.model.name, log_system_params=False)
 
 
 def run(cfg: DictConfig) -> Classifier:
