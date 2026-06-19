@@ -11,8 +11,10 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from edge_cam.data.detection_classes import (
-    DetectionDataConfig,
+from edge_cam.data.detection_classes import DetectionDataConfig
+
+# 统一大类映射经 merge_map（§6 合并入口 / §C.9 显式映射）
+from edge_cam.data.merge_map import (
     class_index,
     coco_to_unified,
     oiv7_to_unified,
