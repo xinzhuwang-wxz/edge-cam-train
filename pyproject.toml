@@ -33,6 +33,11 @@ data = [
     "fiftyone>=1.0",
     "pycocotools>=2.0",
 ]
+# OTA manifest API（FastAPI）+ registry 服务端
+serve = [
+    "fastapi>=0.110",
+    "uvicorn>=0.27",
+]
 dev = [
     "ruff>=0.12",
     "pytest>=8",

@@ -12,4 +12,4 @@ dependencies:
   - python=3.10
   - pip
   - pip:
-      - -e .[train,dev]
+      - -e .[train,dev,data,serve]
