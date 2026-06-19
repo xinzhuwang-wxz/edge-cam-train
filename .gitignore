@@ -35,3 +35,4 @@ lightning_logs/
 .vscode/
 .DS_Store
 third_party/
+weights/

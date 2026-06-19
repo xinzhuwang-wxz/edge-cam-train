@@ -1,0 +1,6 @@
+# 分类器消融网格（plan §B.3）。单变量受控：backbone × 输入分辨率。
+# 跑：见 eval/ablation/runner.run_ablation（base = configs/train/classify/config.yaml）
+# GPU 真跑；本地 smoke 用小 grid + fast_dev_run。
+grid:
+  model.name: [efficientnet_lite0, mobilenetv3_large_100, repvgg_a0]
+  data.input_size: [192, 224]
