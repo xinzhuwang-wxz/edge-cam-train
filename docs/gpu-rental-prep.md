@@ -86,14 +86,37 @@ python -m edge_cam.train.classify.train -m \
 > `data_root` 留空（null）时回退到 manifest 里记录的 mac 本地 root —— 卡上**必须覆盖**，
 > 否则路径不存在。manifest 本身无需重生成。
 
-### 检测器（NanoDet-Plus 基线）
+### 检测器（NanoDet-Plus，B.2）—— 需先建独立环境
+
+NanoDet 用旧版 pytorch-lightning，跑在**独立 conda env**（与本仓隔离）。一次性搭建：
 
 ```bash
-# nanodet config patcher 指向上传后的 detection_feeder 目录（train/val 各 data+labels.json）
-python -m edge_cam.train.detect.run_nanodet \
-  --data-root <BOX>/data/processed/detection_feeder \
-  --weights weights/nanodet/nanodet-plus-m_416_checkpoint.ckpt
+bash scripts/setup_nanodet.sh     # 建 nanodet env + 装依赖 + 锁版；打印训练/eval/导出四步命令
 ```
+
+之后：① 在 edge-cam-train env 生成 config（指向 detection_feeder）→ ② nanodet env 跑
+`tools/train.py` → ③ `tools/test.py` 出 mAP（**手动汇总进消融表**，本仓不含检测 mAP 评测）
+→ ④ `tools/export_onnx.py` 导 FP32 ONNX（本仓自动跑结构契约校验）。详见脚本输出。
+
+### 地域过滤（B.5）—— eBird 映射 + 区域清单
+
+`taxon_key` 已是 eBird code（`data/processed/birds525/ebird_map.csv`，377/525 自动匹配，随 git）。
+要跑 B.5「地域过滤 on/off 对比」还需一份**区域在场物种清单**：
+
+```bash
+# 真实区域（需免费 eBird API key）→ 有意义的对比
+curl -H "X-eBirdApiToken: <KEY>" "https://api.ebird.org/v2/product/spplist/US-CA" -o region_codes.json
+python scripts/build_region_list.py --codes-file region_codes.json \
+  --map data/processed/birds525/ebird_map.csv --out regions/us_ca.json
+
+# 然后评估时带上 regional_json → 出 ④ regional 级
+python -m edge_cam.eval.run_envelope manifest=data/processed/birds525/manifest.json \
+  ckpt=<...> fp32_onnx=<...> regional_json=regions/us_ca.json
+```
+
+> 未填真实区域时可 `--demo` 生成占位清单**仅验证机制**（数字无地域意义）。
+> 未匹配 eBird 的 148 类（BIRDS-525 笔误/泛称）`taxon_key=None`，不进区域 mask；
+> 需要时编辑 `ebird_map.csv` 人工补别名后重跑 prep。
 
 ---
 

@@ -14,3 +14,7 @@ min_train_per_class: 1
 source: "kaggle:birds-525 (DST1192)"
 license: "unverified — feasibility-only, NOT for commercial weights"
 out_path: "data/processed/birds525/manifest.json"
+# eBird 规范键映射（ADR-0002）：taxon_key=eBird code，供地域过滤(B.5)/层级回退。
+# 由 scripts/build_ebird_mapping.py 生成；当前 377/525 自动匹配，余需人工补别名。
+taxonomy_csv: "data/processed/birds525/ebird_map.csv"
+taxonomy_version: "ebird-2024"

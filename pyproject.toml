@@ -77,7 +77,8 @@ markers = [
     "slow: 重型 torch 端到端（训练/ONNX 导出）；默认与 pre-commit 跳过，CI/手动全量跑",
 ]
 # 让 pytest 不依赖 editable install 也能 import edge_cam（W0 便利；装包后仍兼容）
-pythonpath = ["src"]
+# "." 让测试可 import scripts/ 下的离线工具脚本（build_ebird_mapping 等）
+pythonpath = ["src", "."]
 
 # ----------------------------------------------------------------------------
 # pyright/pylance: src layout，让编辑器解析 edge_cam 包

@@ -25,6 +25,8 @@ uv.lock
 !/data/processed/birds525
 /data/processed/birds525/*
 !/data/processed/birds525/manifest.json
+!/data/processed/birds525/ebird_map.csv
+# 注：ebird_taxonomy.csv(1.47M, 可 curl 重拉)仍 ignore；ebird_map.csv(小, 可移植) 随 git
 *.nb
 
 # 训练/实验产物
