@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# uv
+uv.lock
+
+# DVC 实际数据由 DVC 跟踪；原始大文件不进 git
+/data/raw/
+/data/interim/
+/data/processed/
+*.nb
+
+# Env / IDE / OS
+.env
+.idea/
+.vscode/
+.DS_Store
