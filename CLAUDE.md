@@ -95,7 +95,7 @@ data/                     DVC 跟踪：训练集 / 校准集 / .nb 产物
 - **不可逆决策先开 ADR**：写进 `docs/decisions/`，再动代码。
 - **每阶段产物可追溯**：消融结果进实验总表，模型/数据进 DVC + registry，提交信息关联 issue。
 
-> ⚠️ **当前护栏缺口（W0）**：本地尚未 `git init`、无 `pyproject.toml`、无 `.pre-commit-config.yaml`。新会话做阶段 0 核对时，若要落地护栏，先补这三样（GitHub 侧 Issues/标签已配）。
+> ✅ **护栏在位（核对清单）**：`git`（remote=origin 指向上述 GitHub）、`pyproject.toml`（ruff+pytest）、`.pre-commit-config.yaml`（`pre-commit install` 已装，提交前跑 ruff+ruff-format+pytest）、`.claude/`（PreToolUse hook 拦截 `git push`/`reset --hard`/`clean -f`/`branch -D` 等）均已就绪。新会话核对：`pre-commit run --all-files` 三项全过、`echo '{"tool_input":{"command":"git push"}}' | .claude/hooks/block-dangerous-git.sh` 应 exit 2。GitHub 侧 Issues/标签（`ready-for-agent`/`hitl`）已配。
 
 ---
 
