@@ -1,0 +1,10 @@
+# 质量门阈值（plan §B.7 硬门 / §B.1「fp32+int8 两档 4 维」）。
+# 加载：GateThresholds.from_yaml(...)；判定：eval/gates/gate.py:evaluate_gate（设了的取 AND）。
+#
+# 默认全 null = 不设硬门 —— 呼应 ADR-0001「先看包络再定数」：W1 先跑出 fp32/int8/field/regional
+# 包络，看清真实分布后，再把下面的建议起步值取消注释、按数据收紧。
+
+min_fp32_top1: null # fp32 验证集 top-1 下限。建议起步 ~0.85（细粒度 525 类，看包络定）
+min_regional_top1: null # 地域过滤后 top-1 下限（§5.4 杠杆）。建议 ≥ fp32 裸值
+max_int8_drop: null # int8_sim 相对 fp32 的 top-1 掉点上限。建议起步 0.05（§B.4 实测后收紧）
+max_field_drop: null # 类现场相对 fp32 的 top-1 掉点上限。建议起步 0.15（§8 domain-gap，曾见 ~11pt）

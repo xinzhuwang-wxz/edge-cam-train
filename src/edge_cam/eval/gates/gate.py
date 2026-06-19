@@ -6,8 +6,19 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from pathlib import Path
+
+import yaml
 
 from edge_cam.contracts.schemas.eval_report import EnvelopeReport
+
+# from_yaml 只认这些键（4 维阈值门，plan §B.1）；多余键报错防配置漂移
+_THRESHOLD_KEYS = {
+    "min_fp32_top1",
+    "min_regional_top1",
+    "max_int8_drop",
+    "max_field_drop",
+}
 
 
 @dataclass
@@ -16,6 +27,17 @@ class GateThresholds:
     min_regional_top1: float | None = None
     max_int8_drop: float | None = None  # int8_sim 相对 fp32 的 top-1 掉点上限
     max_field_drop: float | None = None  # 类现场相对 fp32 的 top-1 掉点上限
+
+    @classmethod
+    def from_yaml(cls, path: str | Path) -> GateThresholds:
+        """从 yaml 加载阈值（缺省键 = None = 不设该维硬门，呼应 ADR-0001）。"""
+        raw = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
+        unknown = set(raw) - _THRESHOLD_KEYS
+        if unknown:
+            raise ValueError(
+                f"gate 配置含未知键 {sorted(unknown)}（允许：{sorted(_THRESHOLD_KEYS)}）"
+            )
+        return cls(**{k: raw[k] for k in _THRESHOLD_KEYS if k in raw})
 
 
 @dataclass
