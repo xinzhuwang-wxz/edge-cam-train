@@ -1,0 +1,18 @@
+# 可行性包络评估配置（Hydra）。GPU 真训后跑：
+#   python -m edge_cam.eval.run_envelope manifest=data/processed/birds525/manifest.json \
+#     ckpt=outputs/classify/.../epoch=xx.ckpt fp32_onnx=outputs/classify/.../efficientnet_lite0_fp32.onnx
+manifest: data/processed/birds525/manifest.json
+ckpt: null # Lightning checkpoint；null 时用随机权重（仅验证机制）
+model_name: efficientnet_lite0 # 无 ckpt 时建模用
+fp32_onnx: null # 给定则就地 ORT-QDQ 量化出 INT8 级
+regional_json: null # taxon_key 数组 json；给定则加「+地域过滤」级
+input_size: 224
+batch_size: 64
+output_dir: outputs/envelope
+
+# 质量门阈值（默认全 null = 不设硬门，先看包络再定，ADR-0001）
+gate:
+  min_fp32_top1: null
+  min_regional_top1: null
+  max_int8_drop: null
+  max_field_drop: null

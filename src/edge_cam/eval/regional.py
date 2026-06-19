@@ -7,6 +7,9 @@ mask 以 taxon_key 表达（与训练解耦、可 OTA）→ 经 manifest 的 lab
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import torch
 
 NEG_INF = float("-inf")
@@ -39,6 +42,14 @@ class RegionalMask:
         """
         idx = {class_to_idx[label] for label, key in taxon_of.items() if key in allowed_keys}
         return cls(idx, num_classes=len(class_to_idx))
+
+    @classmethod
+    def from_json(
+        cls, path: str | Path, class_to_idx: dict[str, int], taxon_of: dict[str, str]
+    ) -> RegionalMask:
+        """从 json（taxon_key 字符串数组）加载区域清单。"""
+        keys = set(json.loads(Path(path).read_text(encoding="utf-8")))
+        return cls.from_taxon_keys(keys, class_to_idx, taxon_of)
 
     def as_transform(self):
         """返回作用于 logits 的 callable（disallowed 列置 -inf）。"""
