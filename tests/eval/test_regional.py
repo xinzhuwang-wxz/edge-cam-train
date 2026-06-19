@@ -37,3 +37,12 @@ def test_empty_and_oob_rejected() -> None:
         RegionalMask(set(), num_classes=3)
     with pytest.raises(ValueError):
         RegionalMask({5}, num_classes=3)
+
+
+def test_key_mismatch_raises_diagnostic() -> None:
+    """区域清单与 manifest taxon_key 不同套（如 eBird vs 占位小写名）→ 报清楚的契约错。"""
+    class_to_idx = {"sparrow": 0, "robin": 1}
+    taxon_of = {"sparrow": "sparrow", "robin": "robin"}  # IdentityTaxonomy 占位风格
+    with pytest.raises(ValueError, match="交集为 0"):
+        # 区域清单用 eBird code，对不上占位键
+        RegionalMask.from_taxon_keys({"houspa", "amerob"}, class_to_idx, taxon_of)

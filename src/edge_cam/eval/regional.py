@@ -35,12 +35,28 @@ class RegionalMask:
     ) -> RegionalMask:
         """由地域 taxon_key 清单 + manifest 映射构建。
 
+        **契约（显式校验，非仅注释）**：allowed_keys 与 taxon_of 的值必须是**同一套规范键**
+        （应为 eBird/Clements key）。若交集为空，几乎总是因为 taxonomy 仍是占位
+        （IdentityTaxonomy 产小写俗名，对不上 eBird 清单）—— 报清楚而非抛「集合为空」。
+
         Args:
             allowed_keys: 区域「在场」物种的 taxon_key 集合。
             class_to_idx: manifest 的 label→idx。
             taxon_of: label→taxon_key（与 manifest 同源，防 index 漂移）。
         """
-        idx = {class_to_idx[label] for label, key in taxon_of.items() if key in allowed_keys}
+        manifest_keys = set(taxon_of.values())
+        if not (allowed_keys & manifest_keys):
+            raise ValueError(
+                f"RegionalMask: 区域清单({len(allowed_keys)} keys)与 manifest taxon_key"
+                f"({len(manifest_keys)} keys)交集为 0。检查 taxonomy 是否已解析到 eBird 规范键"
+                "（IdentityTaxonomy 占位产小写俗名，对不上 eBird 清单）。"
+            )
+        # label 必在 class_to_idx（taxon_of 与 class_to_idx 同源 manifest）；防御性 guard
+        idx = {
+            class_to_idx[label]
+            for label, key in taxon_of.items()
+            if key in allowed_keys and label in class_to_idx
+        }
         return cls(idx, num_classes=len(class_to_idx))
 
     @classmethod
