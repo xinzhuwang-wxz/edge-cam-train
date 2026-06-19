@@ -51,3 +51,10 @@ testpaths = ["tests"]
 addopts = "-ra"
 # 让 pytest 不依赖 editable install 也能 import edge_cam（W0 便利；装包后仍兼容）
 pythonpath = ["src"]
+
+# ----------------------------------------------------------------------------
+# pyright/pylance: src layout，让编辑器解析 edge_cam 包
+# ----------------------------------------------------------------------------
+[tool.pyright]
+extraPaths = ["src"]
+include = ["src", "tests"]
