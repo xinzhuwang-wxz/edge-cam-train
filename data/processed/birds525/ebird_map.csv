@@ -6,6 +6,7 @@ AFRICAN EMERALD CUCKOO,afecuc1,Chrysococcyx cupreus
 AFRICAN FIREFINCH,afffin,Lagonosticta rubricata
 AFRICAN OYSTER CATCHER,afroys1,Haematopus moquini
 AFRICAN PYGMY GOOSE,afrpyg1,Nettapus auritus
+ALBERTS TOWHEE,abetow,Melozone aberti
 ALEXANDRINE PARAKEET,alepar2,Psittacula eupatria
 ALTAMIRA YELLOWTHROAT,altyel1,Geothlypis flavovelata
 AMERICAN AVOCET,ameavo,Recurvirostra americana
@@ -61,10 +62,14 @@ BLACK FRANCOLIN,blkfra,Francolinus francolinus
 BLACK NECKED STILT,bknsti,Himantopus mexicanus
 BLACK SKIMMER,blkski,Rynchops niger
 BLACK SWAN,blkswa,Cygnus atratus
+BLACK TAIL CRAKE,bltcra1,Zapornia bicolor
+BLACK THROATED BUSHTIT,blttit2,Aegithalos concinnus
 BLACK VENTED SHEARWATER,bkvshe,Puffinus opisthomelas
 BLACK VULTURE,blkvul,Coragyps atratus
 BLACK-CAPPED CHICKADEE,bkcchi,Poecile atricapillus
 BLACK-THROATED SPARROW,bktspa,Amphispiza bilineata
+BLACKBURNIAM WARBLER,bkbwar,Setophaga fusca
+BLONDE CRESTED WOODPECKER,blcwoo4,Celeus flavescens
 BLOOD PHEASANT,blophe1,Ithaginis cruentus
 BLUE DACNIS,bludac1,Dacnis cayana
 BLUE GRAY GNATCATCHER,buggna,Polioptila caerulea
@@ -74,8 +79,11 @@ BLUE THROATED PIPING GUAN,butpig1,Pipile cumanensis
 BOBOLINK,boboli,Dolichonyx oryzivorus
 BORNEAN BRISTLEHEAD,borbri1,Pityriasis gymnocephala
 BORNEAN LEAFBIRD,borlea1,Chloropsis kinabaluensis
+BRANDT CORMARANT,bracor,Urile penicillatus
 BREWERS BLACKBIRD,brebla,Euphagus cyanocephalus
+BROWN CREPPER,brncre,Certhia americana
 BROWN HEADED COWBIRD,bnhcow,Molothrus ater
+BROWN NOODY,brnnod,Anous stolidus
 BROWN THRASHER,brnthr,Toxostoma rufum
 BUFFLEHEAD,buffle,Bucephala albeola
 BULWERS PHEASANT,bulphe1,Lophura bulweri
@@ -96,6 +104,7 @@ CASPIAN TERN,caster1,Hydroprogne caspia
 CEDAR WAXWING,cedwax,Bombycilla cedrorum
 CERULEAN WARBLER,cerwar,Setophaga cerulea
 CHATTERING LORY,chalor1,Lorius garrulus
+CHESTNET BELLIED EUPHONIA,chbeup1,Euphonia pectoralis
 CHESTNUT WINGED CUCKOO,chwcuc1,Clamator coromandus
 CHINESE BAMBOO PARTRIDGE,chbpar3,Bambusicola thoracicus
 CHINESE POND HERON,chpher1,Ardeola bacchus
@@ -128,6 +137,7 @@ CRIMSON CHAT,cricha1,Epthianura tricolor
 CRIMSON SUNBIRD,eacsun1,Aethopyga siparaja
 CUBAN TODY,cubtod1,Todus multicolor
 CUBAN TROGON,cubtro1,Priotelus temnurus
+CURL CRESTED ARACURI,cucara1,Pteroglossus beauharnaisii
 D-ARNAUDS BARBET,darbar1,Trachyphonus darnaudii
 DALMATIAN PELICAN,dalpel1,Pelecanus crispus
 DARJEELING WOODPECKER,darwoo1,Dendrocopos darjellensis
@@ -135,14 +145,18 @@ DARK EYED JUNCO,daejun,Junco hyemalis
 DAURIAN REDSTART,daured1,Phoenicurus auroreus
 DEMOISELLE CRANE,demcra1,Grus virgo
 DOUBLE BARRED FINCH,dobfin1,Stizoptera bichenovii
+DOUBLE BRESTED CORMARANT,doccor,Nannopterum auritum
 DOUBLE EYED FIG PARROT,defpar1,Cyclopsitta diophthalma
 DOWNY WOODPECKER,dowwoo,Dryobates pubescens
 DUNLIN,dunlin,Calidris alpina
 DUSKY LORY,duslor1,Chalcopsitta fuscata
 DUSKY ROBIN,dusrob1,Melanodryas vittata
+EARED PITA,earpit1,Hydrornis phayrei
 EASTERN BLUEBIRD,easblu,Sialia sialis
 EASTERN MEADOWLARK,easmea,Sturnella magna
 EASTERN ROSELLA,easros1,Platycercus eximius
+EASTERN TOWEE,eastow,Pipilo erythrophthalmus
+EASTERN WIP POOR WILL,easwpw1,Antrostomus vociferus
 EASTERN YELLOW ROBIN,yelrob1,Eopsaltria australis
 ECUADORIAN HILLSTAR,ecuhil1,Oreotrochilus chimborazo
 EGYPTIAN GOOSE,egygoo,Alopochen aegyptiaca
@@ -160,6 +174,7 @@ EVENING GROSBEAK,evegro,Hesperiphona vespertina
 FASCIATED WREN,faswre1,Campylorhynchus fasciatus
 FIERY MINIVET,fiemin1,Pericrocotus igneus
 FIORDLAND PENGUIN,fiopen1,Eudyptes pachyrhynchus
+FIRE TAILLED MYZORNIS,fitmyz1,Myzornis pyrrhoura
 FLAME BOWERBIRD,flabow2,Sericulus ardens
 FOREST WAGTAIL,forwag1,Dendronanthus indicus
 GAMBELS QUAIL,gamqua,Callipepla gambelii
@@ -187,8 +202,13 @@ GREAT TINAMOU,gretin1,Tinamus major
 GREAT XENOPS,grexen1,Megaxenops parnaguae
 GREATER PEWEE,grepew,Contopus pertinax
 GREATER PRAIRIE CHICKEN,grpchi,Tympanuchus cupido
+GREATOR SAGE GROUSE,saggro,Centrocercus urophasianus
 GREEN BROADBILL,grebro1,Calyptomena viridis
 GREEN JAY,grnjay,Cyanocorax yncas
+GREY CUCKOOSHRIKE,grycus1,Ceblepyris caesius
+GREY HEADED CHACHALACA,grhcha1,Ortalis cinereiceps
+GREY HEADED FISH EAGLE,gyhfie1,Icthyophaga ichthyaetus
+GROVED BILLED ANI,grbani,Crotophaga sulcirostris
 GUINEA TURACO,guitur1,Tauraco persa
 GURNEYS PITTA,gurpit1,Hydrornis gurneyi
 GYRFALCON,gyrfal,Falco rusticolus
@@ -244,6 +264,7 @@ MAGPIE GOOSE,maggoo1,Anseranas semipalmata
 MALACHITE KINGFISHER,malkin1,Corythornis cristatus
 MALAGASY WHITE EYE,madwhe1,Zosterops maderaspatanus
 MALEO,maleo1,Macrocephalon maleo
+MANDRIN DUCK,manduc,Aix galericulata
 MANGROVE CUCKOO,mancuc,Coccyzus minor
 MARABOU STORK,marsto1,Leptoptilos crumenifer
 MASKED BOOBY,masboo,Sula dactylatra
@@ -269,6 +290,7 @@ OCELLATED TURKEY,ocetur1,Meleagris ocellata
 OILBIRD,oilbir1,Steatornis caripensis
 OKINAWA RAIL,okirai1,Gallirallus okinawae
 ORANGE BREASTED TROGON,orbtro2,Harpactes oreskios
+ORANGE BRESTED BUNTING,orbbun1,Passerina leclancherii
 ORIENTAL BAY OWL,orbowl1,Phodilus badius
 ORNATE HAWK EAGLE,orheag1,Spizaetus ornatus
 OSPREY,osprey,Pandion haliaetus
@@ -277,6 +299,7 @@ PAINTED BUNTING,paibun,Passerina ciris
 PALILA,palila,Loxioides bailleui
 PALM NUT VULTURE,panvul1,Gypohierax angolensis
 PARADISE TANAGER,partan1,Tangara chilensis
+PARAKETT  AUKLET,parauk,Aethia psittacula
 PATAGONIAN SIERRA FINCH,pasfin1,Phrygilus patagonicus
 PEREGRINE FALCON,perfal,Falco peregrinus
 PHAINOPEPLA,phaino,Phainopepla nitens
@@ -304,6 +327,7 @@ RED NAPED TROGON,rentro1,Harpactes kasumba
 RED SHOULDERED HAWK,reshaw,Buteo lineatus
 RED TAILED HAWK,rethaw,Buteo jamaicensis
 RED WINGED BLACKBIRD,rewbla,Agelaius phoeniceus
+RED WISKERED BULBUL,rewbul,Pycnonotus jocosus
 REGENT BOWERBIRD,regbow1,Sericulus chrysocephalus
 RING-NECKED PHEASANT,rinphe1,Phasianus colchicus
 ROSE BREASTED GROSBEAK,robgro,Pheucticus ludovicianus
@@ -312,6 +336,8 @@ ROSY FACED LOVEBIRD,peflov,Agapornis roseicollis
 RUBY CROWNED KINGLET,ruckin,Corthylio calendula
 RUBY THROATED HUMMINGBIRD,rthhum,Archilochus colubris
 RUDDY SHELDUCK,rudshe,Tadorna ferruginea
+RUDY KINGFISHER,rudkin1,Halcyon coromanda
+RUFUOS MOTMOT,rufmot1,Baryphthengus martii
 SANDHILL CRANE,sancra,Antigone canadensis
 SATYR TRAGOPAN,sattra1,Tragopan satyra
 SAYS PHOEBE,saypho,Sayornis saya
@@ -330,6 +356,7 @@ SNOWY PLOVER,snoplo5,Anarhynchus nivosus
 SNOWY SHEATHBILL,snoshe2,Chionis albus
 SORA,sora,Porzana carolina
 SPANGLED COTINGA,spacot1,Cotinga cayana
+SPOON BILED SANDPIPER,spbsan1,Calidris pygmaea
 SPOTTED CATBIRD,spocat2,Ailuroedus maculosus
 SPOTTED WHISTLING DUCK,spwduc1,Dendrocygna guttata
 SQUACCO HERON,squher1,Ardeola ralloides
@@ -346,10 +373,13 @@ TOWNSENDS WARBLER,towwar,Setophaga townsendi
 TREE SWALLOW,treswa,Tachycineta bicolor
 TRICOLORED BLACKBIRD,tribla,Agelaius tricolor
 TROPICAL KINGBIRD,trokin,Tyrannus melancholicus
+TRUMPTER SWAN,truswa,Cygnus buccinator
 TURKEY VULTURE,turvul,Cathartes aura
 VARIED THRUSH,varthr,Ixoreus naevius
 VEERY,veery,Catharus fuscescens
+VENEZUELIAN TROUPIAL,ventro1,Icterus icterus
 VERDIN,verdin,Auriparus flaviceps
+VERMILION FLYCATHER,verfly,Pyrocephalus rubinus
 VICTORIA CROWNED PIGEON,vicpig1,Goura victoria
 VIOLET BACKED STARLING,vibsta2,Cinnyricinclus leucogaster
 VIOLET CUCKOO,viocuc1,Chrysococcyx xanthorhynchus
@@ -364,6 +394,7 @@ WHITE BROWED CRAKE,whbcra1,Poliolimnas cinereus
 WHITE CHEEKED TURACO,whctur1,Menelikornis leucotis
 WHITE EARED HUMMINGBIRD,whehum,Basilinna leucotis
 WHITE NECKED RAVEN,whnrav1,Corvus albicollis
+WHITE TAILED TROPIC,whttro,Phaethon lepturus
 WHITE THROATED BEE EATER,wtbeat1,Merops albicollis
 WILD TURKEY,wiltur,Meleagris gallopavo
 WILLOW PTARMIGAN,wilpta,Lagopus lagopus

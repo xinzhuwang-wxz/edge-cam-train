@@ -46,3 +46,34 @@ def test_build_matches_with_apostrophe_and_despace(tmp_path: Path) -> None:
     assert body["ABBOTTS BABBLER"] == "abbbab1"  # 撇号匹配
     assert body["AFRICAN OYSTER CATCHER"] == "afroys1"  # 去空格回退匹配
     assert "UNKNOWN X" not in body  # 无对应 → 不编造
+
+
+def test_alias_fallback(tmp_path: Path) -> None:
+    """人工别名表把笔误类救回（自动匹配不中 → 别名回退）。"""
+    tax = tmp_path / "tax.csv"
+    tax.write_text(
+        "SCIENTIFIC_NAME,COMMON_NAME,SPECIES_CODE,CATEGORY\n"
+        "Setophaga fusca,Blackburnian Warbler,bkbwar,species\n",
+        encoding="utf-8",
+    )
+    manifest = tmp_path / "m.json"
+    manifest.write_text(
+        json.dumps(
+            {
+                "name": "t",
+                "version": "v0",
+                "seed": 0,
+                "class_to_idx": {"BLACKBURNIAM WARBLER": 0},
+                "records": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+    aliases = tmp_path / "alias.csv"
+    aliases.write_text("label,ebird_code\nBLACKBURNIAM WARBLER,bkbwar\n", encoding="utf-8")
+    out = tmp_path / "map.csv"
+    build(str(tax), str(manifest), str(out), aliases=str(aliases))
+    rows = out.read_text(encoding="utf-8").splitlines()
+    body = {r.split(",")[0]: r.split(",")[1] for r in rows[1:]}
+    assert body["BLACKBURNIAM WARBLER"] == "bkbwar"  # 笔误经别名救回 + 补回学名
+    assert "Setophaga fusca" in out.read_text(encoding="utf-8")

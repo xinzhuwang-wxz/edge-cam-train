@@ -54,16 +54,35 @@ def manifest_labels(path: str | Path) -> list[str]:
     return list(json.loads(Path(path).read_text(encoding="utf-8"))["class_to_idx"])
 
 
-def build(taxonomy: str, manifest: str, out: str) -> None:
+def load_aliases(path: str | Path | None) -> dict[str, str]:
+    """别名表 csv（label,ebird_code）→ {label: ebird_code}。人工补 148 未匹配里可救的。"""
+    if not path:
+        return {}
+    out: dict[str, str] = {}
+    with Path(path).open(encoding="utf-8") as fh:
+        for row in csv.DictReader(fh):
+            if row.get("label") and row.get("ebird_code"):
+                out[row["label"]] = row["ebird_code"]
+    return out
+
+
+def build(taxonomy: str, manifest: str, out: str, aliases: str | None = None) -> None:
     by_norm, by_despace = load_ebird(taxonomy)
+    code_to_sci = {code: sci for code, sci in by_norm.values()}
+    alias_map = load_aliases(aliases)
     labels = manifest_labels(manifest)
     rows: list[tuple[str, str, str]] = []
     unmatched: list[str] = []
+    n_alias = 0
     for label in labels:
         key = norm(label)
         hit = by_norm.get(key) or by_despace.get(key.replace(" ", ""))  # 精确 → 去空格回退
         if hit:
             rows.append((label, hit[0], hit[1]))
+        elif label in alias_map:  # 人工别名回退
+            code = alias_map[label]
+            rows.append((label, code, code_to_sci.get(code, "")))
+            n_alias += 1
         else:
             unmatched.append(label)
 
@@ -75,7 +94,8 @@ def build(taxonomy: str, manifest: str, out: str) -> None:
         w.writerows(rows)
 
     n = len(labels)
-    print(f"[ebird-map] 匹配 {len(rows)}/{n}（{len(rows) / n:.1%}）→ {out_path}")
+    extra = f"（含别名回退 {n_alias}）" if n_alias else ""
+    print(f"[ebird-map] 匹配 {len(rows)}/{n}（{len(rows) / n:.1%}）{extra}→ {out_path}")
     if unmatched:
         print(f"[ebird-map] 未匹配 {len(unmatched)} 个（需人工补别名/确认改名）：")
         for u in unmatched[:30]:
@@ -89,8 +109,9 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--taxonomy", required=True, help="eBird taxonomy CSV")
     p.add_argument("--manifest", required=True, help="DatasetManifest json（取 class 列）")
     p.add_argument("--out", required=True, help="输出 label,ebird_code csv")
+    p.add_argument("--aliases", help="人工别名表 csv（label,ebird_code），补未匹配项")
     args = p.parse_args(argv)
-    build(args.taxonomy, args.manifest, args.out)
+    build(args.taxonomy, args.manifest, args.out, aliases=args.aliases)
 
 
 if __name__ == "__main__":
