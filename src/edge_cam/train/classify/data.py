@@ -27,17 +27,20 @@ class ManifestDataset(Dataset):
         manifest: DatasetManifest,
         split: Split,
         transform: Callable | None = None,
+        data_root: str | None = None,
     ) -> None:
+        self.manifest = manifest
         self.records = [r for r in manifest.records if r.split == split]
         self.class_to_idx = manifest.class_to_idx
         self.transform = transform or build_eval_transform()
+        self.data_root = data_root
 
     def __len__(self) -> int:
         return len(self.records)
 
     def __getitem__(self, idx: int) -> tuple[torch.Tensor, int]:
         record = self.records[idx]
-        image = Image.open(record.path).convert("RGB")
+        image = Image.open(self.manifest.resolve_path(record, self.data_root)).convert("RGB")
         return self.transform(image), self.class_to_idx[record.label]
 
 
@@ -51,6 +54,7 @@ class ClassifyDataModule(L.LightningDataModule):
         batch_size: int = 64,
         num_workers: int = 4,
         degradation_strength: float = 1.0,
+        data_root: str | None = None,
     ) -> None:
         super().__init__()
         self.manifest = manifest
@@ -58,10 +62,11 @@ class ClassifyDataModule(L.LightningDataModule):
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.degradation_strength = degradation_strength
+        self.data_root = data_root
 
     def _loader(self, split: Split, transform: Callable, shuffle: bool) -> DataLoader:
         return DataLoader(
-            ManifestDataset(self.manifest, split, transform),
+            ManifestDataset(self.manifest, split, transform, self.data_root),
             batch_size=self.batch_size,
             shuffle=shuffle,
             num_workers=self.num_workers,

@@ -57,3 +57,41 @@ def test_save_load_roundtrip(tmp_path: Path) -> None:
     m.save(out)
     loaded = DatasetManifest.load(out)
     assert loaded == m
+
+
+def test_resolve_path_uses_manifest_root() -> None:
+    """root 设了 → 相对 path 拼到 root 上。"""
+    m = DatasetManifest(
+        name="t",
+        version="v0",
+        seed=0,
+        class_to_idx={"a": 0},
+        root="/data/birds",
+        records=[SampleRecord(path="train/a/0.jpg", label="a", split="train")],
+    )
+    assert m.resolve_path(m.records[0]) == Path("/data/birds/train/a/0.jpg")
+
+
+def test_resolve_path_data_root_override() -> None:
+    """换机：data_root 覆盖 manifest.root，同一份 manifest 复用。"""
+    m = DatasetManifest(
+        name="t",
+        version="v0",
+        seed=0,
+        class_to_idx={"a": 0},
+        root="/mac/local",
+        records=[SampleRecord(path="train/a/0.jpg", label="a", split="train")],
+    )
+    assert m.resolve_path(m.records[0], data_root="/gpu/box") == Path("/gpu/box/train/a/0.jpg")
+
+
+def test_resolve_path_legacy_absolute() -> None:
+    """旧格式 root=None → path 当绝对路径直接用（向后兼容）。"""
+    m = DatasetManifest(
+        name="t",
+        version="v0",
+        seed=0,
+        class_to_idx={"a": 0},
+        records=[SampleRecord(path="/abs/x.jpg", label="a", split="train")],
+    )
+    assert m.resolve_path(m.records[0]) == Path("/abs/x.jpg")

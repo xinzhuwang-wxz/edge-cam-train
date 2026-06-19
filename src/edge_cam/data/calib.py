@@ -37,6 +37,7 @@ def build_calib_set(
     degradation_ratio: float = 0.5,
     input_size: int = 224,
     seed: int = 0,
+    data_root: str | None = None,
 ) -> Path:
     """抽 n 张图建校准集，degradation_ratio 比例施加退化；导 calib/ + dataset.txt。
 
@@ -55,7 +56,7 @@ def build_calib_set(
     field = build_field_transform(input_size)
     lines: list[str] = []
     for i, record in enumerate(records):
-        image = Image.open(record.path).convert("RGB")
+        image = Image.open(manifest.resolve_path(record, data_root)).convert("RGB")
         if rng.random() < degradation_ratio:
             image = _tensor_to_pil(field(image))  # 夜视/噪声/压缩退化样本
         else:

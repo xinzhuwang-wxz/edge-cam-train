@@ -37,6 +37,8 @@ def run(cfg: DictConfig) -> Classifier:
         batch_size=cfg.data.batch_size,
         num_workers=cfg.data.num_workers,
         degradation_strength=cfg.data.degradation_strength,
+        # 换机时覆盖：data.data_root=/path/to/uploaded/raw（留空=用 manifest 记录的 root）
+        data_root=cfg.data.get("data_root", None),
     )
     model = Classifier(
         model_name=cfg.model.name,

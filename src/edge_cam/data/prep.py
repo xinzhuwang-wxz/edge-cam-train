@@ -10,6 +10,7 @@ CLI:
 from __future__ import annotations
 
 import argparse
+import os
 from pathlib import Path
 
 import yaml
@@ -49,9 +50,11 @@ def build_manifest(config: DataPrepConfig, taxonomy: Taxonomy | None = None) -> 
 
     assignment = stratified_split(items, config.ratios, config.seed, config.min_train_per_class)
     class_to_idx = {label: i for i, label in enumerate(sorted({lbl for _, lbl in items}))}
+    root = str(Path(config.root).resolve())
     records = [
         SampleRecord(
-            path=path,
+            # 存相对 root 的路径，保证 manifest 可移植（换机用 data_root 覆盖即可）
+            path=os.path.relpath(path, root),
             label=label,
             split=assignment[path],
             taxon_key=taxonomy.to_taxon_key(label),
@@ -65,6 +68,7 @@ def build_manifest(config: DataPrepConfig, taxonomy: Taxonomy | None = None) -> 
         version=config.version,
         seed=config.seed,
         class_to_idx=class_to_idx,
+        root=root,
         records=records,
     )
 

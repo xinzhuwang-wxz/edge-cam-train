@@ -6,6 +6,7 @@ output_dir: outputs/classify
 
 data:
   manifest: data/processed/birds525/manifest.json
+  data_root: null # 留空=用 manifest 记录的 root；换机(租卡)上传 raw 后覆盖为新数据根
   input_size: 224 # 细粒度需细节；192/224 做消融（plan §4.2）
   batch_size: 64
   num_workers: 4

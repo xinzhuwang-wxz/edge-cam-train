@@ -26,13 +26,27 @@ class SampleRecord(BaseModel):
 
 
 class DatasetManifest(BaseModel):
-    """一份数据集的完整清单（可存盘 / 加载，跨实验复用同一划分）。"""
+    """一份数据集的完整清单（可存盘 / 加载，跨实验复用同一划分）。
+
+    可移植：records.path 存**相对 root 的路径**，root 记录 prep 时的数据根。
+    换机（如租 GPU 卡）时上传 raw 数据后，用 data_root 覆盖即可复用同一份 manifest，
+    无需重跑 prep。root=None 表示旧格式（path 为绝对路径），仍兼容。
+    """
 
     name: str
     version: str
     seed: int
     class_to_idx: dict[str, int]
+    root: str | None = None
     records: list[SampleRecord] = Field(default_factory=list)
+
+    def resolve_path(self, record: SampleRecord, data_root: str | None = None) -> Path:
+        """把 record 的（相对）路径解析为可读绝对路径。
+
+        优先级：显式 data_root > manifest.root > 把 record.path 当绝对路径（旧格式）。
+        """
+        base = data_root or self.root
+        return Path(base) / record.path if base else Path(record.path)
 
     @model_validator(mode="after")
     def _check_integrity(self) -> DatasetManifest:
