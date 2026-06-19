@@ -53,10 +53,11 @@ def run_ablation(
             manifest,
             input_size=cfg.data.input_size,
             batch_size=cfg.data.batch_size,
-            num_workers=0,
+            num_workers=cfg.data.get("num_workers", 4),
             fp32_onnx=fp32_onnx,
             output_dir=cfg.output_dir,
             regional_mask=regional_mask,
+            data_root=cfg.data.get("data_root", None),
         )
         row: dict = {"label": label_for(overrides), **overrides}
         for lv in report.levels:
