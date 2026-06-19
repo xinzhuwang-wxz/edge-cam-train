@@ -56,7 +56,38 @@ def run(cfg: DictConfig) -> tuple[Path, Path]:
     md = report.to_markdown() + "\n\n" + gate.to_markdown() + "\n"
     md_path.write_text(md, encoding="utf-8")
     print(md)
+
+    # 接通断链（架构审查 A）：cfg.register 给定则把 report+gate 固化成 ModelCard → registry，
+    # gate 过则 promote 到 stable（registry.promote 内部再校验 gate_pass，双保险）。
+    if cfg.get("register"):
+        _publish_card(cfg, report, gate, manifest)
+
     return json_path, md_path
+
+
+def _publish_card(cfg: DictConfig, report, gate, manifest: DatasetManifest) -> None:
+    """据 cfg.register 把评估结论发布到 registry（架构审查 A 的接线点）。"""
+    from edge_cam.registry.promotion import build_model_card, provenance_from_manifest, publish
+    from edge_cam.registry.store import ModelRegistry
+
+    reg = cfg.register
+    card = build_model_card(
+        report,
+        gate,
+        name=reg.get("name", cfg.model_name),
+        version=reg.get("version", "v0"),
+        backbone=cfg.model_name,
+        num_classes=manifest.num_classes,
+        input_size=cfg.input_size,
+        platform=reg.get("platform", "dev"),
+        artifact_path=reg.get("artifact_path", cfg.get("fp32_onnx") or ""),
+        provenance=provenance_from_manifest(manifest),
+    )
+    registry = ModelRegistry(reg.get("index", str(Path(cfg.output_dir) / "models.yaml")))
+    card = publish(registry, card, promote=bool(reg.get("promote", False)) and gate.passed)
+    print(
+        f"[publish] {card.name} v{card.version} → channel={card.channel} gate_pass={card.gate_pass}"
+    )
 
 
 @hydra.main(version_base=None, config_path=CONFIG_DIR, config_name="envelope")

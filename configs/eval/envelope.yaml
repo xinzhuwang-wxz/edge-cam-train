@@ -16,3 +16,14 @@ gate:
   min_regional_top1: null
   max_int8_drop: null
   max_field_drop: null
+
+# 发布（架构审查 A）：给定则把 report+gate 固化成 ModelCard 入 registry。
+# 默认 null = 只出报告、不登记（保持纯评估）。
+register: null
+# register:
+#   name: birds525             # ModelCard 名（默认用 model_name）
+#   version: v0
+#   platform: v85x             # dev | v85x
+#   index: outputs/registry/models.yaml
+#   artifact_path: ""          # 默认用 fp32_onnx
+#   promote: false             # true 且 gate 过 → 直接升 stable
