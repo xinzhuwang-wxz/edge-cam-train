@@ -5,21 +5,22 @@ from __future__ import annotations
 import pytest
 import torch
 
-from edge_cam.train.classify.module import Classifier, topk_correct
+from edge_cam.eval.metrics import topk_hits
+from edge_cam.train.classify.module import Classifier
 
 
 def test_topk_correct_logic() -> None:
     # 2 个样本，5 类
     logits = torch.tensor([[0.1, 0.9, 0.2, 0.0, 0.3], [0.5, 0.1, 0.2, 0.9, 0.0]])
     target = torch.tensor([1, 0])  # 样本0 top-1 命中(1)；样本1 真值0 排第2
-    hits = topk_correct(logits, target, (1, 5))
+    hits = topk_hits(logits, target, (1, 5))
     assert hits[1] == 1  # 仅样本0 top-1 命中
     assert hits[5] == 2  # top-5 都命中
 
 
 def test_topk_caps_at_num_classes() -> None:
     logits = torch.randn(3, 4)
-    hits = topk_correct(logits, torch.tensor([0, 1, 2]), (1, 5))
+    hits = topk_hits(logits, torch.tensor([0, 1, 2]), (1, 5))
     assert 0 <= hits[1] <= 3
     assert hits[5] == 3  # 类数<5 → top-5 等于全命中
 

@@ -24,22 +24,30 @@ class EvalMetrics:
     per_class_top1: dict[int, float] = field(default_factory=dict)
 
 
+def topk_hits(
+    logits: torch.Tensor, targets: torch.Tensor, ks: tuple[int, ...] = (1, 5)
+) -> dict[int, int]:
+    """{k: top-k 命中数}。单一 top-k 计数实现，训练(module)与评估共用（架构审查 D）。"""
+    maxk = min(max(ks), logits.size(1))
+    _, pred = logits.topk(maxk, dim=1)
+    correct = pred.eq(targets.view(-1, 1))
+    return {k: int(correct[:, : min(k, maxk)].any(dim=1).sum().item()) for k in ks}
+
+
 def _batch_hits(
     logits: torch.Tensor, targets: torch.Tensor
 ) -> tuple[int, int, dict[int, list[int]]]:
     """返回 (top1 命中, top5 命中, {label: [correct, total]})。"""
+    hits = topk_hits(logits, targets, (1, 5))
     maxk = min(5, logits.size(1))
     _, pred = logits.topk(maxk, dim=1)
-    correct = pred.eq(targets.view(-1, 1))
-    top1 = int(correct[:, :1].any(dim=1).sum().item())
-    top5 = int(correct[:, :maxk].any(dim=1).sum().item())
+    hit1 = pred.eq(targets.view(-1, 1))[:, :1].any(dim=1)
     per_class: dict[int, list[int]] = {}
-    hit1 = correct[:, :1].any(dim=1)
     for t, h in zip(targets.tolist(), hit1.tolist(), strict=True):
         acc = per_class.setdefault(t, [0, 0])
         acc[0] += int(h)
         acc[1] += 1
-    return top1, top5, per_class
+    return hits[1], hits[5], per_class
 
 
 def _finalize(top1: int, top5: int, n: int, pc: dict[int, list[int]]) -> EvalMetrics:

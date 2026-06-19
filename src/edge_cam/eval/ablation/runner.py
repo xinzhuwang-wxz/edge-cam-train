@@ -14,8 +14,9 @@ from omegaconf import DictConfig, OmegaConf
 
 from edge_cam.contracts.schemas.dataset import DatasetManifest
 from edge_cam.eval.ablation.grid import expand_grid, label_for
-from edge_cam.eval.envelope import build_envelope
+from edge_cam.eval.full_eval import run_full_eval
 from edge_cam.eval.regional import RegionalMask
+from edge_cam.train.classify.export import export_onnx
 from edge_cam.train.classify.train import run as run_train
 
 
@@ -25,19 +26,36 @@ def run_ablation(
     manifest: DatasetManifest,
     *,
     regional_mask: RegionalMask | None = None,
+    quant: bool = False,
 ) -> list[dict]:
-    """跑整个网格，返回结果行列表（每行 = overrides + 各级 top-1/5）。"""
+    """跑整个网格，返回结果行列表（每行 = overrides + 各级 top-1/5）。
+
+    quant=True 时每格导出 FP32 ONNX 并加 INT8 模拟级（plan §B.4 量化掉点列）；默认关（更快）。
+    经 run_full_eval 统一编排，与 run_envelope 同一条评估路（架构审查 B）。
+    """
     rows: list[dict] = []
-    for overrides in expand_grid(grid_spec):
+    for i, overrides in enumerate(expand_grid(grid_spec)):
         dotlist = [f"{k}={v}" for k, v in overrides.items()]
         cfg = OmegaConf.merge(base_cfg, OmegaConf.from_dotlist(dotlist))
         model = run_train(cfg)  # type: ignore[arg-type]
-        report = build_envelope(
+
+        fp32_onnx = None
+        if quant:  # 导出本格模型 → run_full_eval 据此出 INT8 级
+            fp32_onnx = export_onnx(
+                model,
+                Path(cfg.output_dir) / f"cell{i}_{cfg.model.name}_fp32.onnx",
+                input_size=cfg.data.input_size,
+                opset=cfg.export.opset,
+            )
+
+        report = run_full_eval(
             model,
             manifest,
             input_size=cfg.data.input_size,
             batch_size=cfg.data.batch_size,
             num_workers=0,
+            fp32_onnx=fp32_onnx,
+            output_dir=cfg.output_dir,
             regional_mask=regional_mask,
         )
         row: dict = {"label": label_for(overrides), **overrides}

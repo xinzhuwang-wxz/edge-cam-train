@@ -11,13 +11,8 @@ import torch
 from lightning.pytorch.utilities.types import OptimizerLRScheduler
 from torch import nn
 
-
-def topk_correct(logits: torch.Tensor, target: torch.Tensor, ks: tuple[int, ...]) -> dict[int, int]:
-    """返回 {k: 命中数}，手算 top-k 避免额外依赖 torchmetrics。"""
-    maxk = min(max(ks), logits.size(1))
-    _, pred = logits.topk(maxk, dim=1)
-    correct = pred.eq(target.view(-1, 1))
-    return {k: int(correct[:, : min(k, maxk)].any(dim=1).sum().item()) for k in ks}
+# 单一 top-k 计数实现，与评估侧共用（架构审查 D）。metrics 仅依赖 numpy/torch，无循环依赖。
+from edge_cam.eval.metrics import topk_hits
 
 
 class Classifier(L.LightningModule):
@@ -48,7 +43,7 @@ class Classifier(L.LightningModule):
         images, targets = batch
         logits = self(images)
         loss = self.criterion(logits, targets)
-        hits = topk_correct(logits, targets, (1, 5))
+        hits = topk_hits(logits, targets, (1, 5))
         bs = targets.size(0)
         self.log(f"{stage}_loss", loss, prog_bar=True, batch_size=bs)
         self.log(f"{stage}_top1", hits[1] / bs, prog_bar=True, batch_size=bs)

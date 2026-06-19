@@ -24,6 +24,7 @@ def build_envelope(
     num_workers: int = 0,
     int8_onnx: str | Path | None = None,
     regional_mask: RegionalMask | None = None,
+    data_root: str | None = None,
     device: str = "cpu",
 ) -> EnvelopeReport:
     """跑各级评估，组装 EnvelopeReport。
@@ -32,9 +33,14 @@ def build_envelope(
         model: 训练好的分类器（用于 torch 端 FP32/类现场评估）。
         int8_onnx: 给定时加 INT8 模拟级（ORT 评估，量化后 ONNX 由 quant_estimate 产出）。
         regional_mask: 给定时加「+地域过滤」级（在干净 test 上消融）。
+        data_root: 换机时覆盖 manifest 记录的数据根（见 DatasetManifest.resolve_path）。
     """
     dm = ClassifyDataModule(
-        manifest, input_size=input_size, batch_size=batch_size, num_workers=num_workers
+        manifest,
+        input_size=input_size,
+        batch_size=batch_size,
+        num_workers=num_workers,
+        data_root=data_root,
     )
     levels: list[LevelResult] = []
 

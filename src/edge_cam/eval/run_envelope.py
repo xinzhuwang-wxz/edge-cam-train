@@ -15,10 +15,9 @@ import hydra
 from omegaconf import DictConfig
 
 from edge_cam.contracts.schemas.dataset import DatasetManifest
-from edge_cam.eval.envelope import build_envelope
+from edge_cam.eval.full_eval import run_full_eval
 from edge_cam.eval.gates.gate import GateThresholds, evaluate_gate
 from edge_cam.eval.regional import RegionalMask
-from edge_cam.train.classify.data import ClassifyDataModule
 from edge_cam.train.classify.module import Classifier
 
 CONFIG_DIR = str(Path(__file__).resolve().parents[3] / "configs" / "eval")
@@ -32,28 +31,21 @@ def run(cfg: DictConfig) -> tuple[Path, Path]:
     else:  # 无 checkpoint（如 CI smoke）：随机权重，仅验证机制
         model = Classifier(cfg.model_name, num_classes=manifest.num_classes, pretrained=False)
 
-    int8_onnx = None
-    if cfg.get("fp32_onnx"):
-        from edge_cam.eval.quant_estimate import quantize_int8
-
-        dm = ClassifyDataModule(manifest, input_size=cfg.input_size, num_workers=0)
-        int8_onnx = quantize_int8(
-            cfg.fp32_onnx, dm.train_dataloader(), Path(cfg.output_dir) / "model.int8.onnx"
-        )
-
     mask = None
     if cfg.get("regional_json"):
         taxon_of = {r.label: r.taxon_key for r in manifest.records if r.taxon_key}
         mask = RegionalMask.from_json(cfg.regional_json, manifest.class_to_idx, taxon_of)
 
-    report = build_envelope(
+    report = run_full_eval(
         model,
         manifest,
         input_size=cfg.input_size,
         batch_size=cfg.batch_size,
         num_workers=0,
-        int8_onnx=int8_onnx,
+        fp32_onnx=cfg.get("fp32_onnx"),
+        output_dir=cfg.output_dir,
         regional_mask=mask,
+        data_root=cfg.data.get("data_root", None) if cfg.get("data") else None,
     )
     gate = evaluate_gate(report, GateThresholds(**dict(cfg.get("gate", {}))))
 
