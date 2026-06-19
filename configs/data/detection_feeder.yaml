@@ -1,0 +1,7 @@
+# 观鸟器粗检测数据（COCO + OIV7 子集）。FiftyOne 按类拉取，控盘 max_per_class。
+# ⚠️ 可行性优先、不进商用权重（plan §C.1 许可；OIV7 须维护署名清册——后续）。
+# 跑：python -m edge_cam.data.detection_ingest --config configs/data/detection_feeder.yaml
+classes: [bird, squirrel, cat, dog, raccoon, rabbit, deer, fox, skunk, hedgehog, bear]
+max_per_class: 1000 # 控盘：每类上限（11类×~1000×2split ≈ 数 GB），避免拉全量数十 GB
+splits: [train, validation]
+out_dir: data/processed/detection_feeder

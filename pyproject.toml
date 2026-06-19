@@ -28,6 +28,11 @@ train = [
     "onnx>=1.16",
     "onnxruntime>=1.17",
 ]
+# 数据准备（离线 dev 机）：FiftyOne 拉 COCO/OIV7 + 可视化/导出。mongodb 由 fiftyone 自带。
+data = [
+    "fiftyone>=1.0",
+    "pycocotools>=2.0",
+]
 dev = [
     "ruff>=0.12",
     "pytest>=8",
