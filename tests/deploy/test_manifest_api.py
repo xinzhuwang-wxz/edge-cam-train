@@ -7,11 +7,12 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 
 from edge_cam.contracts.schemas.model_card import ModelCard
+from edge_cam.core.paths import CONFIGS_DIR
 from edge_cam.deploy.manifest_api.app import create_app
 from edge_cam.registry.store import ModelRegistry
 
 
-def _client(tmp_path: Path) -> TestClient:
+def _index(tmp_path: Path) -> Path:
     index = tmp_path / "models.yaml"
     reg = ModelRegistry(index)
     reg.register(
@@ -37,7 +38,11 @@ def _client(tmp_path: Path) -> TestClient:
             channel="candidate",
         )
     )
-    return TestClient(create_app(index))
+    return index
+
+
+def _client(tmp_path: Path) -> TestClient:
+    return TestClient(create_app(_index(tmp_path)))
 
 
 def test_healthz(tmp_path: Path) -> None:
@@ -55,3 +60,19 @@ def test_manifest_returns_only_stable_for_platform(tmp_path: Path) -> None:
 def test_manifest_empty_for_unknown_platform(tmp_path: Path) -> None:
     body = _client(tmp_path).get("/v1/manifest/dev/stable").json()
     assert body["models"] == []
+
+
+def test_manifest_without_channels_dir_omits_fallback(tmp_path: Path) -> None:
+    """向后兼容：未给 channels_dir → 响应不含 cloud_fallback。"""
+    body = _client(tmp_path).get("/v1/manifest/v85x/stable").json()
+    assert "cloud_fallback" not in body
+
+
+def test_manifest_attaches_channel_policy(tmp_path: Path) -> None:
+    """给 channels_dir（用仓内真实配置）→ 响应附 cloud_fallback + min_runtime_abi。"""
+    client = TestClient(create_app(_index(tmp_path), channels_dir=CONFIGS_DIR / "channels"))
+    body = client.get("/v1/manifest/v85x/stable").json()
+    assert body["min_runtime_abi"] == "viplite-1.0"
+    assert body["rollout_percent"] == 100
+    assert body["cloud_fallback"]["enabled"] is True
+    assert body["cloud_fallback"]["endpoint"].startswith("https://")
