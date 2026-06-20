@@ -78,7 +78,16 @@ def test_generate_from_template_file(tmp_path: Path) -> None:
     repo = tmp_path / "nanodet"
     (repo / "config").mkdir(parents=True)
     (repo / "config" / "nanodet-plus-m_320.yml").write_text(yaml.safe_dump(_BASE), encoding="utf-8")
-    out = generate_nanodet_config(repo, "data/det", ["bird", "cat", "dog"], tmp_path / "gen.yml")
+    out = generate_nanodet_config(
+        repo,
+        "data/raw/detect",
+        "data/processed/detect/labels",
+        ["bird", "cat", "dog"],
+        tmp_path / "gen.yml",
+    )
     cfg = yaml.safe_load(out.read_text(encoding="utf-8"))
     assert cfg["model"]["arch"]["head"]["num_classes"] == 3
-    assert cfg["data"]["train"]["img_path"].endswith("data/det/train/data")
+    # img_path=raw_root（file_name 自带子路径）；ann 指向 manifest 派生 labels
+    assert cfg["data"]["train"]["img_path"] == "data/raw/detect"
+    assert cfg["data"]["train"]["ann_path"].endswith("labels/train_train.json")
+    assert cfg["data"]["val"]["ann_path"].endswith("labels/train_val.json")

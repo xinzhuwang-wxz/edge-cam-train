@@ -30,30 +30,37 @@ pip install -r "$NANODET_DIR/requirements.txt"
 pip install -e "$NANODET_DIR"
 
 echo ""
-echo "==> 预训练权重"
-echo "  基线权重已在仓内：weights/nanodet/nanodet-plus-m_416_checkpoint.ckpt（34M）"
-echo "  如需其它档/全量，见 third_party/nanodet/README（Google Drive，手动下）。"
+echo "==> 预训练权重（三档消融：320 1.0x / 416 1.0x / 1.5x 320）"
+echo "  仓内已有：weights/nanodet/nanodet-plus-m_416_checkpoint.ckpt（416 1.0x，34M）"
+echo "  另两档（nanodet-plus-m_320 / nanodet-plus-m-1.5x_320）在 NanoDet release（Google Drive）。"
+echo "  国内拉 Google Drive 慢/墙 → AutoDL 上先 'source /etc/network_turbo' 再 'gdown <id>'，"
+echo "  或从 HF 镜像下；放到 weights/nanodet/ 下。"
 echo ""
-echo "✓ nanodet env 就绪。接下来（在本仓根目录、edge-cam-train env 里生成 config，再切 nanodet env 跑）："
+echo "✓ nanodet env 就绪。接下来（edge-cam-train env 生成 config，再切 nanodet env 跑）："
 cat <<'STEPS'
 
-# 1) 生成指向本仓检测数据的 NanoDet config（在 edge-cam-train env）
+# 1) 生成指向**新 manifest 派生 labels** 的 NanoDet config（在 edge-cam-train env，5 类）
 conda activate edge-cam-train
 python - <<'PY'
-from edge_cam.data.detection_classes import FEEDER_CAM_CLASSES
+from edge_cam.data.adapters.detect import FEEDER5_CATEGORIES
 from edge_cam.train.detect.nanodet_config import generate_nanodet_config
-names = [c.name for c in FEEDER_CAM_CLASSES]
-generate_nanodet_config("third_party/nanodet", "data/processed/detection_feeder", names,
-                        "outputs/detect/nanodet_feeder_416.yml",
-                        base_config="config/nanodet-plus-m_416.yml", input_size=416, epochs=100)
-print("config -> outputs/detect/nanodet_feeder_416.yml")
+names = sorted(FEEDER5_CATEGORIES, key=FEEDER5_CATEGORIES.get)  # idx 序：bird/squirrel/cat/person/other_animal
+RAW = "/root/autodl-tmp/detect_raw"                 # = build 的 raw_root（manifest.root）
+LAB = "/root/autodl-tmp/detect_raw/processed/labels"  # train_train.json / train_val.json / test_test.json
+for tag, base, sz in (("320", "config/nanodet-plus-m_320.yml", 320),
+                      ("416", "config/nanodet-plus-m_416.yml", 416),
+                      ("1.5x_320", "config/nanodet-plus-m-1.5x_320.yml", 320)):
+    generate_nanodet_config("third_party/nanodet", RAW, LAB, names,
+                            f"outputs/detect/nanodet_feeder_{tag}.yml",
+                            base_config=base, input_size=sz, epochs=100)
+    print("config ->", f"outputs/detect/nanodet_feeder_{tag}.yml")
 PY
 
-# 2) 训练（在 nanodet env，从基线权重微调）
+# 2) 训练（nanodet env，从对应档预训练权重微调；逐档跑）
 conda activate nanodet
 python third_party/nanodet/tools/train.py outputs/detect/nanodet_feeder_416.yml
 
-# 3) 评测 mAP / per-class（NanoDet 自带；结果手动汇总进消融表）
+# 3) 评测 mAP / per-class（NanoDet 自带；再用 eval.detect_metrics.evaluate_coco 汇总进总表）
 python third_party/nanodet/tools/test.py outputs/detect/nanodet_feeder_416.yml \
   --model outputs/detect/nanodet-plus-m/model_best/model_best.ckpt --task val
 
