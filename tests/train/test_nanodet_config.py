@@ -50,6 +50,7 @@ def test_patch_overrides_num_classes_both_heads() -> None:
         save_dir="out/detect",
         input_size=416,
         epochs=120,
+        load_model="weights/nanodet/coco_pretrained.ckpt",
     )
     assert cfg["model"]["arch"]["head"]["num_classes"] == 11
     assert cfg["model"]["arch"]["aux_head"]["num_classes"] == 11
@@ -57,6 +58,7 @@ def test_patch_overrides_num_classes_both_heads() -> None:
     assert cfg["data"]["val"]["input_size"] == [416, 416]
     assert cfg["schedule"]["total_epochs"] == 120
     assert cfg["schedule"]["lr_schedule"]["T_max"] == 120
+    assert cfg["schedule"]["load_model"] == "weights/nanodet/coco_pretrained.ckpt"  # 微调起点
     assert cfg["class_names"] == ["bird", "squirrel"]
 
 

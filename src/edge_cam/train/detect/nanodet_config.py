@@ -33,8 +33,13 @@ def patch_nanodet_config(
     gpu_ids: tuple[int, ...] = (0,),
     batch_size: int = 96,
     workers: int = 10,
+    load_model: str | None = None,
 ) -> dict:
-    """在官方模板基础上覆盖我们需要的字段，返回新 config dict（不改入参）。"""
+    """在官方模板基础上覆盖我们需要的字段，返回新 config dict（不改入参）。
+
+    load_model：COCO 预训练 ckpt 路径 → 写入 `schedule.load_model`，NanoDet train.py 微调时加载
+    （`load_model_weight` 按名+形状过滤，80→5 类头自动跳过重置）。
+    """
     cfg = copy.deepcopy(base)
     cfg["save_dir"] = save_dir
 
@@ -55,6 +60,8 @@ def patch_nanodet_config(
     cfg["schedule"]["total_epochs"] = epochs
     if "lr_schedule" in cfg["schedule"]:
         cfg["schedule"]["lr_schedule"]["T_max"] = epochs
+    if load_model is not None:
+        cfg["schedule"]["load_model"] = load_model  # 微调起点（COCO 预训练）
 
     cfg["class_names"] = list(class_names)
     return cfg
