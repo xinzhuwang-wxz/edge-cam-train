@@ -16,8 +16,7 @@ from edge_cam.contracts.schemas.dataset import DatasetManifest
 from edge_cam.eval.ablation.grid import expand_grid, label_for
 from edge_cam.eval.full_eval import run_full_eval
 from edge_cam.eval.regional import RegionalMask
-from edge_cam.train.classify.export import export_onnx
-from edge_cam.train.classify.train import run as run_train
+from edge_cam.train.backends import get_backend
 
 
 def run_ablation(
@@ -34,18 +33,18 @@ def run_ablation(
     经 run_full_eval 统一编排，与 run_envelope 同一条评估路（架构审查 B）。
     """
     rows: list[dict] = []
+    backend = get_backend(base_cfg.get("backend", "classify"))  # 经训练 seam（[[ADR-0003]] C1）
     for i, overrides in enumerate(expand_grid(grid_spec)):
         dotlist = [f"{k}={v}" for k, v in overrides.items()]
         cfg = OmegaConf.merge(base_cfg, OmegaConf.from_dotlist(dotlist))
-        model = run_train(cfg)  # type: ignore[arg-type]
+        model = backend.train(cfg)  # type: ignore[arg-type]
 
         fp32_onnx = None
-        if quant:  # 导出本格模型 → run_full_eval 据此出 INT8 级
-            fp32_onnx = export_onnx(
+        if quant:  # 导出本格模型 → run_full_eval 据此出 INT8 级（过 onnx_artifact 契约门）
+            fp32_onnx = backend.export_fp32_onnx(
                 model,
                 Path(cfg.output_dir) / f"cell{i}_{cfg.model.name}_fp32.onnx",
-                input_size=cfg.data.input_size,
-                opset=cfg.export.opset,
+                cfg.data.input_size,
             )
 
         report = run_full_eval(

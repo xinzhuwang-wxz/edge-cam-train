@@ -52,6 +52,15 @@
 - **发布 (promotion)**：包络+门结论 → 固化 ModelCard（gate_pass/指标/溯源）→ registry →（过门）promote 到 stable channel → OTA。连接「评估」与「部署」。
 - **FP32 ONNX**：上游唯一交付物（铁律）；INT8/.nb 交板上 ACUITY。
 
+**框架架构（模型族扩展，[[ADR-0003]]）**
+- **模型族 (model family)**：一类走全流程 `train→export→eval→publish→deploy` 的模型。当前两族对等：**检测**（粗分类+框）与**细分类**。加新族（YOLO 系等）= 加一个 adapter,不动 caller。
+- **TrainerBackend**：train+export 的 seam（Protocol）。`train(cfg)->TrainedRef`（不透明句柄：分类=内存模型,subprocess=checkpoint 路径）+ `export_fp32_onnx(ref,...)`。每族一个 adapter（ClassifyBackend/NanodetBackend/YoloBackend），工厂派发。
+- **共享脊柱 (shared spine)**：族无关、两族共用的下游链 `EvalReport→ModelCard(task)→registry→PackagerBackend→ChannelPolicy/OTA`。加族不重新发明它。
+- **EvalReport（统一）**：`levels[].metrics: dict[str,float]` + `primary` 指标名;分类级带 top1/top5、检测级带 map/ap50/bird_recall。不分裂子类,指标进 dict。gate 泛化为「命名指标阈值集」。
+- **CascadePipeline**：脊柱之上的组合层（不属任何单族）。`infer`（贯穿置信门控/层级回退）+ `evaluate`（检出率/级联 top-1/量化组合）,复用 crop 域。产品本体的代码归宿。
+- **onnx_artifact 契约**：FP32 ONNX 铁律的唯一归宿。`export_fp32_onnx` 内总跑 `check_onnx_contract`（FP32+静态 shape,上 ACUITY 硬契约）+ 有 torch 模型时 `check_onnx_matches_torch`（数值对齐）。
+- **数据脊柱 (dataset spine)**：共享 `Provenance/DatasetSpec` 基（`name/version/splits` + 逐样本 `source/license/taxon_key`），两族 manifest 继承：分类用 `DatasetManifest`,检测新增 `DetectionManifest`（包 COCO bbox + 同款溯源,替代裸 COCO labels.json）。provenance 一路流到 ModelCard（许可红线全链路可追溯）。检测 `bird` 粗类 ↔ 分类 species 经 [[ADR-0002]] eBird 键对接 → 级联在数据层即接得上。
+
 ## 当前不做（避免范围蔓延）
 
 - 不碰上板/ACUITY 真量化（无板子；INT8 用 ORT-QDQ 模拟代替）→ issue #4（待板子）。
