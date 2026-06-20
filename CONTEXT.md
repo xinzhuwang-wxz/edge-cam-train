@@ -69,3 +69,17 @@
 - 已 defer 的增量：蒸馏（#7）、PicoDet 对照（#8）、地域 mask 季节频率版（#10）。
 
 > 注：检测器**已不在「不做」之列**——本轮已为其备齐数据/config/评测/搭建脚本（issue #2 已闭）。
+
+## 变更记录（Changelog）
+
+**2026-06-20 · 可行性实验1 + 架构成熟化**（[[ADR-0003]]）
+- **实验1**（双卡 GPU 全链路可行性）：分类 eff_lite0@224 test 0.921 / int8 −0.19pt（已发布 stable）；
+  检测 NanoDet-Plus mAP 0.591 / bird 检出 64.5%；级联 fp32 0.858（int8 检测 −8.3pt，框质量经裁剪放大）；
+  优化 A1/A2/A2v2/B 均未超基线（掉点=裁框信息损失+评估假象）。详 `results/实验1/实验报告.html`。
+- **架构重构 P1-P5**：立 `TrainerBackend`/`Quantizer`/`Detector`/`Classifier`/ingest 五类 seam（Protocol+工厂+注册，
+  config 切换）；`EvalReport` dict 化（检测进发布链）；`Provenanced`+`DetectionManifest` 数据脊柱（含蒸馏 soft_label hook）；
+  `CascadePipeline` 升一等模块。零回归（旧产物兼容已验）。
+- **架构审查 issue 收口**（#11-16，均 closed）：#12 级联真 OnnxClassifier/OnnxDetector(numpy NanoDet 解码)；
+  #13 DetectionManifest 承重(from_coco/write_nanodet_labels)；#14 检测训练经 NanodetBackend；#15 ingest 注册表；
+  #16 soft_label 决策保留为 hook；#11 regional 改 in-region on/off 口径(修 41.7% artifact → 真实 +1.3pt)。
+- 至此：检测/分类两族对等、可串联(级联)、易扩展(加 YOLO=注册一 adapter)、蒸馏友好；177 测试绿。
