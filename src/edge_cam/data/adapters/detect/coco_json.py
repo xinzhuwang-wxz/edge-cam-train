@@ -59,9 +59,10 @@ class CocoJsonAdapter(DetectionDatasetAdapter):
             boxes: list[tuple[str, list[float]]] = []
             for a in anns_by_img.get(img["id"], []):
                 name = cats.get(a["category_id"])
-                if name is None:
-                    continue
-                boxes.append((name, [float(v) for v in a["bbox"]]))
+                bbox = a.get("bbox")
+                if name is None or bbox is None:
+                    continue  # 未映射类目 或 无框注解（如相机陷阱 empty 帧）→ 不计框
+                boxes.append((name, [float(v) for v in bbox]))
             gk = None
             if self.group_key_field is not None:
                 raw_gk = img.get(self.group_key_field)

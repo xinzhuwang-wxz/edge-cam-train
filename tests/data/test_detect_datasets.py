@@ -49,31 +49,28 @@ def test_ena24_maps_drops_livestock_and_splits_by_image(tmp_path) -> None:
     assert ad.spec.split_unit == "image" and ad.spec.commercial_safe and ad.spec.exhaustive
 
 
-def test_caltech_ct_joins_location_and_adds_empty_negatives(tmp_path) -> None:
-    base = tmp_path / "commercial/caltech_ct"
-    bbox = {
-        "images": [{"id": "i1", "file_name": "x.jpg", "width": 100, "height": 100}],
-        "annotations": [{"id": "a1", "image_id": "i1", "category_id": 11, "bbox": [1, 1, 2, 2]}],
-        "categories": [{"id": 11, "name": "bird"}],
-    }
-    meta = {
-        "images": [
-            {"id": "i1", "file_name": "x.jpg", "width": 100, "height": 100, "location": "loc7"},
-            {"id": "e1", "file_name": "e.jpg", "width": 100, "height": 100, "location": "loc7"},
-        ],
-        "annotations": [
-            {"id": "m1", "image_id": "i1", "category_id": 11},
-            {"id": "m2", "image_id": "e1", "category_id": 30},  # empty
-        ],
-        "categories": [{"id": 11, "name": "bird"}, {"id": 30, "name": "empty"}],
-    }
-    _write(base / "caltech_bboxes_20200316.json", bbox)
-    _write(base / "caltech_images_20210113.json", meta)
+def _eccv(tmp_path, anns, images, cats, fname="train_annotations.json"):
+    """写 ECCV18 注解文件到 caltech_ct/eccv18/eccv_18_annotation_files/。"""
+    p = tmp_path / "commercial/caltech_ct/eccv18/eccv_18_annotation_files" / fname
+    _write(p, {"images": images, "annotations": anns, "categories": cats})
+
+
+def test_caltech_ct_eccv_location_split_and_empty_negatives(tmp_path) -> None:
+    imgs = [
+        {"id": "i1", "file_name": "x.jpg", "width": 100, "height": 100, "location": "loc7"},
+        {"id": "e1", "file_name": "e.jpg", "width": 100, "height": 100, "location": "loc7"},
+    ]
+    anns = [
+        {"id": "a1", "image_id": "i1", "category_id": 11, "bbox": [1, 1, 2, 2]},  # bird
+        {"id": "m2", "image_id": "e1", "category_id": 30},  # empty: 无 bbox → 负样本
+    ]
+    cats = [{"id": 11, "name": "bird"}, {"id": 30, "name": "empty"}]
+    _eccv(tmp_path, anns, imgs, cats)
 
     ad = build_adapter("caltech_ct", str(tmp_path), negative_quota=None)
     recs = {r.path: r for r in ad.build_records()}
-    pos = recs["commercial/caltech_ct/cct_images/x.jpg"]
-    neg = recs["commercial/caltech_ct/cct_images/e.jpg"]  # empty 补成负样本
+    pos = recs["commercial/caltech_ct/eccv_18_all_images_sm/x.jpg"]
+    neg = recs["commercial/caltech_ct/eccv_18_all_images_sm/e.jpg"]  # empty → 负样本
     assert [b.category_id for b in pos.boxes] == [FEEDER5_CATEGORIES["bird"]]
     assert neg.boxes == []
     assert len({r.split for r in recs.values()}) == 1  # 同 location=loc7 → 同 split
@@ -81,22 +78,15 @@ def test_caltech_ct_joins_location_and_adds_empty_negatives(tmp_path) -> None:
 
 
 def test_caltech_ct_negative_quota_zero_drops_empties(tmp_path) -> None:
-    base = tmp_path / "commercial/caltech_ct"
-    bbox = {
-        "images": [{"id": "i1", "file_name": "x.jpg", "width": 9, "height": 9}],
-        "annotations": [{"id": "a1", "image_id": "i1", "category_id": 11, "bbox": [1, 1, 2, 2]}],
-        "categories": [{"id": 11, "name": "bird"}],
-    }
-    meta = {
-        "images": [
-            {"id": "i1", "file_name": "x.jpg", "width": 9, "height": 9, "location": "l"},
-            {"id": "e1", "file_name": "e.jpg", "width": 9, "height": 9, "location": "l"},
-        ],
-        "annotations": [{"id": "m2", "image_id": "e1", "category_id": 30}],
-        "categories": [{"id": 11, "name": "bird"}, {"id": 30, "name": "empty"}],
-    }
-    _write(base / "caltech_bboxes_20200316.json", bbox)
-    _write(base / "caltech_images_20210113.json", meta)
+    imgs = [
+        {"id": "i1", "file_name": "x.jpg", "width": 9, "height": 9, "location": "l"},
+        {"id": "e1", "file_name": "e.jpg", "width": 9, "height": 9, "location": "l"},
+    ]
+    anns = [
+        {"id": "a1", "image_id": "i1", "category_id": 11, "bbox": [1, 1, 2, 2]},
+        {"id": "m2", "image_id": "e1", "category_id": 30},  # empty, 无 bbox
+    ]
+    _eccv(tmp_path, anns, imgs, [{"id": 11, "name": "bird"}, {"id": 30, "name": "empty"}])
     recs = build_adapter("caltech_ct", str(tmp_path), negative_quota=0).build_records()
     assert all(r.boxes for r in recs)  # quota=0 → 无负样本
 
