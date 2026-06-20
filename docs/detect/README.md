@@ -12,7 +12,8 @@
 |---|---|
 | [01-数据集.md](01-数据集.md) | 开源数据集盘点、5 类体系、license 分层、DatasetAdapter 抽象、存放结构、组装/清洗 |
 | [02-训练与评估.md](02-训练与评估.md) | 模型变体(NanoDet 三档)、COCO 预训练微调、数据增强、split、评估口径、MegaDetector 角色 |
-| (后续) 03-导出与部署 | FP32 ONNX → ACUITY → .nb → VIPLite(待板子) |
+| [03-数据获取实操.md](03-数据获取实操.md) | **AutoDL 上逐源下数据的实操日志**：实际类目核验、踩坑(py3.8/107GB CCT)、每源具体处理 |
+| (后续) 04-导出与部署 | FP32 ONNX → ACUITY → .nb → VIPLite(待板子) |
 
 ## 一图看懂:数据集 → 角色 → 用在哪步
 
