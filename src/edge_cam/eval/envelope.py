@@ -10,7 +10,7 @@ from pathlib import Path
 from edge_cam.contracts.schemas.dataset import DatasetManifest
 from edge_cam.contracts.schemas.eval_report import EnvelopeReport, LevelResult
 from edge_cam.eval.metrics import evaluate_onnx, evaluate_torch
-from edge_cam.eval.regional import RegionalMask
+from edge_cam.eval.regional import RegionalMask, evaluate_regional
 from edge_cam.train.classify.data import ClassifyDataModule
 from edge_cam.train.classify.module import Classifier
 
@@ -76,18 +76,23 @@ def build_envelope(
         )
     )
 
-    # ④ +地域过滤（最大杠杆；在干净 test 上消融）
+    # ④ +地域过滤（最大杠杆）：**只在 in-region 子集比 on/off**（修 issue#11 全局 artifact）
     if regional_mask is not None:
-        mr = evaluate_torch(
-            model, dm.test_dataloader(), device=device, logit_transform=regional_mask.as_transform()
-        )
+        r = evaluate_regional(model, dm.test_dataloader(), regional_mask, device=device)
         levels.append(
             LevelResult(
                 name="regional",
-                top1=mr.top1,
-                top5=mr.top5,
-                n=mr.n,
-                note=f"区域覆盖 {regional_mask.coverage:.1%} 类",
+                n=r["in_region_n"],
+                metrics={
+                    "in_region_top1_off": round(r["top1_off"], 4),
+                    "in_region_top1_on": round(r["top1_on"], 4),
+                    "gain": round(r["gain"], 4),
+                },
+                primary="in_region_top1_on",
+                note=(
+                    f"in-region({r['in_region_n']}) on/off 增益 {r['gain']:+.3f}；"
+                    f"区域覆盖 {regional_mask.coverage:.1%}；非全局 artifact(issue#11)"
+                ),
             )
         )
 

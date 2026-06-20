@@ -83,3 +83,30 @@ class RegionalMask:
     def coverage(self) -> float:
         """区域类数 / 全局类数（候选缩小倍数的倒数）。"""
         return len(self.allowed_idx) / self.num_classes
+
+
+@torch.no_grad()
+def evaluate_regional(model, loader, mask: RegionalMask, device: str = "cpu") -> dict:
+    """**只在 in-region 子集(真值∈区域)** 上比 mask on/off → 真实地域增益(修 issue#11)。
+
+    旧口径在全局 test 上加 mask,把外地真值压成 -inf 必错 → artifact(非真增益)。正确口径:
+    部署场景是"鸟确实是本地种",故只看 in-region 样本的 top-1 off vs on。
+    返回 {in_region_n, top1_off, top1_on, gain}。"""
+    model = model.eval().to(device)
+    transform = mask.as_transform()
+    n = off = on = 0
+    for images, targets in loader:
+        logits = model(images.to(device)).cpu()
+        masked = transform(logits)
+        for i, gt in enumerate(targets.tolist()):
+            if gt not in mask.allowed_idx:
+                continue
+            n += 1
+            off += int(logits[i].argmax().item() == gt)
+            on += int(masked[i].argmax().item() == gt)
+    return {
+        "in_region_n": n,
+        "top1_off": off / n if n else 0.0,
+        "top1_on": on / n if n else 0.0,
+        "gain": (on - off) / n if n else 0.0,
+    }

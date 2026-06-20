@@ -83,7 +83,11 @@ def evaluate_gate(report: EnvelopeReport, thr: GateThresholds) -> GateResult:
     fp32 = report.get("fp32_val")
     regional = report.get("regional")
     check_min("fp32_top1", fp32.top1 if fp32 else None, thr.min_fp32_top1)
-    check_min("regional_top1", regional.top1 if regional else None, thr.min_regional_top1)
+    # regional 改 in-region on 口径(issue#11);兼容旧 top1
+    reg_val = None
+    if regional is not None:
+        reg_val = regional.value("in_region_top1_on") or regional.top1
+    check_min("regional_top1", reg_val, thr.min_regional_top1)
     check_max_drop("int8_drop", report.drop_from_baseline("int8_sim"), thr.max_int8_drop)
     check_max_drop("field_drop", report.drop_from_baseline("field"), thr.max_field_drop)
 

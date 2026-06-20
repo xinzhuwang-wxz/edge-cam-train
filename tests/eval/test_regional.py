@@ -46,3 +46,28 @@ def test_key_mismatch_raises_diagnostic() -> None:
     with pytest.raises(ValueError, match="交集为 0"):
         # 区域清单用 eBird code，对不上占位键
         RegionalMask.from_taxon_keys({"houspa", "amerob"}, class_to_idx, taxon_of)
+
+
+def test_evaluate_regional_in_region_only() -> None:
+    """evaluate_regional 只在 in-region 子集比 on/off(修 issue#11 artifact)。"""
+    import torch
+    from torch import nn
+
+    from edge_cam.eval.regional import evaluate_regional
+
+    mask = RegionalMask({0, 1}, num_classes=3)  # 类2 出区域
+
+    class FakeModel(nn.Module):
+        # in-region 样本(gt=0)无 mask 误判成出区域类2;mask 后纠正为0 → 增益
+        def forward(self, x):
+            return torch.tensor([[1.0, 0.0, 5.0], [0.0, 0.0, 9.0]])[: x.shape[0]]
+
+    class OneBatch:
+        def __iter__(self):
+            yield torch.zeros(2, 3, 4, 4), torch.tensor([0, 2])  # gt=0(区域内), gt=2(区域外,跳过)
+
+    r = evaluate_regional(FakeModel(), OneBatch(), mask)
+    assert r["in_region_n"] == 1  # 只算 gt=0
+    assert r["top1_off"] == 0.0  # 无 mask 误判类2
+    assert r["top1_on"] == 1.0  # mask 后纠正为类0
+    assert r["gain"] == 1.0
