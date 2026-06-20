@@ -51,48 +51,38 @@ def _resize_url(u: str, flickr_size: str) -> str:
     return u
 
 
-def select(dataset_key: str, licenses: list[str], cap: int, max_species: int) -> list[dict]:
-    """speciesKey facet → 逐种查（每种 ≤cap）→ 选样本（学名/license/media/经纬/日期/观测者）。"""
-    base = {
-        "datasetKey": dataset_key,
-        "taxonKey": AVES,
-        "mediaType": "StillImage",
-        "license": licenses,
-    }
+def _facet_species(base: dict, max_species: int) -> list[int]:
+    """speciesKey facet → 该源样本最多的 top-N speciesKey（均衡，不被单一常见种淹没）。"""
     facet = _get({**base, "facet": "speciesKey", "facetLimit": max_species, "limit": 0})
-    species = [c["name"] for c in facet["facets"][0]["counts"]] if facet.get("facets") else []
-    print(f"[gbif] {len(species)} species (top {max_species})", flush=True)
+    return [c["name"] for c in facet["facets"][0]["counts"]] if facet.get("facets") else []
+
+
+def _select_species(base: dict, sk: int, cap: int) -> list[dict]:
+    """单种查（≤cap）→ 该种样本（学名/license/media URL/经纬/日期/观测者）。"""
     out: list[dict] = []
-    skipped = 0
-    for sk in species:
-        try:
-            got = 0
-            for offset in range(0, cap, 300):
-                q = {**base, "speciesKey": sk, "limit": min(300, cap - got), "offset": offset}
-                page = _get(q)
-                for rec in page["results"]:
-                    media = [m["identifier"] for m in rec.get("media", []) if m.get("identifier")]
-                    if not media or not rec.get("species"):
-                        continue
-                    out.append(
-                        {
-                            "sk": sk,
-                            "scientific_name": rec["species"],
-                            "license": rec.get("license", ""),
-                            "url": media[0],
-                            "group_key": rec.get("recordedBy") or rec.get("occurrenceID") or "",
-                            "lat": rec.get("decimalLatitude"),
-                            "lon": rec.get("decimalLongitude"),
-                            "observed_at": rec.get("eventDate"),
-                        }
-                    )
-                    got += 1
-                if page["endOfRecords"] or got >= cap:
-                    break
-        except Exception as e:  # noqa: BLE001 — 单种查询持续失败 → 跳过该种，不崩整体
-            skipped += 1
-            print(f"[gbif] species {sk} skipped: {e!r}", flush=True)
-    print(f"[gbif] selected {len(out)} from {len(species)} species ({skipped} skipped)", flush=True)
+    got = 0
+    for offset in range(0, cap, 300):
+        q = {**base, "speciesKey": sk, "limit": min(300, cap - got), "offset": offset}
+        page = _get(q)
+        for rec in page["results"]:
+            media = [m["identifier"] for m in rec.get("media", []) if m.get("identifier")]
+            if not media or not rec.get("species"):
+                continue
+            out.append(
+                {
+                    "sk": sk,
+                    "scientific_name": rec["species"],
+                    "license": rec.get("license", ""),
+                    "url": media[0],
+                    "group_key": rec.get("recordedBy") or rec.get("occurrenceID") or "",
+                    "lat": rec.get("decimalLatitude"),
+                    "lon": rec.get("decimalLongitude"),
+                    "observed_at": rec.get("eventDate"),
+                }
+            )
+            got += 1
+        if page["endOfRecords"] or got >= cap:
+            break
     return out
 
 
@@ -111,6 +101,9 @@ def _download(args: tuple[dict, Path, str]) -> dict | None:
         return None
 
 
+_FIELDS = ["path", "scientific_name", "license", "group_key", "lat", "lon", "observed_at"]
+
+
 def fetch(
     dataset_key: str,
     out: Path,
@@ -120,34 +113,49 @@ def fetch(
     jobs: int,
     size: str,
 ) -> Path:
-    recs = select(dataset_key, licenses, cap, max_species)
-    img_dir = out / "images"
-    ok: list[dict] = []
-    with ThreadPoolExecutor(max_workers=jobs) as ex:
-        for i, r in enumerate(ex.map(_download, ((r, img_dir, size) for r in recs)), 1):
-            if r:
-                ok.append(r)
-            if i % 500 == 0:
-                print(f"[gbif] {i}/{len(recs)} ({len(ok)} ok)", flush=True)
+    """逐种：查 → 下图 → **增量写 index**（下载即开始、进度可见、中断不丢已下）。"""
+    base = {
+        "datasetKey": dataset_key,
+        "taxonKey": AVES,
+        "mediaType": "StillImage",
+        "license": licenses,
+    }
+    species = _facet_species(base, max_species)
+    print(f"[gbif] {len(species)} species (top {max_species}); 逐种下载…", flush=True)
     out.mkdir(parents=True, exist_ok=True)
+    img_dir = out / "images"
     idx = out / "index.csv"
-    with idx.open("w", newline="", encoding="utf-8") as fh:
-        w = csv.DictWriter(
-            fh,
-            fieldnames=[
-                "path",
-                "scientific_name",
-                "license",
-                "group_key",
-                "lat",
-                "lon",
-                "observed_at",
-            ],
-        )
+    total_ok = total_sel = skipped = 0
+    with (
+        idx.open("w", newline="", encoding="utf-8") as fh,
+        ThreadPoolExecutor(max_workers=jobs) as ex,
+    ):
+        w = csv.DictWriter(fh, fieldnames=_FIELDS)
         w.writeheader()
-        for r in ok:
-            w.writerow({k: ("" if r.get(k) is None else r.get(k)) for k in w.fieldnames})
-    print(f"[gbif] wrote {idx}: {len(ok)} imgs", flush=True)
+        fh.flush()
+        for si, sk in enumerate(species, 1):
+            try:
+                recs = _select_species(base, sk, cap)
+            except Exception as e:  # noqa: BLE001 — 单种持续失败 → 跳过该种，不崩整体
+                skipped += 1
+                print(f"[gbif] species {sk} skipped: {e!r}", flush=True)
+                continue
+            total_sel += len(recs)
+            ok = [r for r in ex.map(_download, ((r, img_dir, size) for r in recs)) if r]
+            for r in ok:
+                w.writerow({k: ("" if r.get(k) is None else r.get(k)) for k in _FIELDS})
+            fh.flush()  # 增量落盘 → 中断后 index.csv 仍是有效部分集
+            total_ok += len(ok)
+            if si % 10 == 0 or si == len(species):
+                print(
+                    f"[gbif] {si}/{len(species)} species | {total_ok} imgs "
+                    f"({total_sel} sel, {skipped} skip)",
+                    flush=True,
+                )
+    print(
+        f"[gbif] wrote {idx}: {total_ok} imgs / {len(species)} species ({skipped} skip)",
+        flush=True,
+    )
     return idx
 
 
