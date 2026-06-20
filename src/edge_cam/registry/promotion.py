@@ -7,7 +7,8 @@ registry.promote 的 gate 门恒拒、右半边（registry/OTA）够不着。本
 
 from __future__ import annotations
 
-from edge_cam.contracts.schemas.dataset import DatasetManifest
+from edge_cam.contracts.schemas.dataset import DatasetManifest, provenance_summary
+from edge_cam.contracts.schemas.detection_manifest import DetectionManifest
 from edge_cam.contracts.schemas.eval_report import EnvelopeReport
 from edge_cam.contracts.schemas.model_card import ModelCard, Platform, Precision, Provenance, Task
 from edge_cam.eval.gates.gate import GateResult
@@ -15,11 +16,10 @@ from edge_cam.registry.store import ModelRegistry
 
 
 def provenance_from_manifest(
-    manifest: DatasetManifest, *, commercial_safe: bool = False
+    manifest: DatasetManifest | DetectionManifest, *, commercial_safe: bool = False
 ) -> Provenance:
-    """从 manifest 逐样本溯源汇出 Provenance（数据集 + 许可，去重保序）。"""
-    datasets = sorted({r.source for r in manifest.records if r.source})
-    licenses = sorted({r.license for r in manifest.records if r.license})
+    """逐样本溯源汇出 Provenance（数据集+许可）。分类/检测 manifest 通用([[ADR-0003]] C5)。"""
+    datasets, licenses = provenance_summary(manifest.records)
     return Provenance(datasets=datasets, licenses=licenses, commercial_safe=commercial_safe)
 
 
