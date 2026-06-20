@@ -44,8 +44,8 @@ class DatasetSpec:
     role: Role = "train"  # train | eval_only(feasibility 仅评估)
     exhaustive: bool = True  # 非穷尽(OIV7)→未标区域 ignore/不当负样本；穷尽→可作负样本
     split_unit: str = "image"  # image | location | sequence（相机陷阱按组防泄漏）
-    max_per_class: int | None = None  # 每类抽样上限（控不平衡）
-    negative_quota: int = 0  # 拉多少无框负样本（empty/no-target）
+    max_per_class: int | None = None  # 每类**含该类图**上限（控不平衡，None=不限）
+    negative_quota: int | None = 0  # 保留多少无框负样本（0=不留，None=全留，N=确定性留前 N）
     attribution: bool = False  # 是否需逐图署名清册（OIV7/Roboflow 商用）
 
     def __post_init__(self) -> None:
@@ -92,9 +92,14 @@ class DetectionDatasetAdapter(ABC):
         ...
 
     def build_records(self) -> list[DetImageRecord]:
-        """RawSample → DetImageRecord（映射 5 类、丢未映射、负样本、确定 split、provenance）。"""
+        """RawSample → DetImageRecord（映射 5 类、丢未映射、负样本、确定 split、provenance）。
+
+        负样本(0 框)仅穷尽源或显式 is_negative 才保留，受 negative_quota 限额；正样本受
+        max_per_class 每类限额。两处限额均按 path 哈希确定性抽样（可复现、与 split 解耦）。
+        """
         s = self.spec
-        recs: list[DetImageRecord] = []
+        pos: list[DetImageRecord] = []
+        neg: list[DetImageRecord] = []
         for raw in self.load_raw():
             boxes: list[DetBox] = []
             for src_label, bbox in raw.boxes:
@@ -102,22 +107,49 @@ class DetectionDatasetAdapter(ABC):
                 if tgt is None:
                     continue  # 未映射 → 丢弃（非穷尽源的未标区域留 ignore，此处不当框）
                 boxes.append(DetBox(bbox=list(bbox), category_id=FEEDER5_CATEGORIES[tgt]))
-            # 无映射框：仅穷尽源 或 显式负样本 才当负样本（非穷尽源可能漏标真目标→不当负）
-            if not boxes and not (raw.is_negative or s.exhaustive):
-                continue
-            split = _split_of(raw.group_key or raw.path, s.name)
-            recs.append(
-                DetImageRecord(
-                    path=raw.path,
-                    split=split,  # type: ignore[arg-type]
-                    width=raw.width,
-                    height=raw.height,
-                    boxes=boxes,
-                    source=s.name,
-                    license=s.license,
-                )
+            rec = DetImageRecord(
+                path=raw.path,
+                split=_split_of(raw.group_key or raw.path, s.name),  # type: ignore[arg-type]
+                width=raw.width,
+                height=raw.height,
+                boxes=boxes,
+                source=s.name,
+                license=s.license,
             )
-        return recs
+            if boxes:
+                pos.append(rec)
+            elif raw.is_negative or s.exhaustive:
+                neg.append(rec)
+            # else: 非穷尽源的纯未映射图 → 丢（可能漏标真目标，§5.1 防污染负样本）
+        return _cap_per_class(pos, s.max_per_class) + _cap_negatives(neg, s.negative_quota)
+
+
+def _hash_key(path: str) -> str:
+    return hashlib.sha256(path.encode()).hexdigest()
+
+
+def _cap_negatives(neg: list[DetImageRecord], quota: int | None) -> list[DetImageRecord]:
+    """负样本限额：None=全留，<=0=不留，N=按 path 哈希确定性留前 N。"""
+    if quota is None:
+        return neg
+    if quota <= 0:
+        return []
+    return sorted(neg, key=lambda r: _hash_key(r.path))[:quota]
+
+
+def _cap_per_class(pos: list[DetImageRecord], cap: int | None) -> list[DetImageRecord]:
+    """每类限额：保留含该类的图 ≤ cap（多类图任一类未满即留）；确定性按 path 哈希。"""
+    if cap is None:
+        return pos
+    counts: dict[int, int] = dict.fromkeys(FEEDER5_CATEGORIES.values(), 0)
+    kept: list[DetImageRecord] = []
+    for r in sorted(pos, key=lambda r: _hash_key(r.path)):
+        classes = {b.category_id for b in r.boxes}
+        if any(counts[c] < cap for c in classes):
+            kept.append(r)
+            for c in classes:
+                counts[c] += 1
+    return kept
 
 
 def assemble(

@@ -10,12 +10,14 @@ from edge_cam.data.adapters.detect.base import (
     get_adapter_cls,
     register_adapter,
 )
+from edge_cam.data.adapters.detect.coco_json import CocoJsonAdapter
 
 __all__ = [
     "FEEDER5_CATEGORIES",
     "DatasetSpec",
     "RawSample",
     "DetectionDatasetAdapter",
+    "CocoJsonAdapter",
     "assemble",
     "register_adapter",
     "get_adapter_cls",

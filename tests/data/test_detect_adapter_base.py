@@ -61,16 +61,19 @@ def test_build_records_maps_and_drops_unmapped() -> None:
 
 
 def test_exhaustive_keeps_negative_but_nonexhaustive_drops() -> None:
+    # negative_quota=None 隔离"留/丢"判定，不掺限额（限额另测）
     only_unmapped = [RawSample("n.jpg", 10, 10, [("Cow", [0, 0, 1, 1])])]
+    build = lambda samples, **kw: _FakeAdapter(  # noqa: E731
+        _spec(negative_quota=None, **kw), samples
+    ).build_records()
     # 穷尽源:只剩未映射 → 当负样本(0 框)保留
-    rec_ex = _FakeAdapter(_spec(exhaustive=True), only_unmapped).build_records()
+    rec_ex = build(only_unmapped, exhaustive=True)
     assert len(rec_ex) == 1 and rec_ex[0].boxes == []
     # 非穷尽源:可能漏标真目标 → 丢弃,不当负样本
-    rec_non = _FakeAdapter(_spec(exhaustive=False), only_unmapped).build_records()
-    assert rec_non == []
+    assert build(only_unmapped, exhaustive=False) == []
     # 显式负样本:无论穷尽与否都保留
     neg = [RawSample("e.jpg", 10, 10, [], is_negative=True)]
-    assert len(_FakeAdapter(_spec(exhaustive=False), neg).build_records()) == 1
+    assert len(build(neg, exhaustive=False)) == 1
 
 
 def test_split_deterministic_by_group() -> None:
@@ -114,6 +117,26 @@ def test_assemble_rejects_noncommercial_train() -> None:
     bad = _FakeAdapter(_spec(name="coco", commercial_safe=False, role="train"), [])
     with pytest.raises(ValueError, match="不可商用数据不得进训练"):
         assemble([bad])
+
+
+def test_negative_quota_caps_negatives_deterministically() -> None:
+    negs = [RawSample(f"n{i}.jpg", 10, 10, [], is_negative=True) for i in range(10)]
+    # quota=0 → 不留；None → 全留；N → 留前 N（确定性可复现）
+    assert _FakeAdapter(_spec(exhaustive=True, negative_quota=0), negs).build_records() == []
+    all_kept = _FakeAdapter(_spec(exhaustive=True, negative_quota=None), negs).build_records()
+    assert len(all_kept) == 10
+    kept1 = {r.path for r in _FakeAdapter(_spec(negative_quota=3), negs).build_records()}
+    kept2 = {r.path for r in _FakeAdapter(_spec(negative_quota=3), negs).build_records()}
+    assert len(kept1) == 3 and kept1 == kept2
+
+
+def test_max_per_class_caps_positive_images() -> None:
+    birds = [RawSample(f"b{i}.jpg", 10, 10, [("Bird", [0, 0, 2, 2])]) for i in range(8)]
+    recs = _FakeAdapter(_spec(max_per_class=3), birds).build_records()
+    assert len(recs) == 3  # bird 类封顶 3 张
+    # 多类图：任一类未满即留（Raccoon→other_animal 与 bird 独立计数）
+    mixed = [RawSample("m.jpg", 10, 10, [("Bird", [0, 0, 2, 2]), ("Raccoon", [0, 0, 2, 2])])]
+    assert len(_FakeAdapter(_spec(max_per_class=0), mixed).build_records()) == 0
 
 
 def test_registry() -> None:
