@@ -24,15 +24,21 @@ def provenance_from_manifest(
 
 
 def metrics_from_report(report: EnvelopeReport) -> dict[str, float]:
-    """把四级包络摊平成 ModelCard.metrics（各级 top1/5 + int8/field 掉点）。"""
+    """把包络各级摊平成 ModelCard.metrics（[[ADR-0003]] C3：dict 化，两族通用）。
+
+    分类级 metrics={top1,top5}（validator 自镜像）→ 输出 `{级}_top1/top5` 同旧；
+    检测级 metrics={map_50,map_5095,bird_recall}→ 输出 `{级}_map_50` 等。掉点按各级 primary 算。"""
     metrics: dict[str, float] = {}
     for lv in report.levels:
-        metrics[f"{lv.name}_top1"] = round(lv.top1, 4)
-        metrics[f"{lv.name}_top5"] = round(lv.top5, 4)
-    for level in ("int8_sim", "field"):
-        drop = report.drop_from_baseline(level)
-        if drop is not None:
-            metrics[f"{level}_drop"] = round(drop, 4)
+        for mname, mval in lv.metrics.items():
+            metrics[f"{lv.name}_{mname}"] = round(mval, 4)
+    # 掉点：相对首级（分类 fp32_val / 检测 fp32），按各级 primary 指标
+    if report.levels:
+        baseline = report.levels[0].name
+        for lv in report.levels[1:]:
+            drop = report.drop_from_baseline(lv.name, baseline=baseline)
+            if drop is not None:
+                metrics[f"{lv.name}_drop"] = round(drop, 4)
     return metrics
 
 

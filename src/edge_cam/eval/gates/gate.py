@@ -12,21 +12,31 @@ import yaml
 
 from edge_cam.contracts.schemas.eval_report import EnvelopeReport
 
-# from_yaml 只认这些键（4 维阈值门，plan §B.1）；多余键报错防配置漂移
+# from_yaml 只认这些键；多余键报错防配置漂移。分类(top1/regional)+ 检测(map/recall)两族
 _THRESHOLD_KEYS = {
-    "min_fp32_top1",
+    "min_fp32_top1",  # 分类
     "min_regional_top1",
     "max_int8_drop",
     "max_field_drop",
+    "min_map_5095",  # 检测（[[ADR-0003]] C3：命名指标阈值）
+    "min_map_50",
+    "min_bird_recall_50",
+    "max_int8_map_drop",
 }
 
 
 @dataclass
 class GateThresholds:
+    # 分类
     min_fp32_top1: float | None = None
     min_regional_top1: float | None = None
     max_int8_drop: float | None = None  # int8_sim 相对 fp32 的 top-1 掉点上限
     max_field_drop: float | None = None  # 类现场相对 fp32 的 top-1 掉点上限
+    # 检测（fp32 级 map/recall 下限 + int8 的 mAP 掉点上限）
+    min_map_5095: float | None = None
+    min_map_50: float | None = None
+    min_bird_recall_50: float | None = None
+    max_int8_map_drop: float | None = None
 
     @classmethod
     def from_yaml(cls, path: str | Path) -> GateThresholds:
@@ -69,12 +79,28 @@ def evaluate_gate(report: EnvelopeReport, thr: GateThresholds) -> GateResult:
         ok = drop is not None and drop <= ceil
         checks.append((name, ok, f"掉点 {drop if drop is not None else 'n/a'} ≤ {ceil}"))
 
+    # 分类：fp32_val/regional 的 top-1 下限 + int8/field 掉点上限
     fp32 = report.get("fp32_val")
     regional = report.get("regional")
     check_min("fp32_top1", fp32.top1 if fp32 else None, thr.min_fp32_top1)
     check_min("regional_top1", regional.top1 if regional else None, thr.min_regional_top1)
     check_max_drop("int8_drop", report.drop_from_baseline("int8_sim"), thr.max_int8_drop)
     check_max_drop("field_drop", report.drop_from_baseline("field"), thr.max_field_drop)
+
+    # 检测：fp32 级 map/recall 下限 + int8 的 mAP@.5:.95 掉点上限
+    fp32_det = report.get("fp32")
+    check_min("map_5095", fp32_det.value("map_5095") if fp32_det else None, thr.min_map_5095)
+    check_min("map_50", fp32_det.value("map_50") if fp32_det else None, thr.min_map_50)
+    check_min(
+        "bird_recall_50",
+        fp32_det.value("bird_recall_50") if fp32_det else None,
+        thr.min_bird_recall_50,
+    )
+    check_max_drop(
+        "int8_map_drop",
+        report.drop_from_baseline("int8_sim", baseline="fp32", metric="map_5095"),
+        thr.max_int8_map_drop,
+    )
 
     passed = all(ok for _, ok, _ in checks) if checks else True
     return GateResult(passed=passed, checks=checks)
