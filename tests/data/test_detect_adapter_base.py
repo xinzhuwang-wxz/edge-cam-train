@@ -166,6 +166,17 @@ def test_max_per_class_dict_rejects_bad_key() -> None:
         )
 
 
+def test_split_ratios_configurable() -> None:
+    s = [
+        RawSample(f"r{i}.jpg", 10, 10, [("Bird", [0, 0, 2, 2])], group_key=f"g{i}")
+        for i in range(20)
+    ]
+    all_train = _FakeAdapter(_spec(split_ratios=(1.0, 0.0, 0.0)), s).build_records()
+    assert all(r.split == "train" for r in all_train)
+    all_test = _FakeAdapter(_spec(split_ratios=(0.0, 0.0, 1.0)), s).build_records()
+    assert all(r.split == "test" for r in all_test)
+
+
 def test_registry() -> None:
     register_adapter("fake_reg", _FakeAdapter)
     assert "fake_reg" in available_adapters()
