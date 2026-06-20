@@ -34,7 +34,7 @@
 
 **级联结构**
 - **级联 (cascade)**：粗检测器（固定）→ bird crop → 细分类器（可 OTA 换/扩）。非鸟直接出大类。
-- **统一大类 (unified coarse class)**：检测层 11 个 feeder-cam 大类；跨集（COCO/OIV7）经显式映射表归一到此闭集；bird 在检测层为单一类，细分交分类器。
+- **统一大类 (unified coarse class)**：检测层 **5 个** feeder-cam 大类（`bird / squirrel / cat / person / other_animal`，[[ADR-0004]]）；跨集（COCO/OIV7/Caltech CT/NACTI）经各源映射表归一到此闭集；bird 在检测层为单一类，细分交分类器；person=补粮的人(检到→抑制告警)；other_animal=长尾哺乳动物合并(raccoon/rabbit/fox/dog/deer…)，避免稀有类样本饿死（实验1 skunk AP 1.3 教训）。旧 11 类口径已废（[[ADR-0004]]）。
 - **crop 域 (crop domain)**：检测框按统一规范（padding 外扩 + 最小尺寸门控）裁出的图像域；训练裁剪与端侧推理裁剪共用同一函数。BIRDS-525 近似 crop 域。
 
 **评估与门控**

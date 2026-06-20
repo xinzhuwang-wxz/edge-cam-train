@@ -2,7 +2,7 @@
 
 替代「直接喂裸 COCO labels.json」——检测也有可移植、可溯源的统一清单:逐图 source/license/
 taxon_key(与分类共享 `Provenanced`)+ 固定 split。`to_coco(split)` 产 NanoDet 可读的 COCO dict,
-provenance 不丢。新检测源经 ingest adapter(merge_map 的源→11 粗类)产出本 manifest。
+provenance 不丢。新检测源经 DatasetAdapter(源标签 → 5 类，[[ADR-0004]])产出本 manifest。
 """
 
 from __future__ import annotations
@@ -39,7 +39,7 @@ class DetectionManifest(BaseModel):
     version: str
     seed: int = 0
     root: str | None = None
-    categories: dict[str, int]  # 粗类名 → id(11 feeder-cam 闭集)
+    categories: dict[str, int]  # 粗类名 → id(5 类闭集，[[ADR-0004]])
     records: list[DetImageRecord] = Field(default_factory=list)
 
     @model_validator(mode="after")
