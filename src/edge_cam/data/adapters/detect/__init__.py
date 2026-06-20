@@ -7,6 +7,7 @@ from edge_cam.data.adapters.detect.base import (
     RawSample,
     assemble,
     available_adapters,
+    build_adapter,
     get_adapter_cls,
     register_adapter,
 )
@@ -22,4 +23,13 @@ __all__ = [
     "register_adapter",
     "get_adapter_cls",
     "available_adapters",
+    "build_adapter",
 ]
+
+# 具体数据集 adapter：import 即注册（registry 副作用）。加新源 = 写一个模块 + 在此 import。
+# 放在 base/__all__ 之后（避免 isort 上移到 base 之前）。
+from edge_cam.data.adapters.detect import (  # noqa: E402,F401
+    caltech_ct,
+    coco2017,
+    ena24,
+)

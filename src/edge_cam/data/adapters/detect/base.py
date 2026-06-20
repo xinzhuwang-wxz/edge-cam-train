@@ -207,3 +207,12 @@ def get_adapter_cls(name: str) -> type[DetectionDatasetAdapter]:
 
 def available_adapters() -> list[str]:
     return sorted(_ADAPTERS)
+
+
+def build_adapter(name: str, raw_root: str, **overrides) -> DetectionDatasetAdapter:
+    """按名构造已注册 adapter。约定：具体 adapter __init__(raw_root, **overrides)。
+
+    overrides 透传给 adapter（如 negative_quota/max_per_class/splits）。配置驱动组装的统一入口
+    （build CLI 只认名字 + raw_root + overrides，不 import 具体类）。
+    """
+    return get_adapter_cls(name)(raw_root, **overrides)  # type: ignore[call-arg]
