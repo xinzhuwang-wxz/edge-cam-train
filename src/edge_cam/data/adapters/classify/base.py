@@ -139,11 +139,16 @@ def _cap_per_class(recs: list[SampleRecord], cap: int | None) -> list[SampleReco
 
 
 def assemble(
-    adapters: list[ClassifyDatasetAdapter], *, name: str = "feeder_classify", version: str = "v1"
+    adapters: list[ClassifyDatasetAdapter],
+    *,
+    name: str = "feeder_classify",
+    version: str = "v1",
+    root: str | None = None,
 ) -> DatasetManifest:
     """各 adapter → 合并 DatasetManifest（按 taxon_key 合并物种类；role=train 的并集）。
 
     eval_only 源（如自建跨源 holdout）单独走（本轮无）。class_to_idx 由 taxon_key 全集排序生成。
+    root：图片根（record.path 相对它，可移植）。
     """
     records: list[SampleRecord] = []
     for a in adapters:
@@ -153,7 +158,7 @@ def assemble(
     labels = sorted({r.label for r in records})
     class_to_idx = {lab: i for i, lab in enumerate(labels)}
     return DatasetManifest(
-        name=name, version=version, seed=0, class_to_idx=class_to_idx, records=records
+        name=name, version=version, seed=0, root=root, class_to_idx=class_to_idx, records=records
     )
 
 
