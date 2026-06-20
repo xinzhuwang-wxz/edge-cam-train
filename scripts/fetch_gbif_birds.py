@@ -18,6 +18,7 @@ import argparse
 import csv
 import json
 import sys
+import time
 import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
@@ -27,10 +28,18 @@ GBIF = "https://api.gbif.org/v1/occurrence/search"
 AVES = 212  # GBIF class Aves taxonKey
 
 
-def _get(params: dict) -> dict:
+def _get(params: dict, retries: int = 5) -> dict:
+    """GBIF 查询，带退避重试（网络抖动/RemoteDisconnected 不应崩整个 fetch）。"""
     url = GBIF + "?" + urllib.parse.urlencode(params, doseq=True)
-    with urllib.request.urlopen(url, timeout=60) as r:  # noqa: S310
-        return json.load(r)
+    for attempt in range(retries):
+        try:
+            with urllib.request.urlopen(url, timeout=60) as r:  # noqa: S310
+                return json.load(r)
+        except Exception:  # noqa: BLE001 — 重试瞬时网络错误
+            if attempt == retries - 1:
+                raise
+            time.sleep(2 * (attempt + 1))
+    raise RuntimeError("unreachable")
 
 
 def _resize_url(u: str, flickr_size: str) -> str:
@@ -54,30 +63,36 @@ def select(dataset_key: str, licenses: list[str], cap: int, max_species: int) ->
     species = [c["name"] for c in facet["facets"][0]["counts"]] if facet.get("facets") else []
     print(f"[gbif] {len(species)} species (top {max_species})", flush=True)
     out: list[dict] = []
+    skipped = 0
     for sk in species:
-        got = 0
-        for offset in range(0, cap, 300):
-            page = _get({**base, "speciesKey": sk, "limit": min(300, cap - got), "offset": offset})
-            for rec in page["results"]:
-                media = [m["identifier"] for m in rec.get("media", []) if m.get("identifier")]
-                if not media or not rec.get("species"):
-                    continue
-                out.append(
-                    {
-                        "sk": sk,
-                        "scientific_name": rec["species"],
-                        "license": rec.get("license", ""),
-                        "url": media[0],
-                        "group_key": rec.get("recordedBy") or rec.get("occurrenceID") or "",
-                        "lat": rec.get("decimalLatitude"),
-                        "lon": rec.get("decimalLongitude"),
-                        "observed_at": rec.get("eventDate"),
-                    }
-                )
-                got += 1
-            if page["endOfRecords"] or got >= cap:
-                break
-    print(f"[gbif] selected {len(out)} samples across {len(species)} species", flush=True)
+        try:
+            got = 0
+            for offset in range(0, cap, 300):
+                q = {**base, "speciesKey": sk, "limit": min(300, cap - got), "offset": offset}
+                page = _get(q)
+                for rec in page["results"]:
+                    media = [m["identifier"] for m in rec.get("media", []) if m.get("identifier")]
+                    if not media or not rec.get("species"):
+                        continue
+                    out.append(
+                        {
+                            "sk": sk,
+                            "scientific_name": rec["species"],
+                            "license": rec.get("license", ""),
+                            "url": media[0],
+                            "group_key": rec.get("recordedBy") or rec.get("occurrenceID") or "",
+                            "lat": rec.get("decimalLatitude"),
+                            "lon": rec.get("decimalLongitude"),
+                            "observed_at": rec.get("eventDate"),
+                        }
+                    )
+                    got += 1
+                if page["endOfRecords"] or got >= cap:
+                    break
+        except Exception as e:  # noqa: BLE001 — 单种查询持续失败 → 跳过该种，不崩整体
+            skipped += 1
+            print(f"[gbif] species {sk} skipped: {e!r}", flush=True)
+    print(f"[gbif] selected {len(out)} from {len(species)} species ({skipped} skipped)", flush=True)
     return out
 
 
