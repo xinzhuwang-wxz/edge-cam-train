@@ -1,0 +1,91 @@
+loading annotations into memory...
+Done (t=0.00s)
+creating index...
+index created!
+model size is  1.0x
+init weights...
+=> loading pretrained model https://download.pytorch.org/models/shufflenetv2_x1-5666bf0f80.pth
+Finish initialize NanoDet-Plus Head.
+[0;93m2026-06-20 12:42:58.231032683 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/bn2/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231075534 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/bn2/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231082269 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.6/blocks.6.0/bn2/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231088349 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.6/blocks.6.0/bn2/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231094081 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.6/blocks.6.0/bn1/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231100325 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.5/blocks.5.3/bn2/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231106163 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.5/blocks.5.3/bn1/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231111845 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.5/blocks.5.2/bn2/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231117451 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.5/blocks.5.2/bn1/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231123169 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.5/blocks.5.2/bn1/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231128944 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.5/blocks.5.1/bn2/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231134695 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.5/blocks.5.0/bn1/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231140372 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.4/blocks.4.2/bn2/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231146209 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.4/blocks.4.2/bn1/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231152072 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.4/blocks.4.1/bn2/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231157862 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.4/blocks.4.1/bn2/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231174534 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.4/blocks.4.1/bn1/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231180740 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.4/blocks.4.0/bn2/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231186519 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.4/blocks.4.0/bn1/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231192288 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.4/blocks.4.0/bn1/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231198134 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.3/blocks.3.1/bn2/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231203942 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.3/blocks.3.1/bn1/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231209702 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.3/blocks.3.1/bn1/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231215454 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.3/blocks.3.0/bn1/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231221376 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.2/blocks.2.1/bn2/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231227178 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.2/blocks.2.1/bn2/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231232937 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.2/blocks.2.1/bn1/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231238622 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.2/blocks.2.1/bn1/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231244359 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.2/blocks.2.0/bn2/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231250074 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.2/blocks.2.0/bn1/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231255837 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.2/blocks.2.0/bn1/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231261599 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.1/blocks.1.1/bn2/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231269718 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.1/blocks.1.1/bn2/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231275936 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.1/blocks.1.0/bn2/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231281748 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.1/blocks.1.0/bn1/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231287568 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.0/blocks.0.0/bn1/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231293322 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.0/blocks.0.0/bn1/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231299068 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/bn1/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231306179 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.5/blocks.5.3/bn1/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231311923 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.2/blocks.2.0/bn2/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231318303 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.5/blocks.5.1/bn1/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231323995 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.3/blocks.3.2/bn2/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231330436 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.3/blocks.3.2/bn2/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231337288 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.5/blocks.5.3/bn2/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231343461 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.5/blocks.5.0/bn1/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231350217 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.4/blocks.4.0/bn2/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231359422 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.4/blocks.4.1/bn1/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231366184 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.3/blocks.3.0/bn1/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231374752 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.1/blocks.1.0/bn1/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231381059 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.1/blocks.1.0/bn2/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231392442 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.3/blocks.3.2/bn1/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231401080 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.5/blocks.5.0/bn2/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231408481 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.5/blocks.5.2/bn2/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231416926 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.5/blocks.5.0/bn2/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231427171 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.3/blocks.3.2/bn1/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231438336 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.1/blocks.1.1/bn1/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231447056 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.3/blocks.3.0/bn2/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231453349 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.5/blocks.5.1/bn1/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231461410 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/bn1/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231467837 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.6/blocks.6.0/bn1/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231474156 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.1/blocks.1.1/bn1/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231481460 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.3/blocks.3.1/bn2/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231487617 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.4/blocks.4.2/bn1/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231494836 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.5/blocks.5.1/bn2/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231508086 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.3/blocks.3.0/bn2/act/Constant_output_0'. It is not used by any node and should be removed from the model.[m
+[0;93m2026-06-20 12:42:58.231517495 [W:onnxruntime:, graph.cc:4198 CleanUnusedInitializersAndNodeArgs] Removing initializer '/model/blocks/blocks.4/blocks.4.2/bn2/act/Constant_1_output_0'. It is not used by any node and should be removed from the model.[m
+/root/miniconda3/lib/python3.8/site-packages/torch/functional.py:568: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at  ../aten/src/ATen/native/TensorShape.cpp:2228.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+/root/autodl-tmp/padding_sweep_int8.py:33: DeprecationWarning: BILINEAR is deprecated and will be removed in Pillow 10 (2023-07-01). Use Resampling.BILINEAR instead.
+  im = Image.fromarray(rgb).resize((224,224), Image.BILINEAR)
+  150/600 p0=0.767 p0.3=0.787 full=0.907
+  300/600 p0=0.767 p0.3=0.790 full=0.917
+  450/600 p0=0.773 p0.3=0.798 full=0.913
+  600/600 p0=0.777 p0.3=0.807 full=0.917
+
+############ Padding 缓解扫描 全INT8 (n=600, int8检测+int8分类) ############
+  框 padding    0%:  级联 top-1 = 0.7767
+  框 padding   15%:  级联 top-1 = 0.7933
+  框 padding   30%:  级联 top-1 = 0.8067
+  框 padding   50%:  级联 top-1 = 0.8183
+  整图(=训练取景上限):  top-1 = 0.9167
+  (对照: 分类器直评 = 0.921)
+=== PADDING SWEEP DONE ===
