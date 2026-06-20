@@ -64,6 +64,8 @@ packages = ["src/edge_cam"]
 line-length = 100
 target-version = "py310"
 src = ["src", "tests"]
+# results/ = GPU 实跑记录与一次性驱动脚本（provenance），非维护源码 → 不 lint
+extend-exclude = ["results"]
 
 [tool.ruff.lint]
 # E/F=pyflakes+pycodestyle, I=isort, UP=pyupgrade, B=bugbear, SIM=simplify
