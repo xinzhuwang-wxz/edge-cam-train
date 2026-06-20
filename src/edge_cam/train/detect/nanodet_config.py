@@ -97,7 +97,8 @@ def generate_nanodet_config(
         train_ann=str(labels / train_labels),
         val_img=str(raw_root),
         val_ann=str(labels / val_labels),
-        save_dir=str(Path("outputs") / "detect" / "nanodet-plus-m"),
+        # 每档独立 save_dir（取 out_path 文件名），避免三档消融互相覆盖 workspace
+        save_dir=str(Path("outputs") / "detect" / Path(out_path).stem),
         input_size=input_size,
         epochs=epochs,
         **kwargs,
