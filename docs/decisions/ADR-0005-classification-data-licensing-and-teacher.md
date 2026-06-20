@@ -9,9 +9,14 @@
 商用从严"的 §4 红线冲突，且部分是**反直觉**的（"开放许可"≠可商用、MIT 权重≠数据干净）。这些决策**不可逆**
 （数据/teacher 选择会传染到 shipped 权重），故立此 ADR，避免后续会话重蹈。
 
-核验出的关键事实：
-- **iNaturalist Open Data 默认 CC-BY-NC**；"开放"只表示可再分发，**可商用是 CC0/CC-BY 的少数**，逐图 license 在 `photos.license`。
-- **eBird 频率/丰度（Status&Trends）商用禁止**（Cornell 自定条款，需书面授权），**不能进发行产品**。
+核验出的关键事实（数字 = GBIF API 实测，occurrence-license proxy）：
+- **iNaturalist Open Data 默认 CC-BY-NC**；可商用是 CC0/CC-BY 的少数（鸟类 ~16%：CC0 4% + CC-BY 12%，余 ~84% NC）。
+- ⚠️ **iNat ToS 另禁"用任何 iNat 数据训练商用 AI"——连 CC0 都禁**；且 AWS Open Data 的**元数据表本身无 license 声明**
+  （registry License 字段只覆盖图片）；ToS 与逐图 CC 许可的边界**官方含糊**（员工未回应）。→ 对商用发行是**红线级风险**。
+- **可商用鸟图实测**：Aves 有图 42.6M → CC0/CC-BY ~737 万 → iNat ~482 万、**非 iNat ~254 万**；非 iNat 可用**实拍**
+  ≈ naturgucker(德)671k + 挪 572k + 丹 138k ≈ **~1.4M（偏欧洲）**，CC0 大头是博物馆标本（域不符，弃）。**去 iNat 则北美薄**。
+- **eBird 频率/丰度（Status&Trends）商用禁止**；但 eBird **原始观测（GBIF EOD 数据集）= CC-BY，可用**。
+  GBIF Aves 带坐标 occurrence **~21 亿 CC0/CC-BY**（建区域/月先验池，只要种+经纬+日期、不要图）。
 - **BioCLIP/BioCLIP2 权重 MIT 但训练数据含 CC-BY-NC 未过滤**（iNat ~86% NC、GBIF/FathomNet NC）→ 蒸馏污染。
 - **NABirds（康奈尔）/ CUB-200（加州理工）非商用**，明确"不得做产品"/版权未清 → 连"为商用产品评测"都踩线。
 - **SpeciesNet** 是 Apache、但 EfficientNetV2-M（~54M，服务器级），且无逐图 license 清单、输出授权未明（法律灰）。
@@ -19,10 +24,13 @@
 
 ## 决策
 
-1. **训练数据只用可商用、逐图过滤**：iNat `photos.license ∈ {CC0,CC-BY}` + GBIF 逐 `media.license` 过滤 + 自建 feeder。
-   权重天生可发行、无传染。逐图署名清册随产物披露。
-2. **区域/季节先验从 GBIF CC0/CC-BY occurrence 自建**，**不用 eBird 频率数据**（商用禁止）。eBird 物种**代码**
-   仅作对外稳定 ID 串（不涉频率数据）。区域为推理期 mask（OTA、不重训），评估必报 with/without。
+1. **iNat：R&D 先用，商用发行前必须解决许可（open-item）**。逐图仍过滤 `CC0/CC-BY` + research + Aves + species，
+   用它把模型/流程做出来；**但上市前必须**（a）拿到 iNat 书面澄清 或（b）替换为非 iNat 源。**commercial-clean** 源 =
+   naturgucker/挪/丹（CC-BY）+ GBIF 非 iNat CC0/CC-BY + 自建 feeder（这些无 iNat ToS 风险、权重无传染）。
+   逐图署名清册随产物披露（GBIF 引 DOI）。
+2. **区域/月份先验从 GBIF CC0/CC-BY occurrence 自建**（~21 亿池，**含 eBird EOD CC-BY 原始观测**）；**不用 eBird
+   Status&Trends 丰度**（商用禁）。eBird 物种**代码**作对外稳定 ID。**不存原始 21 亿**——按目标种×区域×月聚合计数
+   或 SINR 式采样训小模型 → 输出几 MB 表/网络。推理期软先验重排（OTA），评估必报 with/without + 不加过滤基线。
 3. **第一版不蒸馏**：BioCLIP/BioCLIP2 含 NC 数据 → **不当 shippable teacher**；SpeciesNet 待法务且服务器级 → 不用。
    若做蒸馏，teacher **只能自训于同一批 CC0/CC-BY+自建 clean 数据**。`soft_label` hook 保留（#7 未来）。
 4. **NABirds/CUB 排除出商用线（含评测）**：用**自建 CC0/CC-BY holdout** 做主指标 + 跨源泛化；不引入这两者做任何
@@ -37,7 +45,8 @@
 - 失去 eBird 丰度的精度 → 用 GBIF occurrence 频率近似（略糙但合规）。
 - 失去现成 SOTA teacher（BioCLIP/SpeciesNet）→ 第一版无蒸馏，靠 clean 数据直训；蒸馏待自训 teacher。
 - 失去 NABirds/CUB 学术对标 → 自建 holdout，数字不与论文直接可比（可接受，产品看自有分布）。
-- 两项需用户直接确认（联网查不到）：iNat **元数据本身 license**（邮件 iNat）；CC0+CC-BY 在 Aves 的**确切占比**（自数）。
+- **iNat 是 R&D 先用、上市前的 open-item**（书面澄清或替换）；占比已实测（鸟类 ~16% 可商用）；元数据 license 仍未声明。
+- 去 iNat 则公开可商用实拍偏欧洲（~1.4M）→ 北美/长尾更依赖**自建 feeder**（权重更高）。
 
 ## 备选（已否决）
 
