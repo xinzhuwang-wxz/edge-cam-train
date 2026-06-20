@@ -1,0 +1,53 @@
+loading annotations into memory...
+Done (t=0.00s)
+creating index...
+index created!
+model size is  1.0x
+init weights...
+=> loading pretrained model https://download.pytorch.org/models/shufflenetv2_x1-5666bf0f80.pth
+Finish initialize NanoDet-Plus Head.
+val 子集图数: 800
+=== 量化 fp32->int8 (per-channel, opset13, calib=120) ===
+opset 11 -> 13
+WARNING:root:Please consider to run pre-processing before quantization. Refer to example: https://github.com/microsoft/onnxruntime-inference-examples/blob/main/quantization/image_classification/cpu/ReadMe.md 
+WARNING:root:Please consider pre-processing before quantization. See https://github.com/microsoft/onnxruntime-inference-examples/blob/main/quantization/image_classification/cpu/ReadMe.md 
+量化模式: per-channel(opset13)
+int8 onnx: 2285 KB
+
+=== FP32 ONNX COCOeval ===
+/root/miniconda3/lib/python3.8/site-packages/torch/functional.py:568: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at  ../aten/src/ATen/native/TensorShape.cpp:2228.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+  [fp32_onnx] 200/800
+  [fp32_onnx] 400/800
+  [fp32_onnx] 600/800
+  [fp32_onnx] 800/800
+Loading and preparing results...
+DONE (t=0.49s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=2.67s).
+Accumulating evaluation results...
+DONE (t=0.75s).
+[fp32_onnx] mAP=0.6813 AP_50=0.8113
+
+=== INT8 ONNX COCOeval ===
+  [int8_onnx] 200/800
+  [int8_onnx] 400/800
+  [int8_onnx] 600/800
+  [int8_onnx] 800/800
+Loading and preparing results...
+DONE (t=0.49s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=2.50s).
+Accumulating evaluation results...
+DONE (t=0.79s).
+[int8_onnx] mAP=0.6794 AP_50=0.7917
+
+############ 检测量化对比(800图子集) ############
+fp32_onnx mAP=0.6813 | int8_onnx mAP=0.6794 | int8掉点=0.0019
+=== DETECT INT8 EVAL DONE ===

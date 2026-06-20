@@ -19,13 +19,27 @@
 - 部署 `deploy/packager/acuity_packager.py` + `edge/viplite_runner`（自研薄胶水）
 - registry/OTA `registry` + `deploy/manifest_api`
 
-## Quick start（W1 spike 先行）
+## Quick start
 ```bash
-# 1) 环境
-uv sync            # 或 pip install -e .
-# 2) 端到端打通 spike（最高优先）：一个检测器 → ONNX → pegasus PTQ → .nb → 上板跑通一帧
-#    （摸清 ACUITY 算子兼容 + INT8 掉点；详见 docs/engineering.md §7）
+# 1) 环境（项目专用 conda env，含 torch/timm/lightning/hydra/onnx 全栈）
+conda env create -f environment.yml          # 建 edge-cam-train + 装 .[train,dev]
+conda activate edge-cam-train
+
+# 2) 数据准备（CPU，本地）：ImageFolder → 固定 seed 分层 split → manifest
+python -m edge_cam.data.prep --config configs/data/birds525.yaml
+
+# 3) 训练 smoke（CPU 本地验证框架；真训上 GPU）
+python -m edge_cam.train.classify.train \
+  data.manifest=data/processed/birds525/manifest.json \
+  trainer.fast_dev_run=true trainer.accelerator=cpu model.pretrained=false \
+  data.num_workers=0 data.input_size=64 hydra.job.chdir=False
+
+# 4) GPU 真训（AutoDL）：去掉 smoke 覆盖即可
+python -m edge_cam.train.classify.train data.manifest=... trainer.accelerator=gpu
 ```
+- 测试：`pytest`（快，pre-commit 同款）；`pytest -m "slow or not slow"`（含 torch 端到端）。
+- GPU（Linux+CUDA）：pip 默认装 CUDA torch；特定 CUDA 版本见 `environment.yml` 注释。
+- 上板 spike（ACUITY/pegasus → .nb → VIPLite）见 `docs/engineering.md §7`，待有板子。
 
 ## 许可与红线
 全栈 Apache/MIT；**避 AGPL（Ultralytics）/ GPL（MMYOLO）/ CC-BY-NC（iNat、BirdNET 权重）**。数据只用 CC0/CC-BY + 自采，维护逐项署名清单。详见 `docs/engineering.md` §5、§8。

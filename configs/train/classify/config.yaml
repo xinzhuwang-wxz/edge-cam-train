@@ -1,0 +1,40 @@
+# 分类器微调配置（Hydra）。真训默认值；本地 CPU smoke 用命令行覆盖：
+#   trainer.fast_dev_run=true trainer.accelerator=cpu model.pretrained=false
+# 消融（plan §B.3）：python -m ...train -m model.name=efficientnet_lite0,mobilenetv3_large_100
+seed: 0
+output_dir: outputs/classify
+
+data:
+  manifest: data/processed/birds525/manifest.json
+  data_root: null # 留空=用 manifest 记录的 root；换机(租卡)上传 raw 后覆盖为新数据根
+  input_size: 224 # 细粒度需细节；192/224 做消融（plan §4.2）
+  batch_size: 64
+  num_workers: 4
+  degradation_strength: 1.0 # 退化增强强度（plan §6）；0 = 关闭
+  crop_scale_min: 0.7 # RandomResizedCrop scale 下界；级联鲁棒(优化A1)调低如 0.4 见更紧裁框
+  crop_ratio: [0.75, 1.333] # RandomResizedCrop aspect 范围；A1 放宽如 [0.6, 1.67] 匹配检测框
+
+model:
+  name: efficientnet_lite0 # 首选；消融: mobilenetv3_large_100 / repvgg_a0
+  pretrained: true # 真训 true（timm ImageNet）；离线 smoke 用 false
+
+optim:
+  lr: 1.0e-3
+  weight_decay: 1.0e-4
+  label_smoothing: 0.1
+
+trainer:
+  max_epochs: 80
+  accelerator: auto # 本地 smoke 用 cpu；AutoDL 用 gpu
+  devices: auto
+  fast_dev_run: false # smoke 置 true：只跑 1 个 train/val batch
+  limit_train_batches: 1.0
+  limit_val_batches: 1.0
+  log_every_n_steps: 10
+
+export:
+  enabled: true # 训完导 FP32 ONNX（engineering 铁律）
+  opset: 13
+
+track:
+  aim: false # true=接 aim 实验追踪（需 pip install -e ".[track]"）；消融真跑时开

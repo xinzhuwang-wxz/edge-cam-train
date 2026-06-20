@@ -128,8 +128,9 @@ edge-cam-train/
 │                                    #  + torch/timm/lightning/hydra-core/onnx/onnxruntime/onnxsim/aim/dvc
 ├── src/edge_cam/
 │   ├── core/                        # 自建: config(Hydra)/logging/seed/paths/coords
-│   ├── contracts/schemas/           # 自建: model_card / eval_report (pydantic, 含边侧 Literal + 版本)
-│   ├── registry/                    # 自建薄层 或 MLflow: store/manifest/publish/verify (+v85x 平台)
+│   ├── contracts/schemas/           # 自建 pydantic: dataset(manifest) / model_card / eval_report
+│   │                                #   / channel(OTA 策略) / detection(打标契约, 11 类闭集校验)
+│   ├── registry/                    # 自建薄层: store(git-yaml) + promotion(包络+gate→ModelCard→register/promote)
 │   ├── deploy/
 │   │   ├── manifest_api/            # 自建: FastAPI OTA routes (GET /v1/manifest/{platform}/{channel})
 │   │   └── packager/
@@ -147,12 +148,17 @@ edge-cam-train/
 │   │   ├── detect/                  # ★ NanoDet-Plus fork 包一层 (导 FP32 ONNX)
 │   │   └── classify/                # ★ timm + Lightning + Hydra
 │   ├── eval/
-│   │   ├── ablation/                # ★ Hydra multirun harness
-│   │   │   └── metrics.py           # ★ mAP/AP50/Top-1/per-class + GT 对比
-│   │   ├── gates/second_gate.py     # ★ fp32+int8 两档, 4 维阈值门
+│   │   ├── envelope.py / run_envelope.py  # 四级可行性包络 + Hydra 入口 (+可选 register)
+│   │   ├── full_eval.py             # 完整评估编排 seam (量化+mask+包络; run_envelope/ablation 共用)
+│   │   ├── metrics.py               # Top-1/5/per-class + topk_hits (训练侧共用)
+│   │   ├── regional.py              # likely-species mask (taxon_key → logit 列)
+│   │   ├── detect_metrics.py        # 检测 COCO mAP/bird-recall 结构化 + 汇入 detect 总表
+│   │   ├── ablation/                # ★ Hydra multirun harness (grid + runner)
+│   │   ├── gates/gate.py            # fp32+int8 两档, 4 维阈值门 (+from_yaml)
 │   │   └── quant_estimate.py        # ★ ORT-QDQ 本地掉点预估 (消融列, 不进部署)
 │   └── edge/
 │       └── viplite_runner/          # ★ ctypes 调 VIPLite (借 frigate 蓝本; 输出 CHW reshape!)
+├── scripts/                         # 离线工具: setup_nanodet.sh / build_ebird_mapping.py / build_region_list.py
 ├── configs/
 │   ├── ablation/*.yaml              # Hydra multirun: backbone × 分辨率 × quant 档
 │   ├── eval/gates/second_gate.yaml  # fp32 / int8 两档阈值

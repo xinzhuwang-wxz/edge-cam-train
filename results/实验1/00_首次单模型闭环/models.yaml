@@ -1,0 +1,30 @@
+- name: birds525-eff-lite0
+  task: classify
+  backbone: efficientnet_lite0
+  num_classes: 525
+  input_size: 224
+  precision: fp32
+  platform: v85x
+  artifact_path: /root/autodl-tmp/outputs/eff_lite0_224/efficientnet_lite0_fp32.onnx
+  sha256: 6ad49396a105cea29504788c6cb8a4ab4b5b40718bf8726f1781dc53e17f3165
+  version: v0
+  channel: stable
+  provenance:
+    datasets:
+    - kaggle:birds-525 (DST1192)
+    licenses:
+    - unverified — feasibility-only, NOT for commercial weights
+    commercial_safe: false
+    notes: ''
+  metrics:
+    fp32_val_top1: 0.9326
+    fp32_val_top5: 0.9765
+    int8_sim_top1: 0.9248
+    int8_sim_top5: 0.9712
+    field_top1: 0.8121
+    field_top5: 0.92
+    regional_top1: 0.4167
+    regional_top5: 0.4372
+    int8_sim_drop: 0.0078
+    field_drop: 0.1205
+  gate_pass: true

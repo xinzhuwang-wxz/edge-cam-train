@@ -19,11 +19,29 @@ uv.lock
 # DVC 实际数据由 DVC 跟踪；原始大文件不进 git
 /data/raw/
 /data/interim/
-/data/processed/
+/data/processed/*
+# 例外：分类 manifest 是可移植的小文本契约（相对路径+记录 root），随 git 走，
+# 换机用 data.data_root 覆盖即可复用（detection labels.json 绑大图，不在此例外）
+!/data/processed/birds525
+/data/processed/birds525/*
+!/data/processed/birds525/manifest.json
+!/data/processed/birds525/ebird_map.csv
+!/data/processed/birds525/ebird_aliases.csv
+# 注：ebird_taxonomy.csv(1.47M, 可 curl 重拉)仍 ignore；ebird_map.csv(小, 可移植) 随 git
 *.nb
+
+# 训练/实验产物
+outputs/
+lightning_logs/
+*.onnx
+*.ckpt
+.hydra/
 
 # Env / IDE / OS
 .env
 .idea/
 .vscode/
 .DS_Store
+third_party/
+weights/
+results/**/*.pth

@@ -2,7 +2,7 @@
 # 安装：pre-commit install   手动全跑：pre-commit run --all-files
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.7
+    rev: v0.15.18
     hooks:
       - id: ruff           # lint（--fix 自动修可修项）
         args: [--fix]

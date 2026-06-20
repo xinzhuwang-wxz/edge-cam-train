@@ -39,21 +39,22 @@
 ```
 src/edge_cam/
 ├── core/                 配置(Hydra)/logging/seed/paths/coords
-├── contracts/schemas/    pydantic: model_card / eval_report（含边侧 Literal + 版本）
-├── registry/             自建薄层 或 MLflow：store/manifest/publish/verify
+├── contracts/schemas/    pydantic: dataset/model_card/eval_report/channel/detection(打标契约)
+├── registry/             自建薄层: store(git-yaml) + promotion(包络+gate→ModelCard→register/promote)
 ├── deploy/
-│   ├── manifest_api/     FastAPI OTA routes
+│   ├── manifest_api/     FastAPI OTA routes (+channel policy)
 │   └── packager/acuity_packager.py   ★ subprocess 调 pegasus PTQ→.nb
-├── data/                 ★ 数据准备 pipeline（离线 dev/GPU 机；FiftyOne/MegaDetector/crop/taxonomy/split/calib）
+├── data/                 ★ 数据准备 pipeline（FiftyOne/crop/taxonomy(eBird)/split/calib/merge_map）
 ├── train/
 │   ├── detect/           ★ NanoDet-Plus 包一层（导 FP32 ONNX）
-│   └── classify/         ★ timm + Lightning + Hydra
-├── eval/
-│   ├── ablation/         ★ Hydra multirun harness + metrics
-│   ├── gates/            ★ fp32+int8 两档 4 维阈值门
+│   └── classify/         ★ timm + Lightning + Hydra（train 只训练，export 归发布路）
+├── eval/                 envelope/full_eval(编排seam)/metrics/regional/detect_metrics
+│   ├── ablation/         ★ Hydra multirun harness
+│   ├── gates/gate.py     ★ fp32+int8 两档 4 维阈值门（+from_yaml）
 │   └── quant_estimate.py ★ ORT-QDQ 本地掉点预估（消融列，不进部署）
 └── edge/viplite_runner/  ★ ctypes 调 VIPLite（借 frigate 蓝本；输出 CHW reshape）
-configs/                  Hydra: ablation/ · eval/gates/ · channels/
+scripts/                  离线工具: setup_nanodet.sh / build_ebird_mapping.py / build_region_list.py
+configs/                  Hydra: ablation/ · eval/gates/ · channels/ · data/
 data/                     DVC 跟踪：训练集 / 校准集 / .nb 产物
 ```
 
@@ -104,26 +105,32 @@ data/                     DVC 跟踪：训练集 / 校准集 / .nb 产物
 
 ## 6. 命令参考
 
-> W0 阶段 `pyproject.toml` 未建，以下为**目标命令**，落地前以实际工具链为准（pegasus 子命令随 ACUITY 版本变动，见 `plan-v2.md` 附录 B.8）。
+> 环境 = **项目专用 conda env `edge-cam-train`**（`environment.yml`，含 torch/timm/lightning/
+> hydra/onnx 全栈）。`pyproject.toml` 已声明全部依赖（核心 + `[train]` + `[dev]`）。
 
 ```bash
-# 环境（待建 pyproject 后）
-uv sync                          # 或 pip install -e .
+# 环境
+conda env create -f environment.yml          # 首次；deps 变更后 conda env update --prune
+conda activate edge-cam-train
 
-# 提交前必跑
-pytest
-ruff check src tests
-ruff format src tests
+# 提交前必跑（pre-commit 同款；pytest 默认跳 slow → 快）
+pytest                                        # 全量含 torch 端到端：-m "slow or not slow"
+ruff check src tests && ruff format src tests
 
-# W1 spike（最高优先 / 最大不确定性）：一个检测器端到端跑通一帧
-#   NanoDet-Plus → export_onnx → onnxsim 静态化 → pegasus PTQ → .nb → VIPLite/awnn 上板
-#   摸清 ACUITY 算子兼容清单 + INT8 掉点；验收：一帧端到端有合理输出
+# 数据准备（CPU 本地）
+python -m edge_cam.data.prep --config configs/data/birds525.yaml
 
-# 消融（训练侧立起后）
-#   Hydra multirun: backbone × 输入分辨率 × 增强 × quant 档；aim 追踪 + DVC 版本化
+# 训练 smoke（CPU 验证框架）→ 真训改 trainer.accelerator=gpu model.pretrained=true（AutoDL）
+python -m edge_cam.train.classify.train data.manifest=data/processed/birds525/manifest.json \
+  trainer.fast_dev_run=true trainer.accelerator=cpu model.pretrained=false \
+  data.num_workers=0 data.input_size=64 hydra.job.chdir=False
+
+# 消融（plan §B.3）：Hydra multirun
+python -m edge_cam.train.classify.train -m model.name=efficientnet_lite0,mobilenetv3_large_100
 ```
 
-落地节奏见 `engineering.md §7`（W1 spike → 编排骨架 → 训练侧 → 消融 harness → gate+publish）。
+**测试纪律**：torch 端到端（训练/导出）标 `@pytest.mark.slow`，默认与 pre-commit 跳过（保提交快），
+CI/手动用 `pytest -m "slow or not slow"` 全量。落地节奏见 `engineering.md §7`；上板 spike 待有板子。
 
 ---
 

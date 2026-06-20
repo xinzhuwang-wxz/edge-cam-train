@@ -1,0 +1,20 @@
+# BIRDS-525 同源数据集（Kaggle, DST1192）。ImageFolder，含 train/valid/test 子目录。
+# ⚠️ 图片版权未核 → 仅作可行性，不进商用权重（plan §5.2 / ADR-0001）。
+# 合并三个 split 后用固定 seed 重新分层划分（plan §B.1，保证可复现）。
+name: birds525
+version: v0
+root: "/Users/bamboo/Downloads/bird_species(DST1192)"
+splits:
+  train: train
+  val: valid
+  test: test
+ratios: [0.7, 0.15, 0.15]
+seed: 0
+min_train_per_class: 1
+source: "kaggle:birds-525 (DST1192)"
+license: "unverified — feasibility-only, NOT for commercial weights"
+out_path: "data/processed/birds525/manifest.json"
+# eBird 规范键映射（ADR-0002）：taxon_key=eBird code，供地域过滤(B.5)/层级回退。
+# 由 scripts/build_ebird_mapping.py 生成；当前 377/525 自动匹配，余需人工补别名。
+taxonomy_csv: "data/processed/birds525/ebird_map.csv"
+taxonomy_version: "ebird-2024"

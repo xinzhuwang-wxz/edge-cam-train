@@ -1,0 +1,8 @@
+# candidate 通道策略（灰度）。gate_pass 才能 promote 到 stable（registry.promote）。
+platform: v85x
+channel: candidate
+rollout_percent: 10 # 灰度小流量
+min_runtime_abi: viplite-1.0
+cloud_fallback:
+  enabled: true
+  endpoint: https://api.example.com/v1/identify # 占位 url

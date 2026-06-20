@@ -1,0 +1,8 @@
+# stable 通道策略（plan §C.5/§C.10）。manifest_api 据此下发 cloud_fallback + min_runtime_abi。
+platform: v85x
+channel: stable
+rollout_percent: 100 # stable 全量
+min_runtime_abi: viplite-1.0 # VIPLite/awnn ABI 下限（须与 pegasus 对齐，见 §7 避坑）
+cloud_fallback:
+  enabled: true
+  endpoint: https://api.example.com/v1/identify # 占位 url，端侧契约用（云端不在本仓实现）
