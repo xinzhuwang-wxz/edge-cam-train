@@ -1,5 +1,8 @@
 # 检测流程(粗检测：粗分类 + 框)— 文档家
 
+> 📍 **当前阶段焦点**（见 `CLAUDE.md §2 文档地图`）。基座方向看 `docs/plan-v2.md`/`docs/engineering.md`，
+> 本阶段「怎么落检测」看这里。
+>
 > 边侧喂鸟器**粗检测器**的全过程细化文档。粗检测 = 在整帧上找 **bird/squirrel/cat/person/other_animal** 5 类
 > 并出框；**bird 框 → crop → 交细分类器**出种。目标板 Allwinner V85x（Vivante VIP NPU，INT8-only）。
 > 配合根 `CONTEXT.md`、`docs/plan-v2.md`、`docs/decisions/`（[[ADR-0003]] 框架 seam、[[ADR-0004]] 5 类体系）读。

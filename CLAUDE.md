@@ -19,15 +19,24 @@
 
 ---
 
-## 2. 文档地图（先读这两份）
+## 2. 文档地图
 
-| 文档 | 讲什么 | 何时读 |
-|---|---|---|
-| **`docs/plan-v2.md`** | **what/why**：级联架构、分级置信门控、模型/数据/评估口径、可选音频(§9)、**附录 B 实验清单**、**附录 C 承重规格** | 做方案决策、对齐领域模型 |
-| **`docs/engineering.md`** | **how**：PyTorch 分层选型、数据准备(§5.5)、**仓库结构(§6)**、W1 落地步骤(§7)、风险(§8)、ADR(§9) | 动工程、写代码、选库 |
-| `docs/decisions/` | ADR（架构决策记录），目前为空，后续不可逆决策落这里 | 做/查不可逆决策 |
-| `README.md` | 面向外部的项目简介 | — |
+文档分三层：**全局基座**（plan-v2 + engineering，整产品 what/why/how）→ **当前阶段细化**
+（docs/detect，本阶段在做的「粗检测」）→ **历史/产物**（实验1 上机清单 + 结果）。
 
+> 基座两份（plan-v2/engineering）成文于 W0、对齐实验1，**基本吻合现状但未经上板验证**——读作
+> 总体方向与口径，具体到「现在动哪块」以阶段细化文档为准。
+
+| 层 | 文档 | 讲什么 | 何时读 |
+|---|---|---|---|
+| 基座 | **`docs/plan-v2.md`** | **what/why**：级联架构、分级置信门控、模型/数据/评估口径、可选音频(§9)、**附录 B 实验清单**、**附录 C 承重规格** | 做方案决策、对齐领域模型 |
+| 基座 | **`docs/engineering.md`** | **how**：PyTorch 分层选型、数据准备(§5.5)、**仓库结构(§6)**、W1 落地步骤(§7)、风险(§8) | 动工程、写代码、选库 |
+| **当前阶段** | **`docs/detect/`** | **粗检测全过程**：[README](docs/detect/README.md) 索引 + [01 数据集](docs/detect/01-数据集.md)（5类/数据源/DatasetAdapter 已落地）+ [02 训练与评估](docs/detect/02-训练与评估.md)（NanoDet 三档/口径/MegaDetector） | **做检测数据/训练/评估** |
+| 决策 | `docs/decisions/` | ADR-0001..0004（可行性优先 / eBird seam / 模型族 seam / 检测 5 类） | 做/查不可逆决策 |
+| 历史/产物 | `docs/gpu-rental-prep.md` · `results/实验1/` | 实验1 上机清单（**检测段已被新 adapter build 取代**，见 docs/detect/01 §4）+ 实验1 总报告 | 复跑/回看实验1 |
+| — | `README.md` | 面向外部的项目简介 | — |
+
+> 下一阶段做**分类细化**时，对应新建 `docs/classify/`（与 docs/detect 对等）。
 > 文档里写过的事实（架构、选型理由、许可红线、历史决策）**不要在 CLAUDE.md 里重复**；这份只放「怎么协作」+ 指针。
 
 ---
@@ -44,7 +53,7 @@ src/edge_cam/
 ├── deploy/
 │   ├── manifest_api/     FastAPI OTA routes (+channel policy)
 │   └── packager/acuity_packager.py   ★ subprocess 调 pegasus PTQ→.nb
-├── data/                 ★ 数据准备 pipeline（FiftyOne/crop/taxonomy(eBird)/split/calib/merge_map）
+├── data/                 数据准备：分类(FiftyOne/crop/taxonomy/split/calib) + adapters/detect/(检测源→5类 DatasetAdapter+build，已落地)
 ├── train/
 │   ├── detect/           ★ NanoDet-Plus 包一层（导 FP32 ONNX）
 │   └── classify/         ★ timm + Lightning + Hydra（train 只训练，export 归发布路）
