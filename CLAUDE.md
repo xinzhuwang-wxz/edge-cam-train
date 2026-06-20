@@ -31,8 +31,9 @@
 |---|---|---|---|
 | 基座 | **`docs/plan-v2.md`** | **what/why**：级联架构、分级置信门控、模型/数据/评估口径、可选音频(§9)、**附录 B 实验清单**、**附录 C 承重规格** | 做方案决策、对齐领域模型 |
 | 基座 | **`docs/engineering.md`** | **how**：PyTorch 分层选型、数据准备(§5.5)、**仓库结构(§6)**、W1 落地步骤(§7)、风险(§8) | 动工程、写代码、选库 |
-| **当前阶段** | **`docs/detect/`** | **粗检测全过程**：[README](docs/detect/README.md) 索引 + [01 数据集](docs/detect/01-数据集.md)（5类/数据源/DatasetAdapter 已落地）+ [02 训练与评估](docs/detect/02-训练与评估.md)（NanoDet 三档/口径/MegaDetector） | **做检测数据/训练/评估** |
-| 决策 | `docs/decisions/` | ADR-0001..0004（可行性优先 / eBird seam / 模型族 seam / 检测 5 类） | 做/查不可逆决策 |
+| **当前阶段** | **`docs/detect/`** | **粗检测全过程**：[README](docs/detect/README.md) 索引 + [01 数据集](docs/detect/01-数据集.md)（5类/数据源/DatasetAdapter 已落地）+ [02 训练与评估](docs/detect/02-训练与评估.md)（NanoDet 三档/口径/MegaDetector）+ [03 实操日志](docs/detect/03-实操日志.md) | **做检测数据/训练/评估** |
+| **当前阶段** | **`docs/classify/`** | **鸟种细分类全过程**：[README](docs/classify/README.md) + [01 数据集](docs/classify/01-数据集.md)（iNat/GBIF 逐图过滤/物种表/区域先验）+ [02 训练与评估](docs/classify/02-训练与评估.md)（Lite0/4阶段/层级输出/端云）+ 03 实操日志 | **做分类数据/训练/评估** |
+| 决策 | `docs/decisions/` | ADR-0001..0005（可行性优先 / eBird seam / 模型族 seam / 检测 5 类 / 分类许可+teacher+区域） | 做/查不可逆决策 |
 | 历史/产物 | `docs/gpu-rental-prep.md` · `results/实验1/` | 实验1 上机清单（**检测段已被新 adapter build 取代**，见 docs/detect/01 §4）+ 实验1 总报告 | 复跑/回看实验1 |
 | — | `README.md` | 面向外部的项目简介 | — |
 
