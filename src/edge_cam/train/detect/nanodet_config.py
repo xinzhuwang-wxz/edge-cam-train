@@ -62,28 +62,34 @@ def patch_nanodet_config(
 
 def generate_nanodet_config(
     nanodet_repo: str | Path,
-    detection_out_dir: str | Path,
+    raw_root: str | Path,
+    labels_dir: str | Path,
     class_names: list[str],
     out_path: str | Path,
     *,
     base_config: str = "config/nanodet-plus-m_320.yml",
     input_size: int = 320,
     epochs: int = 300,
+    train_labels: str = "train_train.json",
+    val_labels: str = "train_val.json",
     **kwargs,
 ) -> Path:
-    """加载 NanoDet 官方模板 → patch 指向本仓 FiftyOne 导出 → 存盘。
+    """加载 NanoDet 官方模板 → patch 指向**新 manifest 派生 labels** → 存盘。
 
-    数据布局：<out>/<split>/{data, labels.json}（FiftyOne COCODetectionDataset 导出）。"""
-    nanodet_repo, out = Path(nanodet_repo), Path(detection_out_dir)
+    数据布局（DatasetAdapter build 产物，取代旧 FiftyOne 导出）：
+      - img_path = `raw_root`（labels 的 file_name 已含相对子路径，NanoDet 拼 img_path/file_name）。
+      - ann_path = `labels_dir/{train_labels,val_labels}`（write_nanodet_labels 派生的 COCO）。
+    """
+    nanodet_repo, labels = Path(nanodet_repo), Path(labels_dir)
     base = yaml.safe_load((nanodet_repo / base_config).read_text(encoding="utf-8"))
     cfg = patch_nanodet_config(
         base,
         num_classes=len(class_names),
         class_names=class_names,
-        train_img=str(out / "train" / "data"),
-        train_ann=str(out / "train" / "labels.json"),
-        val_img=str(out / "validation" / "data"),
-        val_ann=str(out / "validation" / "labels.json"),
+        train_img=str(raw_root),
+        train_ann=str(labels / train_labels),
+        val_img=str(raw_root),
+        val_ann=str(labels / val_labels),
         save_dir=str(Path("outputs") / "detect" / "nanodet-plus-m"),
         input_size=input_size,
         epochs=epochs,
