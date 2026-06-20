@@ -84,12 +84,13 @@ def select(dataset_key: str, licenses: list[str], cap: int, max_species: int) ->
 def _download(args: tuple[dict, Path, str]) -> dict | None:
     rec, img_dir, size = args
     dst = img_dir / str(rec["sk"]) / (urllib.parse.quote(rec["url"], safe="")[-40:] + ".jpg")
+    rel = str(dst.relative_to(img_dir.parent))  # 相对 out 根（manifest 可移植）
     dst.parent.mkdir(parents=True, exist_ok=True)
     if dst.exists() and dst.stat().st_size > 0:
-        return {**rec, "path": str(dst)}
+        return {**rec, "path": rel}
     try:
         urllib.request.urlretrieve(_resize_url(rec["url"], size), dst)  # noqa: S310
-        return {**rec, "path": str(dst)}
+        return {**rec, "path": rel}
     except Exception:  # noqa: BLE001 — 个别失败跳过
         dst.unlink(missing_ok=True)
         return None
