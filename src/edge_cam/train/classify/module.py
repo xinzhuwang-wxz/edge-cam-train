@@ -27,6 +27,7 @@ class Classifier(L.LightningModule):
         weight_decay: float = 1e-4,
         label_smoothing: float = 0.1,
         max_epochs: int = 80,
+        class_weights: list[float] | None = None,
     ) -> None:
         super().__init__()
         self.save_hyperparameters()
@@ -34,7 +35,9 @@ class Classifier(L.LightningModule):
         self.weight_decay = weight_decay
         self.max_epochs = max_epochs
         self.model = timm.create_model(model_name, pretrained=pretrained, num_classes=num_classes)
-        self.criterion = nn.CrossEntropyLoss(label_smoothing=label_smoothing)
+        # 类不均衡 → 反频类权重（治长尾）。weight 是 criterion 的 buffer，随 module .to(device)。
+        weight = torch.tensor(class_weights, dtype=torch.float32) if class_weights else None
+        self.criterion = nn.CrossEntropyLoss(weight=weight, label_smoothing=label_smoothing)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.model(x)

@@ -33,6 +33,21 @@ def test_forward_shape() -> None:
 
 
 @pytest.mark.slow
+def test_class_weights_wired_into_criterion() -> None:
+    m = Classifier(
+        model_name="efficientnet_lite0",
+        num_classes=3,
+        pretrained=False,
+        class_weights=[0.5, 1.0, 1.5],
+    )
+    assert m.criterion.weight is not None
+    assert torch.allclose(m.criterion.weight, torch.tensor([0.5, 1.0, 1.5]))
+    # 缺省不带权重
+    plain = Classifier(model_name="efficientnet_lite0", num_classes=3, pretrained=False)
+    assert plain.criterion.weight is None
+
+
+@pytest.mark.slow
 def test_training_step_returns_loss() -> None:
     model = Classifier(model_name="efficientnet_lite0", num_classes=7, pretrained=False)
     batch = (torch.randn(2, 3, 224, 224), torch.tensor([0, 3]))

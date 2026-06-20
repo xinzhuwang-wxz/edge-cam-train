@@ -14,7 +14,9 @@ datasets:
     max_per_class: 30000
   caltech_ct: # 按 location 划分防泄漏；empty 空帧主力负样本
     negative_quota: 12000
-    max_per_class: 30000
+    # max_per_class 也可按类指定（治不平衡）：CCT 多 other_animal → 只压它、不动 bird。
+    # 例：max_per_class: {other_animal: 12000}（int 则所有类同一上限）。
+    max_per_class: { other_animal: 12000 }
   open_images_v7: # FiftyOne 按类拉；全 5 类主力，CC-BY 逐图署名
     splits: [train, validation]
     max_samples: 40000

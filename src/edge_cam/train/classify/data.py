@@ -9,7 +9,7 @@ from collections.abc import Callable
 import lightning as L
 import torch
 from PIL import Image
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader, Dataset, WeightedRandomSampler
 
 from edge_cam.contracts.schemas.dataset import DatasetManifest, Split
 from edge_cam.train.classify.augment import (
@@ -17,6 +17,21 @@ from edge_cam.train.classify.augment import (
     build_field_transform,
     build_train_transform,
 )
+
+
+def inverse_freq_class_weights(manifest: DatasetManifest, split: Split = "train") -> list[float]:
+    """类不均衡 → 反频类权重（按 class_to_idx 顺序，长度 num_classes）。
+
+    w_i = total / (num_classes * count_i)，均值≈1（缺类权重 0）；喂 CrossEntropyLoss(weight=)。
+    """
+    counts = manifest.class_counts(split)
+    total = sum(counts.values()) or 1
+    num = manifest.num_classes
+    weights = [0.0] * num
+    for name, idx in manifest.class_to_idx.items():
+        cnt = counts.get(name, 0)
+        weights[idx] = total / (num * cnt) if cnt else 0.0
+    return weights
 
 
 class ManifestDataset(Dataset):
@@ -57,6 +72,7 @@ class ClassifyDataModule(L.LightningDataModule):
         data_root: str | None = None,
         crop_scale_min: float = 0.7,
         crop_ratio: tuple[float, float] = (0.75, 1.333),
+        balanced_sampler: bool = False,
     ) -> None:
         super().__init__()
         self.manifest = manifest
@@ -67,6 +83,8 @@ class ClassifyDataModule(L.LightningDataModule):
         self.data_root = data_root
         self.crop_scale_min = crop_scale_min
         self.crop_ratio = crop_ratio
+        # 训练用类平衡过采样（WeightedRandomSampler 按类反频，治长尾）；与 class-weighted CE 二选一
+        self.balanced_sampler = balanced_sampler
 
     def _loader(self, split: Split, transform: Callable, shuffle: bool) -> DataLoader:
         return DataLoader(
@@ -81,7 +99,19 @@ class ClassifyDataModule(L.LightningDataModule):
         transform = build_train_transform(
             self.input_size, self.degradation_strength, self.crop_scale_min, self.crop_ratio
         )
-        return self._loader("train", transform, shuffle=True)
+        if not self.balanced_sampler:
+            return self._loader("train", transform, shuffle=True)
+        ds = ManifestDataset(self.manifest, "train", transform, self.data_root)
+        counts = self.manifest.class_counts("train")
+        weights = [1.0 / counts[r.label] for r in ds.records]  # 反频 → 各类期望等量
+        sampler = WeightedRandomSampler(weights, num_samples=len(weights), replacement=True)
+        return DataLoader(
+            ds,
+            batch_size=self.batch_size,
+            sampler=sampler,  # 与 shuffle 互斥
+            num_workers=self.num_workers,
+            drop_last=False,
+        )
 
     def val_dataloader(self) -> DataLoader:
         return self._loader("val", build_eval_transform(self.input_size), shuffle=False)

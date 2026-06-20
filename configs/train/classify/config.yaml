@@ -13,6 +13,7 @@ data:
   degradation_strength: 1.0 # 退化增强强度（plan §6）；0 = 关闭
   crop_scale_min: 0.7 # RandomResizedCrop scale 下界；级联鲁棒(优化A1)调低如 0.4 见更紧裁框
   crop_ratio: [0.75, 1.333] # RandomResizedCrop aspect 范围；A1 放宽如 [0.6, 1.67] 匹配检测框
+  balanced_sampler: false # true=类平衡过采样(WeightedRandomSampler 反频)治长尾；与 class_weighted 二选一
 
 model:
   name: efficientnet_lite0 # 首选；消融: mobilenetv3_large_100 / repvgg_a0
@@ -22,6 +23,7 @@ optim:
   lr: 1.0e-3
   weight_decay: 1.0e-4
   label_smoothing: 0.1
+  class_weighted: false # true=反频类权重喂 CE 治长尾；与 data.balanced_sampler 二选一
 
 trainer:
   max_epochs: 80

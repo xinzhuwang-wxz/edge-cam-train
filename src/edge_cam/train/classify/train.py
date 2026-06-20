@@ -19,7 +19,7 @@ import lightning as L
 from omegaconf import DictConfig, OmegaConf
 
 from edge_cam.contracts.schemas.dataset import DatasetManifest
-from edge_cam.train.classify.data import ClassifyDataModule
+from edge_cam.train.classify.data import ClassifyDataModule, inverse_freq_class_weights
 from edge_cam.train.classify.export import export_onnx, verify_onnx
 from edge_cam.train.classify.module import Classifier
 
@@ -62,6 +62,14 @@ def run(cfg: DictConfig) -> Classifier:
         # 检测式裁框增强（优化 A1）：默认 0.7/温和；级联鲁棒训练用 data.crop_scale_min=0.4 等覆盖
         crop_scale_min=cfg.data.get("crop_scale_min", 0.7),
         crop_ratio=tuple(cfg.data.get("crop_ratio", (0.75, 1.333))),
+        # 类平衡过采样（治长尾，data.balanced_sampler=true）；与 optim.class_weighted 二选一
+        balanced_sampler=cfg.data.get("balanced_sampler", False),
+    )
+    # 类不均衡 → 反频类权重喂 CE（optim.class_weighted=true）。与 balanced_sampler 二选一即可。
+    class_weights = (
+        inverse_freq_class_weights(manifest, "train")
+        if cfg.optim.get("class_weighted", False)
+        else None
     )
     model = Classifier(
         model_name=cfg.model.name,
@@ -71,6 +79,7 @@ def run(cfg: DictConfig) -> Classifier:
         weight_decay=cfg.optim.weight_decay,
         label_smoothing=cfg.optim.label_smoothing,
         max_epochs=cfg.trainer.max_epochs,
+        class_weights=class_weights,
     )
 
     trainer = L.Trainer(
