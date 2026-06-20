@@ -58,12 +58,25 @@ def _degradation_block(strength: float) -> list[v2.Transform]:
     ]
 
 
-def build_train_transform(size: int = 224, degradation_strength: float = 1.0) -> v2.Compose:
-    """训练变换：几何增强 + 退化增强 + 归一化（+ 低照噪声）。"""
+def build_train_transform(
+    size: int = 224,
+    degradation_strength: float = 1.0,
+    crop_scale_min: float = 0.7,
+    crop_ratio: tuple[float, float] = (0.75, 1.333),
+) -> v2.Compose:
+    """训练变换：几何增强 + 退化增强 + 归一化（+ 低照噪声）。
+
+    crop_scale_min / crop_ratio：RandomResizedCrop 的 scale 下界与 aspect 比范围，默认
+    (0.7, [0.75,1.333])=裁到整图 70-100%、温和 aspect。级联里分类器吃的是检测裁框（更紧、
+    取景与 aspect 更杂），调低 scale_min（如 0.4）+ 放宽 ratio（如 [0.6,1.67]）让训练见到这类裁剪
+    → 抗"检测式裁框"domain shift（cascade_eval 实测取景偏移掉 6.3pt 的训练侧解，优化 A1）。
+    """
     return v2.Compose(
         [
             v2.PILToTensor(),
-            v2.RandomResizedCrop(size, scale=(0.7, 1.0), antialias=True),
+            v2.RandomResizedCrop(
+                size, scale=(crop_scale_min, 1.0), ratio=crop_ratio, antialias=True
+            ),
             v2.RandomHorizontalFlip(),
             *_degradation_block(degradation_strength),
             v2.ToDtype(torch.float32, scale=True),

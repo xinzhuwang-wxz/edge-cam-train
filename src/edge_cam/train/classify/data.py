@@ -55,6 +55,8 @@ class ClassifyDataModule(L.LightningDataModule):
         num_workers: int = 4,
         degradation_strength: float = 1.0,
         data_root: str | None = None,
+        crop_scale_min: float = 0.7,
+        crop_ratio: tuple[float, float] = (0.75, 1.333),
     ) -> None:
         super().__init__()
         self.manifest = manifest
@@ -63,6 +65,8 @@ class ClassifyDataModule(L.LightningDataModule):
         self.num_workers = num_workers
         self.degradation_strength = degradation_strength
         self.data_root = data_root
+        self.crop_scale_min = crop_scale_min
+        self.crop_ratio = crop_ratio
 
     def _loader(self, split: Split, transform: Callable, shuffle: bool) -> DataLoader:
         return DataLoader(
@@ -74,7 +78,9 @@ class ClassifyDataModule(L.LightningDataModule):
         )
 
     def train_dataloader(self) -> DataLoader:
-        transform = build_train_transform(self.input_size, self.degradation_strength)
+        transform = build_train_transform(
+            self.input_size, self.degradation_strength, self.crop_scale_min, self.crop_ratio
+        )
         return self._loader("train", transform, shuffle=True)
 
     def val_dataloader(self) -> DataLoader:

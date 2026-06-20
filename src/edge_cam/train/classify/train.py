@@ -59,6 +59,9 @@ def run(cfg: DictConfig) -> Classifier:
         degradation_strength=cfg.data.degradation_strength,
         # 换机时覆盖：data.data_root=/path/to/uploaded/raw（留空=用 manifest 记录的 root）
         data_root=cfg.data.get("data_root", None),
+        # 检测式裁框增强（优化 A1）：默认 0.7/温和；级联鲁棒训练用 data.crop_scale_min=0.4 等覆盖
+        crop_scale_min=cfg.data.get("crop_scale_min", 0.7),
+        crop_ratio=tuple(cfg.data.get("crop_ratio", (0.75, 1.333))),
     )
     model = Classifier(
         model_name=cfg.model.name,
