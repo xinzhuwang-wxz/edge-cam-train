@@ -44,4 +44,4 @@ lightning_logs/
 .DS_Store
 third_party/
 weights/
-results/optim_20260620/B_detect_100ep_model_best.pth
+results/**/*.pth

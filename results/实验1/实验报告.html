@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>实验 1 报告 · 边侧 AI 相机全链路可行性验证</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ink: '#0a0e16',
+          panel: '#121826',
+          panel2: '#1a2233',
+          stroke: '#27324a',
+          accent: '#38bdf8',
+          accent2: '#34d399',
+          warn: '#fbbf24',
+          danger: '#f87171',
+          muted: '#8a97b0',
+        }
+      }
+    }
+  }
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { background: radial-gradient(1200px 600px at 80% -10%, #15233f 0%, #0a0e16 55%) fixed, #0a0e16; }
+  .card { background: linear-gradient(180deg, rgba(26,34,51,0.85) 0%, rgba(18,24,38,0.85) 100%); }
+  .chip { backdrop-filter: blur(6px); }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #27324a; border-radius: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  .glow { box-shadow: 0 0 0 1px rgba(56,189,248,0.08), 0 18px 40px -20px rgba(56,189,248,0.25); }
+
+  /* 正文排版 */
+  .prose h2 { scroll-margin-top: 1.5rem; }
+  .prose h3 { scroll-margin-top: 1.5rem; }
+  .prose p { color: #cbd5e1; line-height: 1.75; margin: 0.75rem 0; }
+  .prose ul { list-style: disc; padding-left: 1.4rem; margin: 0.75rem 0; color: #cbd5e1; }
+  .prose ol { list-style: decimal; padding-left: 1.4rem; margin: 0.75rem 0; color: #cbd5e1; }
+  .prose li { margin: 0.35rem 0; line-height: 1.7; }
+  .prose li::marker { color: #38bdf8; }
+  .prose strong { color: #fff; font-weight: 600; }
+  .prose code { background: #1a2233; color: #93c5fd; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.85em; border: 1px solid #27324a; }
+  .prose a { color: #38bdf8; }
+  /* 引用块 = 诚实边界 / 脚注 / 警示 */
+  blockquote { border-left: 3px solid #fbbf24; background: rgba(251,191,36,0.06); padding: 0.75rem 1rem; margin: 1rem 0; border-radius: 0 8px 8px 0; color: #e2e8f0; }
+  blockquote p { color: #e2e8f0; margin: 0.4rem 0; }
+  blockquote strong { color: #fde68a; }
+  /* 表格 */
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.875rem; }
+  thead th { background: #1a2233; color: #e2e8f0; text-align: left; padding: 0.6rem 0.8rem; border: 1px solid #27324a; font-weight: 600; white-space: nowrap; }
+  tbody td { padding: 0.55rem 0.8rem; border: 1px solid #27324a; color: #cbd5e1; vertical-align: top; }
+  tbody tr:nth-child(even) { background: rgba(26,34,51,0.4); }
+  tbody tr:hover { background: rgba(56,189,248,0.06); }
+  .table-wrap { overflow-x: auto; border-radius: 10px; }
+  /* 图表内嵌容器 */
+  .chart-block { background: rgba(10,14,22,0.5); border: 1px solid #27324a; border-radius: 14px; padding: 1.25rem 1.25rem 1rem; margin: 1.5rem 0; }
+  .chart-cap { font-size: 0.78rem; color: #8a97b0; margin-top: 0.6rem; line-height: 1.6; }
+  /* 目录 */
+  .toc a { color: #93a4c2; }
+  .toc a:hover { color: #38bdf8; }
+</style>
+</head>
+<body class="text-slate-200 antialiased">
+
+<div class="max-w-5xl mx-auto px-5 py-10">
+
+  <!-- HEADER -->
+  <header class="mb-10">
+    <div class="flex flex-wrap items-center gap-2 text-xs text-muted mb-4">
+      <span class="px-2.5 py-1 rounded-full bg-panel border border-stroke chip">edge-cam-train</span>
+      <span class="px-2.5 py-1 rounded-full bg-panel border border-stroke chip">Allwinner V85x · VIP NPU · INT8-only</span>
+      <span class="px-2.5 py-1 rounded-full bg-panel border border-stroke chip">两段式级联</span>
+      <span class="px-2.5 py-1 rounded-full bg-panel border border-stroke chip">W0/W1 可行性 spike</span>
+    </div>
+    <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-white">实验 1 报告：边侧 AI 相机全链路可行性验证</h1>
+    <p class="mt-3 text-muted max-w-3xl leading-relaxed">
+      项目 <strong class="text-slate-200">edge-cam-train</strong> —— Allwinner V85x（VeriSilicon Vivante VIP NPU，0.5–1 TOPS，INT8-only，无 FP）边侧 AI 相机的
+      「数据准备 → 训练/微调 → 消融对比 → 量化 → 级联 → 优化」全链路框架。
+    </p>
+    <div class="mt-3 text-sm text-muted space-y-0.5">
+      <div>实验日期：2026-06-20（首次双卡端到端实跑）　·　阶段：W0/W1 可行性 spike</div>
+      <div>产物目录：<code class="bg-panel2 px-1.5 py-0.5 rounded text-slate-300">results/实验1/</code>（<code class="text-slate-300">00_首次单模型闭环</code> / <code class="text-slate-300">01_分类消融_检测训练</code> / <code class="text-slate-300">02_级联端到端评估</code> / <code class="text-slate-300">03_掉点优化实验</code>）</div>
+    </div>
+  </header>
+
+  <!-- SUMMARY CARDS (dashboard 关键数字) -->
+  <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+    <div class="card glow rounded-2xl p-5 border border-stroke">
+      <div class="text-muted text-xs">分类 INT8 (eff_lite0@224)</div>
+      <div class="mt-2 text-3xl font-bold text-accent2">92.5<span class="text-lg text-muted">%</span></div>
+      <div class="mt-1 text-xs text-muted">INT8 仅掉 <span class="text-accent2">0.19pt</span> · 近乎无损</div>
+    </div>
+    <div class="card glow rounded-2xl p-5 border border-stroke">
+      <div class="text-muted text-xs">检测 mAP / bird 检出</div>
+      <div class="mt-2 text-3xl font-bold text-accent">0.591</div>
+      <div class="mt-1 text-xs text-muted">bird 检出率 <span class="text-warn">64.5%</span>（喂食器真实场景）</div>
+    </div>
+    <div class="card glow rounded-2xl p-5 border border-stroke">
+      <div class="text-muted text-xs">级联端到端</div>
+      <div class="mt-2 text-3xl font-bold text-white">0.858 <span class="text-base text-muted">/</span> <span class="text-danger">0.777</span></div>
+      <div class="mt-1 text-xs text-muted">FP32 全链路 / 全 INT8（检测 INT8 掉 8.3pt）</div>
+    </div>
+    <div class="card glow rounded-2xl p-5 border border-stroke">
+      <div class="text-muted text-xs">核心结论</div>
+      <div class="mt-2 text-2xl font-bold text-warn">基线即最优</div>
+      <div class="mt-1 text-xs text-muted">分类侧优化均未超基线，真提升在检测侧</div>
+    </div>
+  </section>
+
+  <!-- TOC -->
+  <nav class="card rounded-2xl p-6 border border-stroke mb-12 toc">
+    <h2 class="text-sm font-semibold text-white mb-3 flex items-center gap-2"><span class="w-1.5 h-4 bg-accent rounded-full inline-block"></span> 目录</h2>
+    <ol class="grid sm:grid-cols-2 gap-x-8 gap-y-1.5 text-sm list-decimal pl-5">
+      <li><a href="#s1">摘要与结论（先给最重要的）</a></li>
+      <li><a href="#s2">实验设置</a></li>
+      <li><a href="#s3">数据准备</a></li>
+      <li><a href="#s4">分类消融 + 包络 + 深度分析　<span class="text-xs text-muted">①②</span></a></li>
+      <li><a href="#s5">检测训练 + 量化 + 召回　<span class="text-xs text-muted">③④⑤</span></a></li>
+      <li><a href="#s6">级联端到端评估　<span class="text-xs text-muted">⑥⑦</span></a></li>
+      <li><a href="#s7">掉点优化实验（A/B 对照）　<span class="text-xs text-muted">⑧</span></a></li>
+      <li><a href="#s8">工程踩坑（可复用经验）</a></li>
+      <li><a href="#s9">结论与下一步</a></li>
+    </ol>
+  </nav>
+
+  <main class="prose max-w-none">
+
+    <!-- ============ 1 摘要 ============ -->
+    <section id="s1" class="mb-14">
+      <h2 class="text-2xl font-bold text-white border-b border-stroke pb-2 mb-5">1. 摘要与结论（先给最重要的）</h2>
+      <p>本次实验首次把全链路从数据准备一路打通到级联端到端评估，并完成了一轮针对级联掉点的优化对照。<strong>它不是要刷 SOTA，而是要回答四个可行性问题，并诚实标出每个数字的边界。</strong></p>
+
+      <h3 class="text-xl font-semibold text-white mt-8 mb-3">1.1 五条决定性结论</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>结论</th><th>关键数据</th><th>为什么重要</th></tr></thead>
+        <tbody>
+          <tr><td><strong>C1</strong></td><td><strong>分类器选 <code>efficientnet_lite0@224</code>（不是 val 头名 mobilenetv3）</strong></td><td>int8 后 eff_lite0 反超 mobilenetv3 <strong>2.37pt</strong>（0.9193 vs 0.8956）；mobilenetv3 int8 掉点是 eff_lite0 的 <strong>~20 倍</strong>（3.71pt vs 0.19pt）</td><td>V85x 是 INT8-only，<strong>ship 的就是 int8 这个数</strong>，fp32 领先无意义。坐实 §4：mobilenetv3 的 h-swish+SE 量化不友好。</td></tr>
+          <tr><td><strong>C2</strong></td><td><strong>两段都对 INT8 PTQ 友好（方向性）</strong></td><td>分类 int8 掉点 0.19pt（top-1）；检测 int8 掉点 0.19pt（mAP）、1.96pt（AP50）</td><td>契合 0.5T/INT8-only 的 NPU；上游 FP32→端侧量化的路线在精度上站得住。</td></tr>
+          <tr><td><strong>C3</strong></td><td><strong>级联端到端会掉 ~6.3pt，且 int8 检测额外再掉 8.3pt——这是 COCO mAP 完全测不出来的</strong></td><td>级联 fp32 = 0.8583（vs 分类直评 0.921）；int8 检测级联 = 0.7750，但检测 mAP 只掉 0.19pt</td><td><strong>mAP 严重低估 int8 对级联的真实伤害</strong>；级联里<strong>检测框质量 &gt;&gt; 检测 mAP</strong>，端到端才暴露。</td></tr>
+          <tr><td><strong>C4</strong></td><td><strong>基线即最优；级联掉点无法靠重训分类器补回</strong></td><td>A1/A2/A2v2/B 四个优化方案均未超过基线；A2v2（更强分类器 val 0.947 + 见过裁框）级联仍 0.860≈基线</td><td>6.3pt 主要是<strong>裁框丢失细粒度判别信息（非可学 domain shift）+ birds525「整图=鸟」的评估假象</strong>，不是分类器能学回来的。</td></tr>
+          <tr><td><strong>C5</strong></td><td><strong>真正提升级联的方向在检测侧 + 真实数据，不在分类器</strong></td><td>bird AP50 仅 61.6、AP_small 仅 0.165；真实喂食器 bird 检出率仅 <strong>64.5%</strong>（vs 干净鸟照 100%）</td><td>粗检测器的 bird 召回是命门；下一步应投在检测框质量 / 小目标 / 带 species 标注的真实喂食器数据。</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3 class="text-xl font-semibold text-white mt-8 mb-3">1.2 一句话总览</h3>
+      <blockquote><p><strong>可行性成立</strong>：双段级联（NanoDet-Plus 粗检测 → eff_lite0 细分类）在 INT8 约束下精度可接受、链路可跑通、量化方向友好；<strong>但级联端到端暴露了 mAP 测不出的「检测框质量」命门</strong>，这是后续投入的真正杠杆点，而非分类器重训。</p></blockquote>
+
+      <h3 class="text-xl font-semibold text-white mt-8 mb-3">1.3 已发布</h3>
+      <p><code>efficientnet_lite0@224</code> 可行性权重已发布到 <strong>registry stable channel</strong>：fp32 93.3 / int8 92.5 / field 81.2。<strong>注意</strong>：此为可行性权重（taxon_key 仅映射 408/525、数据集含许可受限源的同源），<strong>不进商用发行</strong>。</p>
+    </section>
+
+    <!-- ============ 2 实验设置 ============ -->
+    <section id="s2" class="mb-14">
+      <h2 class="text-2xl font-bold text-white border-b border-stroke pb-2 mb-5">2. 实验设置</h2>
+
+      <h3 class="text-xl font-semibold text-white mt-6 mb-3">2.1 硬件与分卡</h3>
+      <p>NanoDet 上游 pin <code>torch&lt;2.0</code>，无法在 RTX 5090（Blackwell，sm_120，须 torch cu128）上跑，故双卡分工：</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>卡</th><th>角色</th><th>任务</th><th>软件栈</th></tr></thead>
+        <tbody>
+          <tr><td><strong>RTX 5090</strong>（westd seetacloud）</td><td>分类</td><td>birds525 分类训练 + 消融 + 包络 + 级联评估</td><td>torch 2.10.0+cu128（CUDA 12.8）</td></tr>
+          <tr><td><strong>RTX 3080</strong>（nmb2）</td><td>检测</td><td>NanoDet-Plus 全量微调 + ONNX 导出 + int8</td><td>base env py3.8 + torch 1.11+cu113</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3 class="text-xl font-semibold text-white mt-6 mb-3">2.2 环境/平台铁律（§4）</h3>
+      <p>本实验严格遵循 CLAUDE.md §4 不可触碰的硬规则：</p>
+      <ol>
+        <li><strong>上游只产 FP32 ONNX</strong>，绝不上游 INT8。</li>
+        <li><strong>检测后处理（NMS/decode/grid/sigmoid/anchor）留 A7 CPU</strong>，导 ONNX 时切「裸 backbone+head」。</li>
+        <li><strong>复用 = 依赖上游 + 扩展点</strong>，不 fork 改框架源码（NanoDet 半停滞锁版属唯一例外）。</li>
+        <li>许可红线（海外发行从严，避 AGPL/GPL/CC-BY-NC）。</li>
+      </ol>
+
+      <h3 class="text-xl font-semibold text-white mt-6 mb-3">2.3 量化的诚实边界（贯穿全报告）</h3>
+      <blockquote><p><strong>本实验所有 int8 数据均为 ORT-QDQ 模拟，是方向性参考，不是板子真值。</strong> 板上真值来自 ONNX → ACUITY/pegasus PTQ → <code>.nb</code> → VIPLite/awnn。ONNX 仅作上游交换格式。凡引用 int8 数字处，结论只取<strong>掉点趋势/相对大小</strong>，不取绝对值。</p></blockquote>
+    </section>
+
+    <!-- ============ 3 数据准备 ============ -->
+    <section id="s3" class="mb-14">
+      <h2 class="text-2xl font-bold text-white border-b border-stroke pb-2 mb-5">3. 数据准备</h2>
+
+      <h3 class="text-xl font-semibold text-white mt-6 mb-3">3.1 分类数据：BIRDS-525</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>项</th><th>值</th></tr></thead>
+        <tbody>
+          <tr><td>数据集</td><td>BIRDS-525（与 DST1192 同源）</td></tr>
+          <tr><td>类数</td><td>525</td></tr>
+          <tr><td>样本总数</td><td>16,796</td></tr>
+          <tr><td>train / val / test</td><td>11,750 / 2,507 / 2,539</td></tr>
+          <tr><td>taxonomy 映射</td><td>taxon_key 按 eBird 映射，覆盖 408/525 类</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <blockquote><p><strong>许可定位</strong>：taxon_key 映射与该数据集仅用于<strong>可行性验证</strong>，<strong>不进商用权重</strong>。商用走 iNat CC0/CC-BY + 自采（见 memory <code>bird-dataset-license-landscape</code>）。</p></blockquote>
+
+      <h3 class="text-xl font-semibold text-white mt-6 mb-3">3.2 检测数据：detection_feeder（喂食器粗检测）</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>项</th><th>值</th></tr></thead>
+        <tbody>
+          <tr><td>格式</td><td>COCO</td></tr>
+          <tr><td>粗类（feeder-cam 大类）</td><td>11 类：bird / squirrel / cat / dog / raccoon / rabbit / deer / fox / skunk / hedgehog / bear</td></tr>
+          <tr><td>train 图</td><td><strong>原 15,000 → 剔 1 张 0 字节坏图 → 14,999</strong></td></tr>
+          <tr><td>train 标注</td><td>25,688</td></tr>
+          <tr><td>val 图</td><td>3,335</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <blockquote><p><strong>数据完整性事件</strong>：<code>000000007627.jpg</code> 为 0 字节坏图（COCO 源即缺），<code>cv2.imread</code> 返回 None 导致训练崩溃 → 从 <code>labels.json</code> 剔除（备份 <code>.bak</code>）。<strong>建议 data prep 管线加 0 字节/损坏过滤。</strong></p></blockquote>
+
+      <h3 class="text-xl font-semibold text-white mt-6 mb-3">3.3 级联拓扑（= V851S 部署形态）</h3>
+      <pre class="bg-panel2 border border-stroke rounded-lg p-4 text-xs text-slate-300 overflow-x-auto leading-relaxed">原图 ─[检测 ONNX]→ 裸 head (1,3598,43)
+        ─[A7 CPU decode: GFL 分布→bbox + grid + NMS]→ bird 框（原图坐标）
+        ─[A7 CPU 裁剪 + 预处理: crop padding 外扩 + 最小尺寸门控 → resize224 + ImageNet 归一]
+        ─[分类 ONNX]→ 525 logits → species（无 bird 框则回退整图）</pre>
+      <p>NPU 跑卷积（检测 backbone+head / 分类网络），A7 CPU 跑 decode/NMS/裁剪/预处理（§4 铁律）。crop 逻辑见 <code>data/crop.py §C.6</code>：padding 外扩 + 最小尺寸门控。</p>
+    </section>
+
+    <!-- ============ 4 分类消融 ============ -->
+    <section id="s4" class="mb-14">
+      <h2 class="text-2xl font-bold text-white border-b border-stroke pb-2 mb-5">4. 分类消融 + 包络 + 深度分析</h2>
+
+      <h3 class="text-xl font-semibold text-white mt-6 mb-3">4.1 受控消融（plan §B.3，6 格）</h3>
+      <p>固定超参（80 epoch · AdamW lr1e-3/wd1e-4 · label_smoothing 0.1 · cosine · 退化增强 · batch128 · aim 追踪），单变量网格 backbone × input_size。<strong>选型只在 val，不碰 test（§B.0）。</strong></p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>backbone</th><th>input</th><th>fp32_val_top1</th><th>fp32_val_top5</th></tr></thead>
+        <tbody>
+          <tr><td>efficientnet_lite0</td><td>192</td><td>0.9154</td><td>0.9737</td></tr>
+          <tr><td>efficientnet_lite0</td><td>224</td><td>0.9334</td><td>0.9809</td></tr>
+          <tr><td>mobilenetv3_large_100</td><td>192</td><td>0.9274</td><td>0.9777</td></tr>
+          <tr><td><strong>mobilenetv3_large_100</strong></td><td><strong>224</strong></td><td><strong>0.9362</strong></td><td>0.9809</td></tr>
+          <tr><td>repvgg_a0</td><td>192</td><td>0.9146</td><td>0.9629</td></tr>
+          <tr><td>repvgg_a0</td><td>224</td><td>0.9206</td><td>0.9657</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p>val 头名是 <strong>mobilenetv3@224</strong>，仅比 eff_lite0@224 高 <strong>0.28pt</strong>。两强（mobilenetv3@224、eff_lite0@224）进 test 全包络对比。</p>
+
+      <!-- 图① 消融 -->
+      <div class="chart-block">
+        <div class="flex items-baseline justify-between mb-1">
+          <div class="text-base font-semibold text-white">① 分类消融 6 格</div>
+          <span class="text-xs text-muted">fp32_val top-1</span>
+        </div>
+        <div style="height:280px"><canvas id="c1"></canvas></div>
+        <p class="chart-cap">三种 backbone × 两种输入尺寸。@224 全面优于 @192；mobilenetv3@224 fp32 最高（0.9362），eff_lite0@224 次之（0.9334），二者仅差 0.28pt。</p>
+      </div>
+
+      <h3 class="text-xl font-semibold text-white mt-8 mb-3">4.2 最优候选 test 全包络对比（含纯 int8 掉点）—— 决定性翻盘</h3>
+      <p>额外加 <code>fp32_test</code>（排除 val→test 分布差），int8 掉点 = <code>fp32_test − int8_sim</code>（同 test 集，干净对比）：</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>backbone</th><th>fp32_val</th><th>fp32_test</th><th>int8_sim</th><th>int8 掉点</th><th>field</th><th>field 退化</th></tr></thead>
+        <tbody>
+          <tr><td>efficientnet_lite0</td><td>0.9334</td><td>0.9212</td><td><strong>0.9193</strong></td><td><strong>0.0019（0.19pt）</strong></td><td>0.809</td><td>0.1122</td></tr>
+          <tr><td>mobilenetv3_large_100</td><td>0.9362</td><td>0.9327</td><td><strong>0.8956</strong></td><td><strong>0.0371（3.71pt）</strong></td><td>0.8436</td><td>0.0891</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p><strong>翻盘逻辑</strong>：</p>
+      <ul>
+        <li>fp32 下 mobilenetv3 领先 1.15pt（0.9327 vs 0.9212）。</li>
+        <li>但 mobilenetv3 int8 掉点 <strong>3.71pt</strong>，是 eff_lite0（0.19pt）的 <strong>~20 倍</strong>。</li>
+        <li>量化后 <strong>eff_lite0 反超 2.37pt</strong>（0.9193 vs 0.8956）。</li>
+        <li>V85x 是 INT8-only → ship 的就是 int8 这一档 → <strong>efficientnet_lite0 是明确赢家</strong>。</li>
+      </ul>
+
+      <!-- 图② 量化对比（关键） -->
+      <div class="chart-block ring-1 ring-accent/30">
+        <div class="flex items-baseline justify-between mb-1">
+          <div class="text-base font-semibold text-white">② 分类量化对比 <span class="text-accent text-xs align-middle">最关键</span></div>
+          <span class="text-xs text-muted">fp32_test vs int8_sim</span>
+        </div>
+        <div style="height:280px"><canvas id="c2"></canvas></div>
+        <p class="chart-cap">mobilenetv3 fp32 更高，但 INT8 后 <span class="text-accent2">eff_lite0 反超 2.37pt</span>（绿柱 vs 红柱）。V85x 是 INT8-only → eff_lite0 赢——坐实 §4：mobilenetv3 的 h-swish + SE 对 INT8 PTQ 不友好（激活分布长尾、逐通道敏感）。</p>
+      </div>
+
+      <blockquote>
+        <p><strong>机制坐实 §4</strong>：mobilenetv3 的 <strong>h-swish + SE</strong> 对 INT8 PTQ 不友好（激活分布长尾、逐通道敏感）。这正是 §4「避坑算子」预判的现实。</p>
+        <p>（旁注：mobilenetv3 在 fp32 下 field 鲁棒性更好——field 退化 8.91% vs eff_lite0 11.22%——但端侧不相关，因为端侧跑的是 int8。）</p>
+      </blockquote>
+
+      <h3 class="text-xl font-semibold text-white mt-8 mb-3">4.3 四级可行性包络（首跑，eff_lite0@224）</h3>
+      <p>来自 <code>00_首次单模型闭环/report.json</code>：</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>级</th><th>top-1</th><th>top-5</th><th>vs fp32</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>fp32_val</td><td>0.933</td><td>0.976</td><td>—</td><td>干净验证集</td></tr>
+          <tr><td>int8_sim</td><td>0.925</td><td>0.971</td><td>−0.008</td><td>ORT-QDQ 模拟 INT8，掉点极小（量化友好）</td></tr>
+          <tr><td>field</td><td>0.812</td><td>0.920</td><td>−0.120</td><td>退化代理 domain-gap（≠真现场）</td></tr>
+          <tr><td>regional</td><td>0.417</td><td>0.437</td><td>−0.516</td><td>⚠️ <strong>测法 artifact，非真实回归（见 §8）</strong></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <blockquote><p><strong>regional 级数据读反，不可信</strong>：现行口径在全球 525 类 test 上加区域 mask，把非美国种真值压 −inf → 必错，并非真实回归。地域过滤本身有益，应只在 in-region 子集比 on/off。已记为待修 issue。</p></blockquote>
+
+      <h3 class="text-xl font-semibold text-white mt-8 mb-3">4.4 分类器深度分析（eff_lite0，test n=2539）</h3>
+      <p>整体 top-1 = 0.921 / top-5 = 0.972。</p>
+      <p><strong>最差类全是小样本类</strong>（n=3~7）：</p>
+      <ul>
+        <li><code>SPOON BILED SANDPIPER</code> 0.00（n=4）</li>
+        <li>多个类 0.50</li>
+      </ul>
+      <p><strong>易混对 = 分类学近似种</strong>（模型行为合理，错在「长得像」）：</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>真值</th><th>被误判为</th></tr></thead>
+        <tbody>
+          <tr><td>SPOON BILED SANDPIPER</td><td>DUNLIN</td></tr>
+          <tr><td>BAR-TAILED GODWIT</td><td>SHORT BILLED DOWITCHER</td></tr>
+          <tr><td>RUDY KINGFISHER</td><td>RUFOUS KINGFISHER</td></tr>
+          <tr><td>WHITE TAILED TROPIC</td><td>RED BILLED TROPICBIRD</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <blockquote><p><strong>判读</strong>：错误集中在「稀有种 + 近似种」，不是模型崩坏，是长尾数据 + 细粒度本身难。对应产品的分级置信门控：低置信 / 稀有种 → 层级回退（属/科/bird）+ 留云锚点。</p></blockquote>
+    </section>
+
+    <!-- ============ 5 检测训练 ============ -->
+    <section id="s5" class="mb-14">
+      <h2 class="text-2xl font-bold text-white border-b border-stroke pb-2 mb-5">5. 检测训练 + 量化 + 召回</h2>
+
+      <h3 class="text-xl font-semibold text-white mt-6 mb-3">5.1 NanoDet-Plus 全量微调（plan §B.2）</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>项</th><th>值</th></tr></thead>
+        <tbody>
+          <tr><td>输入</td><td>416×416</td></tr>
+          <tr><td>类数</td><td>11（feeder-cam 大类）</td></tr>
+          <tr><td>初始化</td><td>COCO 预训练，加载 backbone + FPN(neck)，头因 80→11 类<strong>重置</strong>（<code>head.gfl_cls</code> 43=11类+32回归；<code>aux_head</code> 11）</td></tr>
+          <tr><td>可训参数</td><td>8.4M 全部可训（非冻结全量微调）</td></tr>
+          <tr><td>训练</td><td>50 epoch · batch32</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3 class="text-xl font-semibold text-white mt-6 mb-3">5.2 mAP 收敛（val 全集 3335 图，COCOeval）</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>epoch</th><th>mAP@.5:.95</th><th>AP50</th><th>AP75</th><th>AP_small</th><th>AP_large</th></tr></thead>
+        <tbody>
+          <tr><td>10</td><td>0.344</td><td>0.469</td><td>0.385</td><td>0.064</td><td>0.368</td></tr>
+          <tr><td>20</td><td>0.492</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+          <tr><td>30</td><td>0.559</td><td>0.693</td><td>0.617</td><td>0.157</td><td>0.586</td></tr>
+          <tr><td>40</td><td>0.584</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+          <tr><td><strong>50</strong></td><td><strong>0.591</strong></td><td><strong>0.720</strong></td><td>0.644</td><td><strong>0.165</strong></td><td>0.619</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p>最终：mAP 0.591 / AP50 0.720 / AP75 0.644 / <strong>AP_small 0.165</strong> / AP_m 0.288 / AP_l 0.619。40→50ep 仍 +0.7pt，<strong>未完全饱和</strong>。</p>
+
+      <!-- 图③ mAP 收敛 -->
+      <div class="chart-block">
+        <div class="flex items-baseline justify-between mb-1">
+          <div class="text-base font-semibold text-white">③ 检测 mAP 收敛曲线</div>
+          <span class="text-xs text-muted">NanoDet-Plus</span>
+        </div>
+        <div style="height:280px"><canvas id="c3"></canvas></div>
+        <p class="chart-cap">50 epoch 收敛至 mAP 0.591，后段趋于平缓（边际收益递减），但 40→50ep 仍 +0.7pt 未完全饱和。</p>
+      </div>
+
+      <h3 class="text-xl font-semibold text-white mt-8 mb-3">5.3 per-class AP（最终）</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>类</th><th>AP50</th><th>mAP</th><th>类</th><th>AP50</th><th>mAP</th></tr></thead>
+        <tbody>
+          <tr><td><strong>bird</strong></td><td><strong>61.6</strong></td><td><strong>45.5</strong></td><td>squirrel</td><td>82.1</td><td>69.3</td></tr>
+          <tr><td>cat</td><td>91.2</td><td>76.6</td><td>dog</td><td>93.1</td><td>79.9</td></tr>
+          <tr><td>rabbit</td><td>87.1</td><td>70.1</td><td>fox</td><td>80.5</td><td>73.8</td></tr>
+          <tr><td>hedgehog</td><td>90.6</td><td>73.6</td><td>deer</td><td>78.7</td><td>60.8</td></tr>
+          <tr><td>bear</td><td>71.2</td><td>57.4</td><td>raccoon</td><td>55.1</td><td>42.1</td></tr>
+          <tr><td><strong>skunk</strong></td><td><strong>1.3</strong></td><td><strong>0.9</strong> ⚠️</td><td></td><td></td><td></td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <!-- 图④ per-class AP -->
+      <div class="chart-block">
+        <div class="flex items-baseline justify-between mb-1">
+          <div class="text-base font-semibold text-white">④ 检测 per-class AP</div>
+          <span class="text-xs text-muted">AP50</span>
+        </div>
+        <div style="height:300px"><canvas id="c4"></canvas></div>
+        <p class="chart-cap"><span class="text-accent">bird</span> 为级联关键类（61.6，偏低，蓝柱）；<span class="text-danger">skunk</span> 几乎失败（1.3，样本太少，红柱）。多数类在 80~93。</p>
+      </div>
+
+      <blockquote>
+        <p><strong>两个警示</strong>：</p>
+        <ol>
+          <li><strong>bird AP50=61.6 偏低</strong>（多数类 80~93）。根因 <strong>AP_small=0.165</strong>——喂食器场景鸟又小又远。级联里 bird 召回 = 命门，漏检风险真实。</li>
+          <li><strong>skunk 几乎全军覆没（AP 1.3）</strong>：样本极少（类不均衡），需补数据或并类。</li>
+        </ol>
+      </blockquote>
+
+      <h3 class="text-xl font-semibold text-white mt-8 mb-3">5.4 FP32 ONNX 导出（§4 铁律）</h3>
+      <p><code>nanodet_feeder_416.onnx</code>：</p>
+      <ul>
+        <li>输出 <strong>(1, 3598, 43)</strong> = 3598 anchor × (11 类 + 32 回归分布)</li>
+        <li><strong>纯裸 head 输出，无 NMS/decode</strong>（decode/NMS 留 A7 CPU）</li>
+        <li>onnxsim 简化通过，5.4MB</li>
+      </ul>
+
+      <h3 class="text-xl font-semibold text-white mt-8 mb-3">5.5 检测 int8 掉点（800 图子集，新建评估链）</h3>
+      <p>专为「检测也要看量化」搭：<code>int8 ONNX → NanoDet head.post_process(decode+NMS) → COCOeval</code>，复用 NanoDet val dataset 预处理 + 评估器。ORT-QDQ per-channel，opset 升 11→13。</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th></th><th>mAP@.5:.95</th><th>AP50</th></tr></thead>
+        <tbody>
+          <tr><td>fp32_onnx</td><td>0.6813</td><td>0.8113</td></tr>
+          <tr><td>int8_onnx</td><td>0.6794</td><td>0.7917</td></tr>
+          <tr><td><strong>int8 掉点</strong></td><td><strong>0.0019（0.19pt）</strong></td><td><strong>0.0196（1.96pt）</strong></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <blockquote>
+        <p><strong>检测也量化友好</strong>：mAP 掉点 0.19pt（AP50 掉 1.96pt，int8 略伤宽阈值定位/置信）。</p>
+        <p>子集绝对值（0.6813）高于全集（0.591），因前 800 图偏易；<strong>掉点须看同子集</strong>才有效。</p>
+      </blockquote>
+
+      <h3 class="text-xl font-semibold text-white mt-8 mb-3">5.6 检测直观召回（feeder val 800 子集，conf≥0.3 / IoU≥0.5 / 大类正确）</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>类</th><th>检出率</th></tr></thead>
+        <tbody>
+          <tr><td><strong>bird</strong></td><td><strong>64.5%（331/513）</strong></td></tr>
+          <tr><td>cat</td><td>97.9%</td></tr>
+          <tr><td>dog</td><td>97.4%</td></tr>
+          <tr><td>deer / fox</td><td>100%（样本少）</td></tr>
+          <tr><td><strong>总体</strong></td><td><strong>84.7%</strong></td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <!-- 图⑤ 召回 -->
+      <div class="chart-block">
+        <div class="flex items-baseline justify-between mb-1">
+          <div class="text-base font-semibold text-white">⑤ 检测召回率（检出率）</div>
+          <span class="text-xs text-muted">feeder 真实场景</span>
+        </div>
+        <div style="height:260px"><canvas id="c5"></canvas></div>
+        <p class="chart-cap">bird 真实喂食器仅 64.5%（蓝柱；干净照 birds525 可达 100%），总体 84.7%（黄柱）。其余大类 97~100%。bird 召回是级联命门。</p>
+      </div>
+
+      <blockquote>
+        <p><strong>诚实标注</strong>：</p>
+        <ul>
+          <li>bird 64.5% 与 AP50 61.6 一致——真实多目标场景会漏 ~35% 鸟。</li>
+          <li>对比 birds525 干净单鸟照 bird 检出 100% vs feeder 真实多目标场景 64.5%——<strong>后者是诚实数</strong>。</li>
+          <li>脚本的<strong>查准率算坏</strong>（未接 NanoDet 推理 NMS 阈值，框泛滥导致 FP 虚高）→ <strong>查准率不可信</strong>。但级联只取 top-1 bird 框，<strong>查准率不影响级联</strong>，故结论仍立。</li>
+        </ul>
+      </blockquote>
+    </section>
+
+    <!-- ============ 6 级联 ============ -->
+    <section id="s6" class="mb-14">
+      <h2 class="text-2xl font-bold text-white border-b border-stroke pb-2 mb-5">6. 级联端到端评估</h2>
+      <p>把训练好的检测（NanoDet-Plus）+ 分类（eff_lite0）串成级联，在 birds525 test 子集（n=600，有 species GT，bird 检出 100%）上跑端到端，量化模型一并评。对照：<strong>分类器直评 test top-1 = 0.921</strong>。</p>
+
+      <h3 class="text-xl font-semibold text-white mt-6 mb-3">6.1 核心结果</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>级联组合</th><th>bird 检出率</th><th>级联 top-1</th><th>vs 直评</th></tr></thead>
+        <tbody>
+          <tr><td>fp32 检测 + fp32 分类</td><td>100%</td><td><strong>0.8583</strong></td><td>−6.3pt</td></tr>
+          <tr><td>fp32 检测 + int8 分类</td><td>100%</td><td><strong>0.8583</strong></td><td>−6.3pt</td></tr>
+          <tr><td><strong>int8 检测</strong> + fp32 分类</td><td>100%</td><td><strong>0.7750</strong></td><td>−14.6pt</td></tr>
+          <tr><td><strong>int8 检测</strong> + int8 分类</td><td>100%</td><td><strong>0.7767</strong></td><td>−14.4pt</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <!-- 图⑥ 级联 4 组合 -->
+      <div class="chart-block ring-1 ring-accent/30">
+        <div class="flex items-baseline justify-between mb-1">
+          <div class="text-base font-semibold text-white">⑥ 级联端到端 4 组合</div>
+          <span class="text-xs text-muted">基线对照 0.921</span>
+        </div>
+        <div style="height:280px"><canvas id="c6"></canvas></div>
+        <p class="chart-cap">INT8 <span class="text-warn">检测</span>掉 8.3pt（红柱），INT8 <span class="text-accent2">分类</span>几乎无损（绿柱两两同高）→ <span class="text-accent">框质量 ≫ mAP</span>（mAP 仅掉 0.19pt）。黄色虚线为分类直评基线 0.921。</p>
+      </div>
+
+      <h3 class="text-xl font-semibold text-white mt-8 mb-3">6.2 三个掉点来源（端到端才暴露）</h3>
+      <ol>
+        <li><strong>裁框取景偏移 −6.3pt</strong>：检测裁出的框比 birds525 训练图（整张鸟照）取景更紧/不同 → 分类器 domain shift。<strong>与量化无关</strong>（int8 分类 = fp32 分类同分）。</li>
+        <li><strong>int8 检测框定位变差，额外 −8.3pt</strong>（0.858→0.775）：但其 COCO mAP 只掉 0.19pt → <strong>mAP 严重低估 int8 对级联的伤害</strong>；框一歪裁出的鸟就偏，被分类器放大成 8.3pt。<strong>级联里检测框质量 &gt;&gt; 检测 mAP。</strong></li>
+        <li><strong>int8 分类器几乎无辜</strong>：级联里和 fp32 分类同分（±0.2pt）。瓶颈是检测框，不是分类量化。</li>
+      </ol>
+
+      <h3 class="text-xl font-semibold text-white mt-8 mb-3">6.3 Padding 缓解扫描（推理侧扩框 vs 必须重训）</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>框 padding</th><th>fp32 检测级联</th><th>int8 检测级联</th></tr></thead>
+        <tbody>
+          <tr><td>0%</td><td>0.8583</td><td>0.7767</td></tr>
+          <tr><td>15%</td><td>0.8567</td><td>0.7933</td></tr>
+          <tr><td>30%</td><td>0.8633</td><td>0.8067</td></tr>
+          <tr><td>50%</td><td>0.8667</td><td>0.8183</td></tr>
+          <tr><td>整图</td><td><strong>0.9167</strong></td><td><strong>0.9167</strong></td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <!-- 图⑦ padding -->
+      <div class="chart-block">
+        <div class="flex items-baseline justify-between mb-1">
+          <div class="text-base font-semibold text-white">⑦ Padding 缓解扫描</div>
+          <span class="text-xs text-muted">fp32 / int8 检测级联</span>
+        </div>
+        <div style="height:280px"><canvas id="c7"></canvas></div>
+        <p class="chart-cap">推理侧 padding 弱缓解（fp32 +0.8pt@50%，int8 +4.2pt@50%），仅「整图」完全恢复至 0.9167（≈直评）→ 须在 <span class="text-warn">训练侧</span>解决裁框信息损失。</p>
+      </div>
+
+      <ul>
+        <li><strong>推理侧 padding 是弱缓解</strong>：fp32 路 +0.8pt@50%；int8 路 +4.2pt@50%（扩边补偿差框，故 int8 受益更大）。</li>
+        <li><strong>只有「整图」才全恢复</strong>（≈直评 0.917）。</li>
+        <li>但 birds525 上「整图=训练图」，真实喂食器场景没有「整图=鸟」的便利 → <strong>结论：推理侧补不回，必须训练侧解决。</strong></li>
+      </ul>
+
+      <h3 class="text-xl font-semibold text-white mt-8 mb-3">6.4 诚实边界</h3>
+      <blockquote><p>birds525 是<strong>已裁好的鸟照、非真喂食器场景</strong>。本评估测的是<strong>级联机制 + 裁框取景偏移 + int8 框质量传播</strong>，<strong>不是真实喂食器 domain gap</strong>（需带 species 标注的喂食器图，暂无）。绝对值受子集（600 张，偏易）影响，<strong>掉点/趋势才是结论</strong>。</p></blockquote>
+    </section>
+
+    <!-- ============ 7 优化 A/B ============ -->
+    <section id="s7" class="mb-14">
+      <h2 class="text-2xl font-bold text-white border-b border-stroke pb-2 mb-5">7. 掉点优化实验（A/B 对照）</h2>
+      <p>承接级联掉点（fp32 取景偏移 6.3pt + int8 检测 8.3pt），试三条路补回。</p>
+
+      <h3 class="text-xl font-semibold text-white mt-6 mb-3">7.1 A：分类器侧（让分类器适应检测裁框）</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>方案</th><th>级联 p=0（紧框）</th><th>整图</th><th>取景 gap</th><th>结论</th></tr></thead>
+        <tbody>
+          <tr><td>基线</td><td>0.858</td><td>0.917</td><td>0.059</td><td>—</td></tr>
+          <tr><td><strong>A1</strong> 通用强裁剪（RandomResizedCrop scale0.4 + 宽 ratio）</td><td>0.855</td><td>0.907</td><td>0.052</td><td>❌ 无改善，还伤干净精度（0.933→0.913）</td></tr>
+          <tr><td><strong>A2</strong> 纯检测裁框训练（数据少 9199）</td><td>0.803</td><td>0.848</td><td>0.045</td><td>⚠️ 更差（数据少混淆）；但 gap 缩小 → 机制有效</td></tr>
+          <tr><td><strong>A2v2</strong> 混合（原图 11750 + 裁框 9699，val 0.947）</td><td><strong>0.860</strong></td><td>0.912</td><td>0.052</td><td>≈基线，精度修复但级联未提升</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <!-- 图⑧ A/B -->
+      <div class="chart-block">
+        <div class="flex items-baseline justify-between mb-1">
+          <div class="text-base font-semibold text-white">⑧ 优化 A/B 对比</div>
+          <span class="text-xs text-muted">vs 基线 0.858</span>
+        </div>
+        <div style="height:280px"><canvas id="c8"></canvas></div>
+        <p class="chart-cap">分类器侧训练（A1/A2/A2v2）均未超基线（黄色虚线 0.858）→ 掉点是裁框信息损失 + 评估假象，<span class="text-danger">非可学 domain shift</span>。B 检测延长边际（mAP 0.591→0.594）。</p>
+      </div>
+
+      <p><strong>逐方案解读</strong>：</p>
+      <ul>
+        <li><strong>A1</strong>：随机裁剪没对准鸟、跟检测框分布不同 → 证伪「通用/推理侧增强能补回」的猜测，且伤干净精度。</li>
+        <li><strong>A2</strong>：纯检测裁框训练数据太少（9199）导致混淆变差，但<strong>取景 gap 缩小（0.045 vs 基线 0.059）→ 机制其实有效</strong>，只是被数据量拖累。</li>
+        <li><strong>A2v2</strong>：混合训练修复了精度（val 0.947，甚至高于基线），也见过裁框，但<strong>级联 p=0 仍 0.860≈基线</strong>。</li>
+      </ul>
+      <blockquote><p><strong>A 结论</strong>：<strong>分类器侧训练无法补回级联 6.3pt。</strong> 该掉点主要是<strong>裁框丢失细粒度判别信息（鸟被裁紧、区分种的细节没了，非可学 domain shift）+ birds525「整图=鸟」的评估假象</strong>（真实喂食器场景没有整图对照，裁框是必需的，「vs 整图」的 gap 部分是人为的）。</p></blockquote>
+
+      <h3 class="text-xl font-semibold text-white mt-8 mb-3">7.2 B：检测框质量（延长 416 训练 50→100ep）</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th></th><th>50ep</th><th>100ep</th></tr></thead>
+        <tbody>
+          <tr><td>mAP</td><td>0.591</td><td>0.594</td></tr>
+          <tr><td>AP_small</td><td>0.165</td><td>0.180</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <blockquote><p><strong>B 结论</strong>：边际提升。<strong>小目标（bird）是瓶颈</strong>，延长训练帮助有限，需 512 输入 / 改架构（增边缘算力，权衡）。</p></blockquote>
+    </section>
+
+    <!-- ============ 8 踩坑 ============ -->
+    <section id="s8" class="mb-14">
+      <h2 class="text-2xl font-bold text-white border-b border-stroke pb-2 mb-5">8. 工程踩坑（可复用经验）</h2>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>坑</th><th>现象</th><th>解法</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td><strong>沙箱 SSH 启远端长任务</strong></td><td>含 <code>&amp;</code> 命令整条静默失败；<code>pkill -f</code> 自匹配杀掉父 shell</td><td>一律 <code>screen -dmS</code> 脱离；<code>pkill</code> 用 <code>[t]</code> 括号技巧（见 memory <code>gpu-cloud-ssh-background-jobs</code>）</td></tr>
+          <tr><td>2</td><td><strong>数据完整性</strong></td><td>detection_feeder 有 1 张 0 字节坏图 <code>000000007627.jpg</code> → <code>cv2.imread</code> None → 训练崩</td><td>从 labels.json 剔除（15000→14999，备份 .bak）；<strong>建议 data prep 加 0 字节过滤</strong></td></tr>
+          <tr><td>3</td><td><strong>检测 int8 opset</strong></td><td>NanoDet 导出 opset 11，per-channel QDQ 需 opset≥13</td><td>脚本内 <code>version_converter</code> 升级 11→13</td></tr>
+          <tr><td>4</td><td><strong>aim 追踪</strong></td><td>GPU 云上 <code>log_system_params=True</code> 会 hang；新版 setuptools 致 <code>pkg_resources</code> 崩</td><td><code>log_system_params=False</code>；pin <code>setuptools&lt;81</code></td></tr>
+          <tr><td>5</td><td><strong>中国 GPU 云外网慢</strong></td><td>pytorch.org/HF/github ~1MB/s</td><td>mac 跳板：mac 下 wheel(15MB/s)→scp(16MB/s)→box 离线装；HF 走 hf-mirror，pip 走 aliyun，github 用 git archive+scp</td></tr>
+          <tr><td>6</td><td><strong>eval 默认走 CPU + num_workers=0</strong></td><td>包络评估慢（~15 分钟）</td><td>已修：device 自动选 GPU、num_workers 默认 4</td></tr>
+          <tr><td>7</td><td><strong>int8 导出目录未先 mkdir</strong></td><td>FileNotFoundError</td><td>已修：写盘前 mkdir</td></tr>
+          <tr><td>8</td><td><strong>regional 包络口径读反</strong></td><td>全 525 类加区域 mask 把非美种真值压 −inf → 必错（0.417 假回归）</td><td>待修：只在 in-region 子集比 on/off</td></tr>
+          <tr><td>9</td><td><strong>RTX 5090 = Blackwell sm_120</strong></td><td>须 torch cu128（torch 2.10.0+cu128，CUDA 12.8）；NanoDet pin torch&lt;2.0 跑不了</td><td>双卡分工：5090=分类，3080=检测</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <!-- ============ 9 结论 ============ -->
+    <section id="s9" class="mb-10">
+      <h2 class="text-2xl font-bold text-white border-b border-stroke pb-2 mb-5">9. 结论与下一步</h2>
+
+      <h3 class="text-xl font-semibold text-white mt-6 mb-3">9.1 最终结论</h3>
+
+      <!-- dashboard 整体结论四卡 -->
+      <div class="grid md:grid-cols-2 gap-4 my-5 not-prose">
+        <div class="bg-panel2/60 rounded-xl p-4 border border-stroke">
+          <div class="text-warn font-semibold mb-1">基线即最优</div>
+          <p class="text-slate-300 text-sm leading-relaxed">分类侧所有训练干预（A1/A2/A2v2）均未超过基线 0.858，说明级联约 6.3pt 的掉点来自<span class="text-white">裁框信息损失 + birds525 评估假象</span>，而非可学习的 domain shift——堆分类器训练无效。</p>
+        </div>
+        <div class="bg-panel2/60 rounded-xl p-4 border border-stroke">
+          <div class="text-danger font-semibold mb-1">INT8 检测的 8.3pt 才是更实问题</div>
+          <p class="text-slate-300 text-sm leading-relaxed">检测 mAP 量化后仅掉 0.19pt，但级联端到端却掉 8.3pt——<span class="text-white">框质量被裁剪放大、mAP 指标测不出来</span>。这是比分类量化更值得关注的真实痛点。</p>
+        </div>
+        <div class="bg-panel2/60 rounded-xl p-4 border border-stroke">
+          <div class="text-accent2 font-semibold mb-1">分类量化几乎无损 + eff_lite0 是正解</div>
+          <p class="text-slate-300 text-sm leading-relaxed">eff_lite0@224 INT8 仅掉 0.19pt，且 INT8 下反超 mobilenetv3 2.37pt。V85x INT8-only 平台上，<span class="text-white">eff_lite0 是细分类器的确定选择</span>。</p>
+        </div>
+        <div class="bg-panel2/60 rounded-xl p-4 border border-stroke">
+          <div class="text-accent font-semibold mb-1">真提升方向</div>
+          <p class="text-slate-300 text-sm leading-relaxed">下一步收益集中在<span class="text-white">检测侧（bird 召回 / 框质量 / 训练侧裁框补偿）</span>，以及引入<span class="text-white">真实喂食器 species 数据</span>，而非继续优化分类器。</p>
+        </div>
+      </div>
+
+      <ul>
+        <li><strong>基线即最优</strong>：分类 <code>eff_lite0@224</code>（test 0.921，int8 −0.19pt）、检测 NanoDet 50ep（mAP 0.591）。A1/A2/A2v2/B 四个优化方案均未超过基线。</li>
+        <li><strong>级联 ~6.3pt 掉点</strong> = 裁框信息损失 + birds525「整图=鸟」评估假象（部分 gap 是人为的）。</li>
+        <li><strong>int8 检测 8.3pt 是更实的问题</strong>：框定位经裁剪放大，且 COCO mAP 测不出。最稳的解仍是<strong>端侧 ACUITY 量化质量 + 检测框质量</strong>，而非分类器重训。</li>
+        <li><strong>方法论收获</strong>：级联里 <strong>检测框质量 &gt;&gt; 检测 mAP</strong>——这是单独评检测时看不到、只有端到端才暴露的关键。</li>
+      </ul>
+
+      <h3 class="text-xl font-semibold text-white mt-8 mb-3">9.2 下一步（优先级排序）</h3>
+      <ol>
+        <li><strong>检测侧提 bird 检出率 / 框质量</strong>（最高杠杆）：416→512、按小目标调尺度、补鸟数据，攻 AP_small 0.165 与 bird 召回 64.5%。</li>
+        <li><strong>真实喂食器带 species 标注的数据</strong>：消除「整图=鸟」评估假象，量到真实 domain gap。</li>
+        <li><strong>板上 ACUITY 真值回灌</strong>：当前所有 int8 为 ORT-QDQ 模拟；真值须 ONNX→ACUITY/pegasus PTQ→<code>.nb</code>→VIPLite，并把板上 latency/精度回灌 EvalReport（当前最大工程盲点，engineering.md §8.1）。</li>
+        <li><strong>skunk 类不均衡</strong>：补数据或并类（当前 AP 1.3）。</li>
+        <li><strong>修 regional 包络口径</strong>：改为 in-region 子集 on/off 对比。</li>
+        <li><strong>可选</strong>：蒸馏 / 更大输入提级联（权衡边缘算力）。</li>
+      </ol>
+
+      <h3 class="text-xl font-semibold text-white mt-8 mb-3">9.3 产物索引</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>阶段目录</th><th>关键产物</th></tr></thead>
+        <tbody>
+          <tr><td><code>00_首次单模型闭环/</code></td><td>report.json/md、metrics.csv、models.yaml（registry promote 记录）</td></tr>
+          <tr><td><code>01_分类消融_检测训练/</code></td><td>ablation.csv/md、envelope_{eff_lite0,mobilenetv3}_224.json、detect_eval_results.txt、detect_int8_eval.log、scripts/</td></tr>
+          <tr><td><code>02_级联端到端评估/</code></td><td>cascade.log、cascade_int8.log、padsweep[_int8].log、scripts/（cascade_eval/cascade_int8/cascade_prep/padding_sweep[_int8]）</td></tr>
+          <tr><td><code>03_掉点优化实验/</code></td><td>A1/A2/A2v2 train+padding 日志、B_detect_100ep（eval/train/best.pth）、det_precision_recall.log、scripts/</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTNOTE -->
+  <footer class="mt-10 pt-6 border-t border-stroke text-xs text-muted leading-relaxed">
+    <p><strong class="text-slate-300">报告声明</strong>：本报告所有 int8 数据为 ORT-QDQ 模拟（方向性，非板子真值）；regional 级数据为已知测法 artifact，不作结论依据；级联绝对值受 600 张偏易子集影响，结论取掉点/趋势。负面结果（A1/A2/A2v2/B 未超基线、bird 召回 64.5%、skunk AP 1.3）均如实保留，未做粉饰。</p>
+    <p class="mt-2">※ 所有 INT8 数值为 <span class="text-slate-300">ORT-QDQ 模拟</span>（方向性参考，非端侧真值）。V85x 私有量化（ACUITY/pegasus PTQ → <code class="text-slate-300">.nb</code>）板上真值待回灌。</p>
+    <p class="mt-1">※ 负面结果（skunk AP 1.3、INT8 检测 8.3pt 掉点、A/B 全部未超基线）均如实标注，未做粉饰。</p>
+    <p class="mt-3 text-slate-500">edge-cam-train · 实验1 实验报告（报告全文 + 内嵌图表合并版）· 自包含可视化（Tailwind + Chart.js CDN）</p>
+  </footer>
+
+</div>
+
+<script>
+const GRID = '#27324a', TICK = '#8a97b0';
+const FONT = "'Segoe UI', system-ui, sans-serif";
+Chart.defaults.color = TICK;
+Chart.defaults.font.family = FONT;
+Chart.defaults.borderColor = GRID;
+
+const baseScales = (opts={}) => ({
+  x: { grid: { color: 'rgba(39,50,74,0.5)' }, ticks: { color: TICK }, ...(opts.x||{}) },
+  y: { grid: { color: 'rgba(39,50,74,0.5)' }, ticks: { color: TICK }, ...(opts.y||{}) },
+});
+const legend = (show=true) => ({ legend: { display: show, labels: { color: '#cbd5e1', boxWidth: 12, font: { size: 11 } } } });
+
+// ① 分类消融
+new Chart(document.getElementById('c1'), {
+  type: 'bar',
+  data: {
+    labels: ['eff_lite0', 'mobilenetv3', 'repvgg_a0'],
+    datasets: [
+      { label: '@192', data: [0.9154, 0.9274, 0.9146], backgroundColor: '#38bdf8', borderRadius: 5 },
+      { label: '@224', data: [0.9334, 0.9362, 0.9206], backgroundColor: '#34d399', borderRadius: 5 },
+    ]
+  },
+  options: {
+    maintainAspectRatio: false,
+    plugins: { ...legend(), tooltip: { callbacks: { label: c => c.dataset.label + ': ' + (c.parsed.y*100).toFixed(2) + '%' } } },
+    scales: baseScales({ y: { min: 0.90, max: 0.94, ticks: { callback: v => (v*100).toFixed(0)+'%', color: TICK } } })
+  }
+});
+
+// ② 量化对比
+new Chart(document.getElementById('c2'), {
+  type: 'bar',
+  data: {
+    labels: ['eff_lite0@224', 'mobilenetv3@224'],
+    datasets: [
+      { label: 'fp32_test', data: [0.9212, 0.9327], backgroundColor: '#64748b', borderRadius: 5 },
+      { label: 'int8_sim', data: [0.9193, 0.8956], backgroundColor: ['#34d399', '#f87171'], borderRadius: 5 },
+    ]
+  },
+  options: {
+    maintainAspectRatio: false,
+    plugins: {
+      ...legend(),
+      tooltip: { callbacks: {
+        label: c => c.dataset.label + ': ' + (c.parsed.y*100).toFixed(2) + '%',
+        afterBody: items => {
+          const i = items[0].dataIndex;
+          const drop = i === 0 ? '0.19' : '3.71';
+          return 'INT8 掉点: ' + drop + ' pt';
+        }
+      } }
+    },
+    scales: baseScales({ y: { min: 0.85, max: 0.95, ticks: { callback: v => (v*100).toFixed(0)+'%', color: TICK } } })
+  }
+});
+
+// ③ mAP 收敛
+new Chart(document.getElementById('c3'), {
+  type: 'line',
+  data: {
+    labels: [10, 20, 30, 40, 50],
+    datasets: [{
+      label: 'mAP', data: [0.344, 0.492, 0.559, 0.584, 0.591],
+      borderColor: '#38bdf8', backgroundColor: 'rgba(56,189,248,0.12)',
+      fill: true, tension: 0.35, pointRadius: 4, pointBackgroundColor: '#38bdf8'
+    }]
+  },
+  options: {
+    maintainAspectRatio: false,
+    plugins: { ...legend(false), tooltip: { callbacks: { label: c => 'mAP: ' + c.parsed.y.toFixed(3) } } },
+    scales: baseScales({ x: { title: { display: true, text: 'epoch', color: TICK } }, y: { min: 0.3, max: 0.65 } })
+  }
+});
+
+// ④ per-class AP
+const apLabels = ['bird','cat','dog','squirrel','rabbit','fox','hedgehog','deer','bear','raccoon','skunk'];
+const apData   = [61.6,91.2,93.1,82.1,87.1,80.5,90.6,78.7,71.2,55.1,1.3];
+const apColors = apLabels.map(l => l==='bird' ? '#38bdf8' : l==='skunk' ? '#f87171' : '#475569');
+new Chart(document.getElementById('c4'), {
+  type: 'bar',
+  data: { labels: apLabels, datasets: [{ label: 'AP50', data: apData, backgroundColor: apColors, borderRadius: 4 }] },
+  options: {
+    indexAxis: 'y', maintainAspectRatio: false,
+    plugins: { ...legend(false), tooltip: { callbacks: { label: c => 'AP50: ' + c.parsed.x } } },
+    scales: baseScales({ x: { min: 0, max: 100 } })
+  }
+});
+
+// ⑤ 召回
+const rcLabels = ['bird','cat','dog','deer','fox','总体'];
+const rcData   = [64.5,97.9,97.4,100,100,84.7];
+const rcColors = rcLabels.map(l => l==='bird' ? '#38bdf8' : l==='总体' ? '#fbbf24' : '#34d399');
+new Chart(document.getElementById('c5'), {
+  type: 'bar',
+  data: { labels: rcLabels, datasets: [{ label: '检出率', data: rcData, backgroundColor: rcColors, borderRadius: 4 }] },
+  options: {
+    indexAxis: 'y', maintainAspectRatio: false,
+    plugins: { ...legend(false), tooltip: { callbacks: { label: c => '检出率: ' + c.parsed.x + '%' } } },
+    scales: baseScales({ x: { min: 0, max: 100, ticks: { callback: v => v+'%', color: TICK } } })
+  }
+});
+
+// ⑥ 级联 4 组合 + 基线对照线
+const baseline = 0.921;
+const baselineLine = {
+  id: 'baselineLine',
+  afterDraw(chart) {
+    const { ctx, chartArea: { left, right }, scales: { y } } = chart;
+    const yPos = y.getPixelForValue(baseline);
+    ctx.save();
+    ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.5; ctx.setLineDash([6,4]);
+    ctx.beginPath(); ctx.moveTo(left, yPos); ctx.lineTo(right, yPos); ctx.stroke();
+    ctx.setLineDash([]); ctx.fillStyle = '#fbbf24'; ctx.font = '11px ' + FONT;
+    ctx.fillText('分类直评基线 0.921', left + 6, yPos - 6);
+    ctx.restore();
+  }
+};
+new Chart(document.getElementById('c6'), {
+  type: 'bar',
+  data: {
+    labels: ['det fp32\ncls fp32','det fp32\ncls int8','det int8\ncls fp32','det int8\ncls int8'],
+    datasets: [{ label: '级联准确率', data: [0.8583, 0.8583, 0.7750, 0.7767],
+      backgroundColor: ['#34d399','#34d399','#f87171','#f87171'], borderRadius: 5 }]
+  },
+  options: {
+    maintainAspectRatio: false,
+    plugins: { ...legend(false), tooltip: { callbacks: { label: c => '准确率: ' + c.parsed.y.toFixed(4) } } },
+    scales: baseScales({ y: { min: 0.70, max: 0.95 }, x: { ticks: { color: TICK, font: { size: 10 }, callback: function(v){ return this.getLabelForValue(v).split('\n'); } } } })
+  },
+  plugins: [baselineLine]
+});
+
+// ⑦ padding
+new Chart(document.getElementById('c7'), {
+  type: 'line',
+  data: {
+    labels: ['0%','15%','30%','50%','整图'],
+    datasets: [
+      { label: 'fp32 检测级联', data: [0.8583,0.8567,0.8633,0.8667,0.9167],
+        borderColor: '#34d399', backgroundColor: 'rgba(52,211,153,0.08)', tension: 0.3, pointRadius: 4, pointBackgroundColor: '#34d399', fill: false },
+      { label: 'int8 检测级联', data: [0.7767,0.7933,0.8067,0.8183,0.9167],
+        borderColor: '#f87171', backgroundColor: 'rgba(248,113,113,0.08)', tension: 0.3, pointRadius: 4, pointBackgroundColor: '#f87171', fill: false },
+    ]
+  },
+  options: {
+    maintainAspectRatio: false,
+    plugins: { ...legend(), tooltip: { callbacks: { label: c => c.dataset.label + ': ' + c.parsed.y.toFixed(4) } } },
+    scales: baseScales({ x: { title: { display: true, text: 'padding 比例', color: TICK } }, y: { min: 0.75, max: 0.95 } })
+  }
+});
+
+// ⑧ A/B
+const abBaselineLine = {
+  id: 'abBaselineLine',
+  afterDraw(chart) {
+    const { ctx, chartArea: { left, right }, scales: { y } } = chart;
+    const yPos = y.getPixelForValue(0.858);
+    ctx.save();
+    ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.5; ctx.setLineDash([6,4]);
+    ctx.beginPath(); ctx.moveTo(left, yPos); ctx.lineTo(right, yPos); ctx.stroke();
+    ctx.setLineDash([]); ctx.fillStyle = '#fbbf24'; ctx.font = '11px ' + FONT;
+    ctx.fillText('基线 0.858', left + 6, yPos - 6);
+    ctx.restore();
+  }
+};
+new Chart(document.getElementById('c8'), {
+  type: 'bar',
+  data: {
+    labels: ['A1','A2','A2v2','基线'],
+    datasets: [{ label: '级联 p0', data: [0.855, 0.803, 0.860, 0.858],
+      backgroundColor: ['#64748b','#f87171','#38bdf8','#fbbf24'], borderRadius: 5 }]
+  },
+  options: {
+    maintainAspectRatio: false,
+    plugins: { ...legend(false), tooltip: { callbacks: { label: c => c.parsed.y.toFixed(3) } } },
+    scales: baseScales({ y: { min: 0.78, max: 0.88 } })
+  },
+  plugins: [abBaselineLine]
+});
+</script>
+</body>
+</html>
