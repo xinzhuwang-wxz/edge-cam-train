@@ -30,6 +30,7 @@ def run_full_eval(
     data_root: str | None = None,
     device: str | None = None,
     val_only: bool = False,
+    quant_method: str = "ort_qdq_per_channel",
 ) -> EnvelopeReport:
     """跑完整四级包络：fp32_onnx 给定则先 ORT-QDQ 量化出 INT8 级，再 build_envelope。
 
@@ -44,7 +45,7 @@ def run_full_eval(
 
     int8_onnx: Path | None = None
     if fp32_onnx and not val_only:
-        from edge_cam.eval.quant_estimate import quantize_int8
+        from edge_cam.eval.quantizers import get_quantizer  # 量化 seam(config 切换量化法)
 
         dm = ClassifyDataModule(
             manifest, input_size=input_size, num_workers=num_workers, data_root=data_root
@@ -52,7 +53,7 @@ def run_full_eval(
         out_dir = Path(output_dir or ".")
         out_dir.mkdir(parents=True, exist_ok=True)  # 量化产物写盘前确保目录在（实跑发现）
         out = out_dir / "model.int8.onnx"
-        int8_onnx = quantize_int8(str(fp32_onnx), dm.train_dataloader(), out)
+        int8_onnx = get_quantizer(quant_method).quantize(str(fp32_onnx), dm.train_dataloader(), out)
 
     return build_envelope(
         model,
