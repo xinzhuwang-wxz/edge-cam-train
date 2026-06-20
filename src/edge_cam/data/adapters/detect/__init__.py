@@ -32,4 +32,5 @@ from edge_cam.data.adapters.detect import (  # noqa: E402,F401
     caltech_ct,
     coco2017,
     ena24,
+    fiftyone_oiv7,
 )

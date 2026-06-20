@@ -1,0 +1,24 @@
+# 喂鸟器粗检测 5 类数据组装（docs/detect/01-数据集.md）。
+# 跑：python -m edge_cam.data.adapters.detect.build --config configs/data/detect_feeder5.yaml
+# 加新源 = 在 datasets 下加一行（先写并注册对应 adapter）；overrides 透传 build_adapter。
+
+name: feeder_detect
+version: v1
+raw_root: data/raw/detect # 各 adapter 在此下 commercial/<ds>、feasibility/<ds> 子目录读 raw
+out_dir: data/processed/detect
+
+datasets:
+  # ── 可商用 → 进训练（权重天生可商用，§4 无传染）──
+  ena24: # 全带框、单帧、按 image 划分；~无空图 → 不取负样本
+    negative_quota: 0
+    max_per_class: 30000
+  caltech_ct: # 按 location 划分防泄漏；empty 空帧主力负样本
+    negative_quota: 12000
+    max_per_class: 30000
+  open_images_v7: # FiftyOne 按类拉；全 5 类主力，CC-BY 逐图署名
+    splits: [train, validation]
+    max_samples: 40000
+    max_per_class: 30000
+
+  # ── 仅可行性 → 仅评估（绝不进训练，role=eval_only 已在 adapter 内固定）──
+  coco2017: {}
