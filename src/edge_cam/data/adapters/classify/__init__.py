@@ -23,3 +23,6 @@ __all__ = [
     "available_adapters",
     "build_adapter",
 ]
+
+# 具体数据源 adapter：import 即注册（registry 副作用）。加新源 = 写模块 + 在此 import。
+from edge_cam.data.adapters.classify import gbif  # noqa: E402,F401
