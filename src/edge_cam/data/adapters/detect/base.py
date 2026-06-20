@@ -48,6 +48,7 @@ class DatasetSpec:
     # dict{类名:上限}=按类指定（只压指定类，未列入的类不限）——如 {"other_animal": 18000} 只压它。
     max_per_class: int | dict[str, int] | None = None
     negative_quota: int | None = 0  # 保留多少无框负样本（0=不留，None=全留，N=确定性留前 N）
+    split_ratios: tuple[float, float, float] = (0.7, 0.15, 0.15)  # train/val/test（可配）
     attribution: bool = False  # 是否需逐图署名清册（OIV7/Roboflow 商用）
 
     def __post_init__(self) -> None:
@@ -76,10 +77,11 @@ class RawSample:
     is_negative: bool = False  # 显式负样本（empty/no-target）
 
 
-def _split_of(key: str, seed: str) -> str:
-    """按 key 确定性划分 train/val/test = 70/15/15（同 group_key 必同 split，防泄漏）。"""
+def _split_of(key: str, seed: str, ratios: tuple[float, float, float] = (0.7, 0.15, 0.15)) -> str:
+    """按 key 确定性划分 train/val/test（同 group_key 必同 split，防泄漏）；ratios 可配。"""
     h = int(hashlib.sha256(f"{seed}:{key}".encode()).hexdigest(), 16) % 100
-    return "train" if h < 70 else "val" if h < 85 else "test"
+    t = ratios[0] * 100
+    return "train" if h < t else "val" if h < t + ratios[1] * 100 else "test"
 
 
 class DetectionDatasetAdapter(ABC):
@@ -115,7 +117,7 @@ class DetectionDatasetAdapter(ABC):
                 boxes.append(DetBox(bbox=list(bbox), category_id=FEEDER5_CATEGORIES[tgt]))
             rec = DetImageRecord(
                 path=raw.path,
-                split=_split_of(raw.group_key or raw.path, s.name),  # type: ignore[arg-type]
+                split=_split_of(raw.group_key or raw.path, s.name, s.split_ratios),  # type: ignore[arg-type]
                 width=raw.width,
                 height=raw.height,
                 boxes=boxes,

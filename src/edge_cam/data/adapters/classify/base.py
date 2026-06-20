@@ -52,6 +52,7 @@ class ClassifySpec:
     role: Role = "train"  # train | eval_only
     split_unit: str = "observation"  # observation|observer|location|image（防泄漏分组）
     max_per_class: int | None = None  # 每类样本上限（控长尾）
+    split_ratios: tuple[float, float, float] = (0.8, 0.1, 0.1)  # train/val/test（可配）
 
     def __post_init__(self) -> None:
         if self.role not in ("train", "eval_only"):
@@ -73,10 +74,11 @@ class ClassifyRawSample:
     observed_at: str | None = None
 
 
-def _split_of(key: str, seed: str) -> str:
-    """按 key 确定性划分 train/val/test = 80/10/10（同 group_key 必同 split，防泄漏）。"""
+def _split_of(key: str, seed: str, ratios: tuple[float, float, float] = (0.8, 0.1, 0.1)) -> str:
+    """按 key 确定性划分 train/val/test（同 group_key 必同 split，防泄漏）；ratios 可配。"""
     h = int(hashlib.sha256(f"{seed}:{key}".encode()).hexdigest(), 16) % 100
-    return "train" if h < 80 else "val" if h < 90 else "test"
+    t = ratios[0] * 100
+    return "train" if h < t else "val" if h < t + ratios[1] * 100 else "test"
 
 
 def _hash_key(s: str) -> str:
@@ -113,7 +115,7 @@ class ClassifyDatasetAdapter(ABC):
                 SampleRecord(
                     path=raw.path,
                     label=key,
-                    split=_split_of(raw.group_key or raw.path, s.name),  # type: ignore[arg-type]
+                    split=_split_of(raw.group_key or raw.path, s.name, s.split_ratios),  # type: ignore[arg-type]
                     source=s.source,
                     license=normalize_license(raw.license),
                     taxon_key=key,
