@@ -119,5 +119,48 @@ def main(argv: list[str] | None = None) -> None:
     build_detection_dataset(DetectionDataConfig(**raw))
 
 
+def build_detection_manifest(
+    out_dir: str | Path,
+    name: str,
+    *,
+    version: str = "v0",
+    source: str = "unknown",
+    license: str = "unknown",
+):
+    """读 build_detection_dataset 产的 COCO 目录 → DetectionManifest(检测管线承重产物,#13)。
+
+    布局 <out>/<split_dir>/{data, labels.json}(FiftyOne 导出);split_dir: train/validation/test。
+    record.path = <split_dir>/data/<file_name>(相对 out_dir,与 root=out_dir 配)。
+    下游 NanoDet 吃 manifest.write_nanodet_labels 派生的 labels(非裸 labels,provenance 不丢)。"""
+    from edge_cam.contracts.schemas.detection_manifest import DetectionManifest
+
+    out_dir = Path(out_dir)
+    split_dirs = {"train": "train", "val": "validation", "test": "test"}
+    merged: DetectionManifest | None = None
+    for split, d in split_dirs.items():
+        lp = out_dir / d / "labels.json"
+        if not lp.exists():
+            continue
+        coco = json.loads(lp.read_text(encoding="utf-8"))
+        m = DetectionManifest.from_coco(
+            coco,
+            split,
+            name=name,
+            version=version,
+            root=str(out_dir),
+            source=source,
+            license=license,  # type: ignore[arg-type]
+        )
+        for r in m.records:  # 路径补 split 子目录(COCO file_name 仅文件名)
+            r.path = f"{d}/data/{r.path}"
+        if merged is None:
+            merged = m
+        else:
+            merged.records.extend(m.records)
+    if merged is None:
+        raise FileNotFoundError(f"build_detection_manifest: {out_dir} 无任何 split 的 labels.json")
+    return merged
+
+
 if __name__ == "__main__":
     main()

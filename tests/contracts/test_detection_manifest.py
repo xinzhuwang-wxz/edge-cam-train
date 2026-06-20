@@ -91,3 +91,22 @@ def test_distillation_soft_label_field() -> None:
 def test_provenance_summary_ignores_unknown() -> None:
     recs = [SampleRecord(path="p", label="x", split="train")]  # 默认 source/license=unknown
     assert provenance_summary(recs) == ([], [])
+
+
+def test_from_coco_roundtrip() -> None:
+    # to_coco → from_coco 还原(承重桥 #13:manifest 是检测数据的生产-消费枢纽)
+    coco = _manifest().to_coco("train")
+    back = DetectionManifest.from_coco(coco, "train", name="rt", source="coco")
+    assert back.categories == {"bird": 0, "cat": 1}
+    assert back.counts_by_split() == {"train": 1, "val": 0, "test": 0}
+    assert back.records[0].boxes[0].category_id == 0  # 1-indexed COCO → 0-indexed 内部
+    assert back.records[0].boxes[0].bbox == [10, 10, 50, 60]
+
+
+def test_write_nanodet_labels(tmp_path) -> None:
+    import json
+
+    out = _manifest().write_nanodet_labels("train", tmp_path / "labels.json")
+    assert out.exists()
+    coco = json.loads(out.read_text())
+    assert len(coco["images"]) == 1 and coco["annotations"][0]["category_id"] == 1

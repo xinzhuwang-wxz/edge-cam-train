@@ -92,6 +92,54 @@ class DetectionManifest(BaseModel):
                 ann_id += 1
         return {"images": images, "annotations": annotations, "categories": cats}
 
+    def write_nanodet_labels(self, split: Split, out_path: str | Path) -> Path:
+        """把某 split 的 to_coco 写成 labels.json(NanoDet CocoDataset 消费)。
+
+        检测管线的承重桥(#13):NanoDet 不再吃裸 COCO,而是吃**由本 manifest 派生**的 labels,
+        provenance/split 经 manifest 统一,不丢。"""
+        import json
+
+        out_path = Path(out_path)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(self.to_coco(split)), encoding="utf-8")
+        return out_path
+
+    @classmethod
+    def from_coco(
+        cls,
+        coco: dict,
+        split: Split,
+        *,
+        name: str,
+        version: str = "v0",
+        root: str | None = None,
+        source: str = "unknown",
+        license: str = "unknown",
+    ) -> DetectionManifest:
+        """从一个 COCO labels dict 构建 manifest(生产者 #13)。
+
+        COCO category id 惯例 1-indexed → 内部 0-indexed;逐图带上 source/license 溯源。"""
+        cats = {c["name"]: c["id"] - 1 for c in coco["categories"]}
+        by_img: dict[int, list[DetBox]] = {}
+        for a in coco.get("annotations", []):
+            x, y, w, h = a["bbox"]
+            by_img.setdefault(a["image_id"], []).append(
+                DetBox(bbox=[x, y, w, h], category_id=a["category_id"] - 1)
+            )
+        records = [
+            DetImageRecord(
+                path=im["file_name"],
+                split=split,
+                width=im.get("width", 0),
+                height=im.get("height", 0),
+                boxes=by_img.get(im["id"], []),
+                source=source,
+                license=license,
+            )
+            for im in coco["images"]
+        ]
+        return cls(name=name, version=version, root=root, categories=cats, records=records)
+
     def save(self, path: str | Path) -> None:
         Path(path).write_text(self.model_dump_json(indent=2), encoding="utf-8")
 
