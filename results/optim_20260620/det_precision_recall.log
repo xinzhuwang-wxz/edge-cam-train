@@ -1,0 +1,25 @@
+loading annotations into memory...
+Done (t=0.01s)
+creating index...
+index created!
+model size is  1.0x
+init weights...
+=> loading pretrained model https://download.pytorch.org/models/shufflenetv2_x1-5666bf0f80.pth
+Finish initialize NanoDet-Plus Head.
+/root/miniconda3/lib/python3.8/site-packages/torch/functional.py:568: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at  ../aten/src/ATen/native/TensorShape.cpp:2228.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+=== 检测直观指标(conf>=0.3, IoU>=0.5, 大类正确)===
+类              GT     TP     FP      召回率      查准率
+bird          513    331  25649    64.5%     1.3%
+squirrel        6      6   1371   100.0%     0.4%
+cat           243    238  13169    97.9%     1.8%
+dog           429    418  25885    97.4%     1.6%
+raccoon         2      2    826   100.0%     0.2%
+rabbit          2      2   2604   100.0%     0.1%
+deer           12     12   3405   100.0%     0.4%
+fox             9      9   1451   100.0%     0.6%
+skunk           0      0    709     0.0%     0.0%
+hedgehog        1      1    284   100.0%     0.4%
+bear           73     73   3555   100.0%     2.0%
+总体           1290   1092  78908    84.7%     1.4%
+=== DET PR DONE ===

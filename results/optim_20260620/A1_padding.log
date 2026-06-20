@@ -1,0 +1,25 @@
+loading annotations into memory...
+Done (t=0.00s)
+creating index...
+index created!
+model size is  1.0x
+init weights...
+=> loading pretrained model https://download.pytorch.org/models/shufflenetv2_x1-5666bf0f80.pth
+Finish initialize NanoDet-Plus Head.
+/root/miniconda3/lib/python3.8/site-packages/torch/functional.py:568: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at  ../aten/src/ATen/native/TensorShape.cpp:2228.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+/root/autodl-tmp/padding_sweep_a1.py:33: DeprecationWarning: BILINEAR is deprecated and will be removed in Pillow 10 (2023-07-01). Use Resampling.BILINEAR instead.
+  im = Image.fromarray(rgb).resize((224,224), Image.BILINEAR)
+  150/600 p0=0.867 p0.3=0.880 full=0.933
+  300/600 p0=0.850 p0.3=0.857 full=0.917
+  450/600 p0=0.858 p0.3=0.851 full=0.907
+  600/600 p0=0.855 p0.3=0.855 full=0.907
+
+############ A1 Padding 扫描 fp32检测+A1分类器(n=600) ############
+  框 padding    0%:  级联 top-1 = 0.8550
+  框 padding   15%:  级联 top-1 = 0.8567
+  框 padding   30%:  级联 top-1 = 0.8550
+  框 padding   50%:  级联 top-1 = 0.8600
+  整图(=训练取景上限):  top-1 = 0.9067
+  (对照: 分类器直评 = 0.921)
+=== PADDING SWEEP DONE ===

@@ -1,0 +1,70 @@
+seed: 0
+output_dir: /root/autodl-tmp/outputs/a2v2_eff_lite0
+data:
+  manifest: data/processed/birds525/manifest_a2v2.json
+  data_root: null
+  input_size: 224
+  batch_size: 128
+  num_workers: 8
+  degradation_strength: 1.0
+  crop_scale_min: 0.7
+  crop_ratio:
+  - 0.75
+  - 1.333
+model:
+  name: efficientnet_lite0
+  pretrained: true
+optim:
+  lr: 0.001
+  weight_decay: 0.0001
+  label_smoothing: 0.1
+trainer:
+  max_epochs: 80
+  accelerator: gpu
+  devices: 1
+  fast_dev_run: false
+  limit_train_batches: 1.0
+  limit_val_batches: 1.0
+  log_every_n_steps: 10
+export:
+  enabled: true
+  opset: 13
+track:
+  aim: true
+
+Seed set to 0
+[2026-06-20 16:36:49,551][timm.models._builder][INFO] - Loading pretrained weights from Hugging Face hub (timm/efficientnet_lite0.ra_in1k)
+[2026-06-20 16:36:59,621][timm.models._hub][INFO] - [timm/efficientnet_lite0.ra_in1k] Safe alternative available for 'pytorch_model.bin' (as 'model.safetensors'). Loading weights using safetensors.
+[2026-06-20 16:36:59,641][timm.models._builder][INFO] - Missing keys (classifier.weight, classifier.bias) discovered while loading pretrained weights. This is expected if model is being adapted.
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
+`Trainer(limit_train_batches=1.0)` was configured so 100% of the batches per epoch will be used..
+`Trainer(limit_val_batches=1.0)` was configured so 100% of the batches will be used..
+💡 Tip: For seamless cloud uploads and versioning, try installing [litmodels](https://pypi.org/project/litmodels/) to enable LitModelCheckpoint, which syncs automatically with the Lightning model registry.
+You are using a CUDA device ('NVIDIA GeForce RTX 5090') that has Tensor Cores. To properly utilize them, you should set `torch.set_float32_matmul_precision('medium' | 'high')` which will trade-off precision for performance. For more details, read https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html#torch.set_float32_matmul_precision
+[2026-06-20 16:37:00,478][aim.sdk.reporter][INFO] - creating RunStatusReporter for 9a46d309285b4ef6b00ca709
+[2026-06-20 16:37:00,478][aim.sdk.reporter][INFO] - starting from: {}
+[2026-06-20 16:37:00,478][aim.sdk.reporter][INFO] - starting writer thread for <aim.sdk.reporter.RunStatusReporter object at 0x7fa6dc705420>
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+┏━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━┳━━━━━━━┓
+┃   ┃ Name      ┃ Type             ┃ Params ┃ Mode  ┃ FLOPs ┃
+┡━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━╇━━━━━━━┩
+│ 0 │ model     │ EfficientNet     │  4.0 M │ train │     0 │
+│ 1 │ criterion │ CrossEntropyLoss │      0 │ train │     0 │
+└───┴───────────┴──────────────────┴────────┴───────┴───────┘
+Trainable params: 4.0 M                                                         
+Non-trainable params: 0                                                         
+Total params: 4.0 M                                                             
+Total estimated model params size (MB): 16.174                                  
+Modules in train mode: 274                                                      
+Modules in eval mode: 0                                                         
+Total FLOPs: 0                                                                  
+/root/autodl-tmp/conda/edge/lib/python3.10/site-packages/lightning/pytorch/utilities/_pytree.py:21: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.
+`Trainer.fit` stopped: `max_epochs=80` reached.
+Epoch 79/79 ━━━━━━━━━━━━━━━━ 163/163 0:00:17 •        9.84it/s v_num: a709      
+                                     0:00:00                   train_loss: 1.247
+                                                               train_top1: 1.000
+                                                               val_loss: 1.313  
+                                                               val_top1: 0.947  
+[export] /root/autodl-tmp/outputs/a2v2_eff_lite0/efficientnet_lite0_fp32.onnx (onnxruntime 对齐: True)
