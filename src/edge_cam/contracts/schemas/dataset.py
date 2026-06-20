@@ -25,7 +25,8 @@ class Provenanced(BaseModel):
     source: str = "unknown"
     license: str = "unknown"
     taxon_key: str | None = None
-    soft_label: list[float] | None = None  # 教师 logits/概率(蒸馏)
+    # 教师 logits/概率:**前瞻 hook**,暂无消费方,待蒸馏(distill #7)落地;默认 None 不影响现有数据。
+    soft_label: list[float] | None = None  # noqa: E501 (issue #16 决策:保留为 hook)
 
 
 class SampleRecord(Provenanced):
