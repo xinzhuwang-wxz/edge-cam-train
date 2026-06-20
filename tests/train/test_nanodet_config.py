@@ -93,3 +93,4 @@ def test_generate_from_template_file(tmp_path: Path) -> None:
     assert cfg["data"]["train"]["img_path"] == "data/raw/detect"
     assert cfg["data"]["train"]["ann_path"].endswith("labels/train_train.json")
     assert cfg["data"]["val"]["ann_path"].endswith("labels/train_val.json")
+    assert cfg["save_dir"].endswith("outputs/detect/gen")  # 每档独立 save_dir（取 out 文件名）
