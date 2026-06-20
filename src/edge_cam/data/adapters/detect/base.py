@@ -44,7 +44,9 @@ class DatasetSpec:
     role: Role = "train"  # train | eval_only(feasibility 仅评估)
     exhaustive: bool = True  # 非穷尽(OIV7)→未标区域 ignore/不当负样本；穷尽→可作负样本
     split_unit: str = "image"  # image | location | sequence（相机陷阱按组防泄漏）
-    max_per_class: int | None = None  # 每类**含该类图**上限（控不平衡，None=不限）
+    # 每类**含该类图**上限（控不平衡，None=不限）。int=所有类同一上限；
+    # dict{类名:上限}=按类指定（只压指定类，未列入的类不限）——如 {"other_animal": 18000} 只压它。
+    max_per_class: int | dict[str, int] | None = None
     negative_quota: int | None = 0  # 保留多少无框负样本（0=不留，None=全留，N=确定性留前 N）
     attribution: bool = False  # 是否需逐图署名清册（OIV7/Roboflow 商用）
 
@@ -56,6 +58,10 @@ class DatasetSpec:
             raise ValueError(f"{self.name}: role 须 train|eval_only，得 {self.role!r}")
         if self.split_unit not in ("image", "location", "sequence"):
             raise ValueError(f"{self.name}: split_unit 非法 {self.split_unit!r}")
+        if isinstance(self.max_per_class, dict):
+            bad_cap = set(self.max_per_class) - set(FEEDER5_CATEGORIES)
+            if bad_cap:
+                raise ValueError(f"{self.name}: max_per_class 含非 5 类键 {sorted(bad_cap)}")
 
 
 @dataclass
@@ -137,18 +143,26 @@ def _cap_negatives(neg: list[DetImageRecord], quota: int | None) -> list[DetImag
     return sorted(neg, key=lambda r: _hash_key(r.path))[:quota]
 
 
-def _cap_per_class(pos: list[DetImageRecord], cap: int | None) -> list[DetImageRecord]:
-    """每类限额：保留含该类的图 ≤ cap（多类图任一类未满即留）；确定性按 path 哈希。"""
+def _cap_per_class(
+    pos: list[DetImageRecord], cap: int | dict[str, int] | None
+) -> list[DetImageRecord]:
+    """每类限额：含该类的图 ≤ 上限（多类图任一类无上限或未满即留，**不误伤欠采样类**）；
+    确定性按 path 哈希。cap=int → 所有类同一上限；cap=dict{类名:上限} → 仅压指定类，余者不限。"""
     if cap is None:
         return pos
-    counts: dict[int, int] = dict.fromkeys(FEEDER5_CATEGORIES.values(), 0)
+    if isinstance(cap, dict):
+        cap_by_id = {FEEDER5_CATEGORIES[n]: c for n, c in cap.items()}
+    else:
+        cap_by_id = dict.fromkeys(FEEDER5_CATEGORIES.values(), cap)
+    counts: dict[int, int] = dict.fromkeys(cap_by_id, 0)
     kept: list[DetImageRecord] = []
     for r in sorted(pos, key=lambda r: _hash_key(r.path)):
         classes = {b.category_id for b in r.boxes}
-        if any(counts[c] < cap for c in classes):
+        if any(c not in cap_by_id or counts[c] < cap_by_id[c] for c in classes):
             kept.append(r)
             for c in classes:
-                counts[c] += 1
+                if c in counts:
+                    counts[c] += 1
     return kept
 
 

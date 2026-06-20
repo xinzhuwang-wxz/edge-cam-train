@@ -139,6 +139,33 @@ def test_max_per_class_caps_positive_images() -> None:
     assert len(_FakeAdapter(_spec(max_per_class=0), mixed).build_records()) == 0
 
 
+def test_max_per_class_dict_caps_only_named_class() -> None:
+    # dict 上限：只压 other_animal，bird 不限 → bird 全留、other_animal 封顶
+    birds = [RawSample(f"b{i}.jpg", 10, 10, [("Bird", [0, 0, 2, 2])]) for i in range(8)]
+    others = [RawSample(f"o{i}.jpg", 10, 10, [("Raccoon", [0, 0, 2, 2])]) for i in range(8)]
+    recs = _FakeAdapter(_spec(max_per_class={"other_animal": 3}), birds + others).build_records()
+    by_cls = {c: 0 for c in ("bird", "other_animal")}
+    for r in recs:
+        for b in r.boxes:
+            if b.category_id == FEEDER5_CATEGORIES["bird"]:
+                by_cls["bird"] += 1
+            elif b.category_id == FEEDER5_CATEGORIES["other_animal"]:
+                by_cls["other_animal"] += 1
+    assert by_cls["bird"] == 8 and by_cls["other_animal"] == 3  # bird 不限、other_animal 封顶 3
+
+
+def test_max_per_class_dict_rejects_bad_key() -> None:
+    with pytest.raises(ValueError, match="非 5 类键"):
+        DatasetSpec(
+            name="x",
+            raw_format="c",
+            label_map={"Bird": "bird"},
+            license="L",
+            commercial_safe=True,
+            max_per_class={"elephant": 5},
+        )
+
+
 def test_registry() -> None:
     register_adapter("fake_reg", _FakeAdapter)
     assert "fake_reg" in available_adapters()
