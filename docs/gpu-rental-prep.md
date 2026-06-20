@@ -1,5 +1,10 @@
 # 租卡前准备 & 上机清单
 
+> ⚠️ **状态：实验1 上机清单（历史）。** 分类侧仍适用；**检测侧已过时**——旧 11 类
+> `data/processed/detection_feeder/` 已被 5 类 DatasetAdapter 取代，新检测数据走
+> `docs/detect/01 §4` 的 `build`（raw 下到 AutoDL → 跑 build 组装），不再本地备 4.8G 检测集。
+> 检测租卡流程以 docs/detect 为准；本文检测段仅供复跑实验1。
+
 > 目标：本地（mac，CPU）把**数据 + 权重 + 可移植 manifest** 全部备齐，租到 GPU 卡后
 > 只做「上传 → 建环境 → 开训」三步，不再在卡上做数据准备。
 > 关联：`CLAUDE.md §6 命令参考`、`engineering.md §7 W1 落地步骤`。
