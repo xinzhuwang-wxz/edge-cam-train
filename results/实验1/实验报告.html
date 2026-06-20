@@ -305,7 +305,7 @@
         </tbody>
       </table>
       </div>
-      <blockquote><p><strong>regional 级数据读反，不可信</strong>：现行口径在全球 525 类 test 上加区域 mask，把非美国种真值压 −inf → 必错，并非真实回归。地域过滤本身有益，应只在 in-region 子集比 on/off。已记为待修 issue。</p></blockquote>
+      <blockquote><p><strong>regional 级 0.417 是 artifact，已修正（见 §6.5）</strong>：现行口径在全球 525 类 test 上加区域 mask，把非美国种真值压 −inf → 必错，<strong>并非真实回归</strong>。改在 in-region 子集比 on/off 后，地域过滤真实效果 = <strong class="text-accent2">+1.3pt</strong>（0.9204→0.9336）。41.7% 是 artifact，不作结论。</p></blockquote>
 
       <h3 class="text-xl font-semibold text-white mt-8 mb-3">4.4 分类器深度分析（eff_lite0，test n=2539）</h3>
       <p>整体 top-1 = 0.921 / top-5 = 0.972。</p>
@@ -531,6 +531,37 @@
 
       <h3 class="text-xl font-semibold text-white mt-8 mb-3">6.4 诚实边界</h3>
       <blockquote><p>birds525 是<strong>已裁好的鸟照、非真喂食器场景</strong>。本评估测的是<strong>级联机制 + 裁框取景偏移 + int8 框质量传播</strong>，<strong>不是真实喂食器 domain gap</strong>（需带 species 标注的喂食器图，暂无）。绝对值受子集（600 张，偏易）影响，<strong>掉点/趋势才是结论</strong>。</p></blockquote>
+
+      <h3 class="text-xl font-semibold text-white mt-8 mb-3">6.5 地域过滤（likely-species mask）on/off 消融 <span class="text-danger text-sm align-middle">修正 issue#11 artifact</span></h3>
+      <p><strong>背景</strong>：plan §5.4 称地域过滤为「<strong>最大精度杠杆</strong>」——推理期按地区加载 eBird likely-species 清单，不在清单的类 logit 置 <code>−inf</code>（软先验、不重训、可 OTA）。它不动权重，纯推理期开关，因此理应是「免费」增益。</p>
+      <p><strong>方法</strong>：<code>eff_lite0</code> fp32 在 birds525 test（n=2539）上，加载 US eBird 区域清单（<code>regions/us.json</code>，覆盖 228/525 = 43.4% 的类），对比 mask off / on 两种口径。</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>口径</th><th>mask OFF</th><th>mask ON</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>全局 525 类（n=2539）</td><td>0.9212</td><td><span class="text-danger">0.4155</span></td><td>⚠️ artifact：非美国种真值被 mask 压成 <code>−inf</code> 必错（issue#11），<strong>非真增益</strong></td></tr>
+          <tr><td>in-region 子集（真值∈US, n=1130）</td><td>0.9204</td><td><strong class="text-accent2">0.9336</strong></td><td>✅ 真实地域增益 <strong>+1.3pt</strong></td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <!-- 图⑨ 地域过滤 on/off -->
+      <div class="chart-block ring-1 ring-accent/30">
+        <div class="flex items-baseline justify-between mb-1">
+          <div class="text-base font-semibold text-white">⑨ 地域过滤 mask on/off</div>
+          <span class="text-xs text-muted">eff_lite0 fp32 · US 清单</span>
+        </div>
+        <div style="height:280px"><canvas id="c9"></canvas></div>
+        <p class="chart-cap">每组 mask OFF（灰）vs ON。<span class="text-accent2">in-region 子集</span>的 ON 高亮（真增益 <strong>+1.3pt</strong>）；<span class="text-danger">全局 525 类</span>的 ON 标红（artifact，−50pt 是测法错误，非地域过滤效果）。</p>
+      </div>
+
+      <p><strong>结论（诚实）</strong>：</p>
+      <ul>
+        <li><strong>真实答案：加地域过滤 vs 不加 = <span class="text-accent2">+1.3pt</span></strong>（部署场景 = 鸟确实是本地种），且<strong>免费</strong>（推理期、不重训、可 OTA）。</li>
+        <li>全局那个 <span class="text-danger">−50pt 暴跌</span>是<strong>测法错误</strong>（全球 test 加区域 mask 把外地真值压成 <code>−inf</code> 必错），<strong>不是地域过滤的实际效果</strong> —— 这正是 §4.3 / §8 那条 regional 41.7% 的来源，本节予以修正。</li>
+        <li><strong>增益温和的原因</strong>：birds525 模型本就强，mask 只纠正「误判成外地相似种」的少数样本；<strong>部署地相似种更多、或模型更弱时，增益会更大</strong>。</li>
+      </ul>
+      <blockquote><p><strong>修正 §4.3 / §8#8</strong>：四级包络里的 regional 41.7%（0.417）是上述全局口径 artifact，<strong>非真实回归</strong>。地域过滤的真实效果是 <strong class="text-accent2">in-region +1.3pt</strong>（0.9204→0.9336）。</p></blockquote>
     </section>
 
     <!-- ============ 7 优化 A/B ============ -->
@@ -596,7 +627,7 @@
           <tr><td>5</td><td><strong>中国 GPU 云外网慢</strong></td><td>pytorch.org/HF/github ~1MB/s</td><td>mac 跳板：mac 下 wheel(15MB/s)→scp(16MB/s)→box 离线装；HF 走 hf-mirror，pip 走 aliyun，github 用 git archive+scp</td></tr>
           <tr><td>6</td><td><strong>eval 默认走 CPU + num_workers=0</strong></td><td>包络评估慢（~15 分钟）</td><td>已修：device 自动选 GPU、num_workers 默认 4</td></tr>
           <tr><td>7</td><td><strong>int8 导出目录未先 mkdir</strong></td><td>FileNotFoundError</td><td>已修：写盘前 mkdir</td></tr>
-          <tr><td>8</td><td><strong>regional 包络口径读反</strong></td><td>全 525 类加区域 mask 把非美种真值压 −inf → 必错（0.417 假回归）</td><td>待修：只在 in-region 子集比 on/off</td></tr>
+          <tr><td>8</td><td><strong>regional 包络口径读反</strong></td><td>全 525 类加区域 mask 把非美种真值压 −inf → 必错（0.417 假回归）</td><td>✅ 已修（§6.5）：改 in-region 子集比 on/off → 地域过滤真实 +1.3pt，41.7% 是 artifact</td></tr>
           <tr><td>9</td><td><strong>RTX 5090 = Blackwell sm_120</strong></td><td>须 torch cu128（torch 2.10.0+cu128，CUDA 12.8）；NanoDet pin torch&lt;2.0 跑不了</td><td>双卡分工：5090=分类，3080=检测</td></tr>
         </tbody>
       </table>
@@ -642,7 +673,7 @@
         <li><strong>真实喂食器带 species 标注的数据</strong>：消除「整图=鸟」评估假象，量到真实 domain gap。</li>
         <li><strong>板上 ACUITY 真值回灌</strong>：当前所有 int8 为 ORT-QDQ 模拟；真值须 ONNX→ACUITY/pegasus PTQ→<code>.nb</code>→VIPLite，并把板上 latency/精度回灌 EvalReport（当前最大工程盲点，engineering.md §8.1）。</li>
         <li><strong>skunk 类不均衡</strong>：补数据或并类（当前 AP 1.3）。</li>
-        <li><strong>修 regional 包络口径</strong>：改为 in-region 子集 on/off 对比。</li>
+        <li>✅ <strong>已修 regional 包络口径</strong>（§6.5）：in-region 子集 on/off 对比，地域过滤真实 +1.3pt；后续可扩展更多区域清单 + 部署地实测增益。</li>
         <li><strong>可选</strong>：蒸馏 / 更大输入提级联（权衡边缘算力）。</li>
       </ol>
 
@@ -664,7 +695,7 @@
 
   <!-- FOOTNOTE -->
   <footer class="mt-10 pt-6 border-t border-stroke text-xs text-muted leading-relaxed">
-    <p><strong class="text-slate-300">报告声明</strong>：本报告所有 int8 数据为 ORT-QDQ 模拟（方向性，非板子真值）；regional 级数据为已知测法 artifact，不作结论依据；级联绝对值受 600 张偏易子集影响，结论取掉点/趋势。负面结果（A1/A2/A2v2/B 未超基线、bird 召回 64.5%、skunk AP 1.3）均如实保留，未做粉饰。</p>
+    <p><strong class="text-slate-300">报告声明</strong>：本报告所有 int8 数据为 ORT-QDQ 模拟（方向性，非板子真值）；regional 级 41.7% 为已知测法 artifact（issue#11），不作结论依据，地域过滤真实效果见 §6.5（in-region +1.3pt）；级联绝对值受 600 张偏易子集影响，结论取掉点/趋势。负面结果（A1/A2/A2v2/B 未超基线、bird 召回 64.5%、skunk AP 1.3）均如实保留，未做粉饰。</p>
     <p class="mt-2">※ 所有 INT8 数值为 <span class="text-slate-300">ORT-QDQ 模拟</span>（方向性参考，非端侧真值）。V85x 私有量化（ACUITY/pegasus PTQ → <code class="text-slate-300">.nb</code>）板上真值待回灌。</p>
     <p class="mt-1">※ 负面结果（skunk AP 1.3、INT8 检测 8.3pt 掉点、A/B 全部未超基线）均如实标注，未做粉饰。</p>
     <p class="mt-3 text-slate-500">edge-cam-train · 实验1 实验报告（报告全文 + 内嵌图表合并版）· 自包含可视化（Tailwind + Chart.js CDN）</p>
@@ -851,6 +882,35 @@ new Chart(document.getElementById('c8'), {
     scales: baseScales({ y: { min: 0.78, max: 0.88 } })
   },
   plugins: [abBaselineLine]
+});
+
+// ⑨ 地域过滤 mask on/off
+new Chart(document.getElementById('c9'), {
+  type: 'bar',
+  data: {
+    labels: ['全局 525 类\n(n=2539)', 'in-region 子集\n(真值∈US, n=1130)'],
+    datasets: [
+      { label: 'mask OFF', data: [0.9212, 0.9204], backgroundColor: '#64748b', borderRadius: 5 },
+      { label: 'mask ON', data: [0.4155, 0.9336], backgroundColor: ['#f87171', '#34d399'], borderRadius: 5 },
+    ]
+  },
+  options: {
+    maintainAspectRatio: false,
+    plugins: {
+      ...legend(),
+      tooltip: { callbacks: {
+        label: c => c.dataset.label + ': ' + (c.parsed.y*100).toFixed(2) + '%',
+        afterBody: items => {
+          const i = items[0].dataIndex;
+          return i === 0 ? '⚠️ artifact：外地真值被压 −inf 必错（issue#11）' : '✅ 真实地域增益 +1.3pt';
+        }
+      } }
+    },
+    scales: baseScales({
+      y: { min: 0.40, max: 0.95, ticks: { callback: v => (v*100).toFixed(0)+'%', color: TICK } },
+      x: { ticks: { color: TICK, font: { size: 10 }, callback: function(v){ return this.getLabelForValue(v).split('\n'); } } }
+    })
+  }
 });
 </script>
 </body>
