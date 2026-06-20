@@ -115,4 +115,5 @@ class FiftyOneOiv7Adapter(DetectionDatasetAdapter):
                 yield self._sample_to_raw(sample.filepath, w, h, self._detections(sample, fo))
 
 
-register_adapter("open_images_v7", FiftyOneOiv7Adapter)
+# 直下版（oiv7_direct）注册为默认 open_images_v7；fiftyone 版留待 py3.10+ 环境用此别名。
+register_adapter("open_images_v7_fiftyone", FiftyOneOiv7Adapter)

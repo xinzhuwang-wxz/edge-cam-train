@@ -61,6 +61,16 @@ def test_parse_maps_categories_and_marks_empty_negative(tmp_path) -> None:
     assert b_rec.boxes == []  # 空图穷尽源 → 负样本保留
 
 
+def test_no_bbox_annotation_skipped(tmp_path) -> None:
+    # 无 bbox 注解（相机陷阱 empty 帧）→ 不计框；该图 0 框 → 负样本
+    cats = [{"id": 1, "name": "Bird"}, {"id": 30, "name": "empty"}]
+    images = [{"id": 1, "file_name": "e.jpg", "width": 10, "height": 10}]
+    anns = [{"id": 1, "image_id": 1, "category_id": 30}]  # empty, 无 bbox 键
+    jp = _write_coco(tmp_path, images, anns, cats)
+    raw = next(iter(CocoJsonAdapter(_spec(), jp).load_raw()))
+    assert raw.boxes == [] and raw.is_negative
+
+
 def test_image_root_prefixes_path(tmp_path) -> None:
     cats = [{"id": 1, "name": "Bird"}]
     images = [{"id": 1, "file_name": "x.jpg", "width": 10, "height": 10}]

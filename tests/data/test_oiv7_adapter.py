@@ -28,13 +28,21 @@ def test_label_map_uses_animal_mouse_not_computer_mouse() -> None:
     assert set(OIV7_LABEL_MAP.values()) <= set(FEEDER5_CATEGORIES)
 
 
-def test_spec_is_commercial_nonexhaustive_with_attribution() -> None:
-    ad = build_adapter("open_images_v7", "/tmp/fo_cache", max_samples=10)
+def test_direct_adapter_is_default_commercial_nonexhaustive() -> None:
+    # open_images_v7 默认 = 直下版（绕开 fiftyone）；语义与 fiftyone 版一致
+    ad = build_adapter("open_images_v7", "/root/x")
     assert ad.spec.commercial_safe and ad.spec.role == "train"
     assert ad.spec.exhaustive is False  # 按类拉 → 非穷尽
     assert ad.spec.attribution is True  # CC-BY 逐图署名
     assert ad.spec.license == "CC-BY-4.0"
 
 
+def test_fiftyone_adapter_constructs_with_max_samples() -> None:
+    ad = FiftyOneOiv7Adapter("/tmp/fo_cache", max_samples=10)
+    assert ad.spec.name == "open_images_v7" and ad.max_samples == 10
+
+
 def test_registered() -> None:
-    assert "open_images_v7" in available_adapters()
+    reg = available_adapters()
+    assert "open_images_v7" in reg  # 直下版（默认）
+    assert "open_images_v7_fiftyone" in reg  # fiftyone 版（py3.10+ 备用）
