@@ -12,6 +12,15 @@ from edge_cam.cascade.pipeline import (
     Detector,
 )
 
+
+def __getattr__(name: str):  # 惰性暴露真 adapter(避免顶层 import onnxruntime)
+    if name in ("OnnxClassifier", "OnnxDetector", "decode_nanodet"):
+        from edge_cam.cascade import adapters
+
+        return getattr(adapters, name)
+    raise AttributeError(name)
+
+
 __all__ = [
     "CascadePipeline",
     "CascadeResult",
@@ -19,4 +28,7 @@ __all__ = [
     "Detector",
     "Classifier",
     "Detection",
+    "OnnxClassifier",
+    "OnnxDetector",
+    "decode_nanodet",
 ]
