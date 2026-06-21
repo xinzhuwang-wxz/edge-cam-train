@@ -16,6 +16,7 @@ from pathlib import Path
 
 import hydra
 import lightning as L
+from lightning.pytorch.callbacks import Callback, EarlyStopping, ModelCheckpoint
 from omegaconf import DictConfig, OmegaConf
 
 from edge_cam.contracts.schemas.dataset import DatasetManifest
@@ -43,10 +44,41 @@ def build_logger(cfg: DictConfig):
     return AimLogger(experiment=cfg.model.name, log_system_params=False)
 
 
+def build_callbacks(cfg: DictConfig) -> list[Callback]:
+    """best-on-val checkpoint + early-stop（按 val 指标，避免导出过拟合末轮）。
+
+    `monitor` 默认 val_top1（max）。fast_dev_run 下 Lightning 自动跳过 checkpoint，无副作用。
+    `early_stop.enabled=false` 关早停；`save_top_k` 默认 1（只留最优轮）。"""
+    ckpt = cfg.get("checkpoint") or {}
+    monitor = ckpt.get("monitor", "val_top1")
+    mode = ckpt.get("mode", "max")
+    callbacks: list[Callback] = [
+        ModelCheckpoint(
+            monitor=monitor,
+            mode=mode,
+            save_top_k=ckpt.get("save_top_k", 1),
+            filename="best-{epoch}-{val_top1:.4f}",
+        )
+    ]
+    es = cfg.get("early_stop") or {}
+    if es.get("enabled", True):
+        callbacks.append(EarlyStopping(monitor=monitor, mode=mode, patience=es.get("patience", 8)))
+    return callbacks
+
+
+def best_checkpoint_path(callbacks: list[Callback]) -> str | None:
+    """从 callbacks 取 best ckpt 路径（无/未触发则 None）。"""
+    for cb in callbacks:
+        if isinstance(cb, ModelCheckpoint) and cb.best_model_path:
+            return cb.best_model_path
+    return None
+
+
 def run(cfg: DictConfig) -> Classifier:
     """执行一次训练，返回训练好的 module（**只训练，不导出**，架构审查 C）。
 
     导出 ONNX 属发布路职责，移到 export_classifier；消融 harness 只要模型对象、不必每格导出。
+    训完加载 **best-on-val** 权重返回（而非过拟合末轮），保证 export/评估用最优轮。
     """
     L.seed_everything(cfg.seed, workers=True)
     manifest = DatasetManifest.load(cfg.data.manifest)
@@ -82,6 +114,7 @@ def run(cfg: DictConfig) -> Classifier:
         class_weights=class_weights,
     )
 
+    callbacks = build_callbacks(cfg)
     trainer = L.Trainer(
         max_epochs=cfg.trainer.max_epochs,
         accelerator=cfg.trainer.accelerator,
@@ -91,9 +124,15 @@ def run(cfg: DictConfig) -> Classifier:
         limit_val_batches=cfg.trainer.limit_val_batches,
         log_every_n_steps=cfg.trainer.log_every_n_steps,
         logger=build_logger(cfg),  # 可选 aim 追踪（track.aim=true）
+        callbacks=callbacks,
         default_root_dir=cfg.output_dir,
     )
     trainer.fit(model, datamodule)
+    # 导出/评估用 best-on-val（非过拟合末轮）：有 best ckpt 则加载回来
+    best_cb = next((cb for cb in callbacks if isinstance(cb, ModelCheckpoint)), None)
+    if best_cb and best_cb.best_model_path:
+        print(f"[best] 加载最优轮权重：{best_cb.best_model_path} (best={best_cb.best_model_score})")
+        model = Classifier.load_from_checkpoint(best_cb.best_model_path)
     return model
 
 
