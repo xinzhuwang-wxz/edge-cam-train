@@ -48,20 +48,20 @@ NanoDet-Plus / ShuffleNetV2 1.0x / 320×320 / 5 类，30 epoch 收敛干净，**
 > 机读见 `per_class_ap.csv`。**bird 召回是产品第一优先**（喂鸟器）——目前 bird mAP 34.1 偏中等、person 最弱、
 > small 目标几乎丢；后续 416/1.5x 档与数据补强主要看这几格能否抬起来。
 
-## 🐦 每类召回率（fp32, val 800 子集, conf≥0.3 / IoU≥0.5 / 类别正确）
+## 🐦 每类召回率（val 800 子集, conf≥0.3 / IoU≥0.5 / 类别正确）
 
-| 类 | GT | TP | 召回率 |
+| 类 | GT | fp32 召回 | int8 召回 |
 |---|---|---|---|
-| **bird** | 201 | 176 | **0.8756** |
-| squirrel | 114 | 86 | 0.7544 |
-| cat | 17 | 14 | 0.8235 |
-| other_animal | 530 | 497 | 0.9377 |
-| 总体 | 862 | 773 | 0.8968 |
+| **bird** | 201 | **0.8756** | **0.8408** |
+| squirrel | 114 | 0.7544 | 0.7105 |
+| cat | 17 | 0.8235 | 0.6471 |
+| other_animal | 530 | 0.9377 | 0.8509 |
+| 总体 | 862 | 0.8968 | 0.8260 |
 
-> 口径对齐实验1。**bird 召回 87.56% vs 实验1 64.5%（+23pt）** —— 关键反转：召回（识别到）大涨，
-> 但 AP/mAP（框准度）偏低。不矛盾——更多/更难数据让模型「看到鸟更敢报」（漏检少→召回高），
-> 但 320 输入定位不精 + precision 一般（误报多）→ AP 低。喂鸟器场景 **bird 召回是命门**
-> （宁多框勿漏，后接分类器细判）→ feeder_320 实为改善。（person 子集 GT=0）。详见 `quant/per_class_recall.md`。
+> 口径对齐实验1。**fp32 bird 召回 87.56% vs 实验1 64.5%（+23pt）；量化后 int8 仍 84.08%（仅 -3.5pt，命门守住）**。
+> 关键反转：召回（识别到）大涨，但 AP/mAP（框准度）偏低——更多/更难数据让模型「看到鸟更敢报」（漏检少→召回高），
+> 320 输入定位不精 + precision 一般（误报多）→ AP 低。喂鸟器场景 **bird 召回是命门**（宁多框勿漏，后接分类器细判）→
+> **feeder_320 量化后对喂鸟器仍 work**。cat GT=17 噪声大；person 子集 GT=0。详见 `quant/per_class_recall*.md`。
 
 ## 量化（int8 模拟掉点，ORT-QDQ per-channel/calib120，方向性非板子）
 
@@ -71,9 +71,10 @@ NanoDet-Plus / ShuffleNetV2 1.0x / 320×320 / 5 类，30 epoch 收敛干净，**
 | int8_sim | 0.413 | 0.630 |
 | **掉点** | **-4.58pt** | **-4.83pt** |
 
-> per-class 掉点 cat 最多(-7.5)、bird 较稳(-2.5)。4.58pt 明显大于实验1 的 0.19pt，疑 calib 120 张
-> 对 4 源杂数据代表性不足 → 可增 calib 重测。fp32 ONNX 推理 mAP 0.4591 == 训练 best（导出零损耗）。
-> 详见 `quant/`（report.md / per_class_fp32_vs_int8.md）。
+> per-class 掉点 cat 最多(-7.5)、bird 较稳(-2.5)。**增 calib 重测（120→1000）已验证无效**（mAP 仅压回 0.20pt）——
+> 掉点主因是 ShuffleNetV2 INT8 固有量化损失，非校准不足；要压需 QAT / 混合精度 / 换 backbone，或待板子 ACUITY 实测。
+> fp32 ONNX 推理 mAP 0.4591 == 训练 best（导出零损耗）。
+> 详见 `quant/`（report.md / per_class_fp32_vs_int8.md / recalib_calib120_vs_1000.md）。
 
 ## 训练 loss 收敛（TensorBoard，427 step 采样点）
 

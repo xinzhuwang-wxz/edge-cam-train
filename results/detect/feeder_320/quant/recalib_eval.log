@@ -1,0 +1,81 @@
+num_classes=5 class_names=['bird', 'squirrel', 'cat', 'person', 'other_animal']
+loading annotations into memory...
+Done (t=0.07s)
+creating index...
+index created!
+val images total=6633 -> eval subset=1600
+model size is  1.0x
+init weights...
+=> loading pretrained model https://download.pytorch.org/models/shufflenetv2_x1-5666bf0f80.pth
+Finish initialize NanoDet-Plus Head.
+opset升级到13 -> outputs/detect/int8_recalib_320/feeder_320_op13.onnx
+SANITY cls_logit_maxdiff=0.00007 reg_maxdiff=0.00002
+[quantize] calib=120 -> outputs/detect/int8_recalib_320/feeder_320.int8.calib120.onnx
+  calib samples collected = 120
+[root][06-21 09:45:01]WARNING:Please consider to run pre-processing before quantization. Refer to example: https://github.com/microsoft/onnxruntime-inference-examples/blob/main/quantization/image_classification/cpu/ReadMe.md 
+[root][06-21 09:45:32]WARNING:Please consider pre-processing before quantization. See https://github.com/microsoft/onnxruntime-inference-examples/blob/main/quantization/image_classification/cpu/ReadMe.md 
+[quantize] done calib=120
+[quantize] calib=1000 -> outputs/detect/int8_recalib_320/feeder_320.int8.calib1000.onnx
+  calib samples collected = 1000
+[root][06-21 09:45:43]WARNING:Please consider to run pre-processing before quantization. Refer to example: https://github.com/microsoft/onnxruntime-inference-examples/blob/main/quantization/image_classification/cpu/ReadMe.md 
+[root][06-21 09:49:33]WARNING:Please consider pre-processing before quantization. See https://github.com/microsoft/onnxruntime-inference-examples/blob/main/quantization/image_classification/cpu/ReadMe.md 
+[quantize] done calib=1000
+=== eval fp32 (capture subset ids) ===
+  [fp32] 400/1600  (282s)
+  [fp32] 800/1600  (288s)
+  [fp32] 1200/1600  (294s)
+  [fp32] 1600/1600  (300s)
+subset img_ids captured = 1600 (unique)
+=== eval int8@calib120 ===
+/root/miniconda3/lib/python3.8/site-packages/torch/functional.py:568: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at  ../aten/src/ATen/native/TensorShape.cpp:2228.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+  [int8_120] 400/1600  (313s)
+  [int8_120] 800/1600  (324s)
+  [int8_120] 1200/1600  (336s)
+  [int8_120] 1600/1600  (348s)
+=== eval int8@calib1000 ===
+  [int8_1000] 400/1600  (361s)
+  [int8_1000] 800/1600  (374s)
+  [int8_1000] 1200/1600  (386s)
+  [int8_1000] 1600/1600  (399s)
+Loading and preparing results...
+DONE (t=0.44s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=3.53s).
+Accumulating evaluation results...
+DONE (t=0.58s).
+[fp32] mAP@.5:.95=0.4719 AP50=0.7266 (subset n=1600)
+Loading and preparing results...
+DONE (t=0.61s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=4.80s).
+Accumulating evaluation results...
+DONE (t=0.80s).
+[int8_calib120] mAP@.5:.95=0.4082 AP50=0.6436 (subset n=1600)
+Loading and preparing results...
+DONE (t=0.38s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=3.87s).
+Accumulating evaluation results...
+DONE (t=0.65s).
+[int8_calib1000] mAP@.5:.95=0.4102 AP50=0.6484 (subset n=1600)
+
+================ RESULT (subset n=1600, drops are within-subset relative) ================
+quant_mode=per-channel(opset13)/QDQ/QInt8  threads=4
+              mAP@.5:.95     AP50
+fp32        :   0.4719     0.7266
+int8@cal120 :   0.4082     0.6436   (drop mAP=0.0637 / 6.37pt, AP50=0.0830 / 8.30pt)
+int8@cal1000:   0.4102     0.6484   (drop mAP=0.0617 / 6.17pt, AP50=0.0782 / 7.82pt)
+RECALIB EFFECT: mAP drop 6.37pt(calib120) -> 6.17pt(calib1000)  | 压回 0.20pt
+RECALIB EFFECT: AP50 drop 8.30pt(calib120) -> 7.82pt(calib1000) | 压回 0.48pt
+total wall=423s
+=== DETECT INT8 RECALIB DONE ===
