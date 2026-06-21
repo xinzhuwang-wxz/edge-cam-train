@@ -1,0 +1,17 @@
+# 分类训练数据组装（feeder 鸟种细分类，Stage 1 通用鸟类）。
+# 用法（box，CPU）：python -m edge_cam.data.adapters.classify.build --config configs/data/classify_feeder.yaml
+# 三源合并（norwegian 因残留 index 损坏 + 用户决定弃用，未纳入）；inat 为 R&D 口径（[[ADR-0005]]，
+# 商用发行前须解 iNat 许可，逐图 license 已过滤 CC0/CC-BY，provenance 落 license_manifest）。
+name: feeder_classify
+version: v1
+raw_root: /root/autodl-tmp/classify_raw
+out_dir: /root/autodl-tmp/classify_raw/processed
+sources:
+  - adapter: gbif_birds
+    root: naturgucker      # CC-BY，欧洲主力，~300 种
+  - adapter: gbif_birds
+    root: arter            # CC-BY，丹麦，200 种
+  - adapter: gbif_birds
+    root: inat             # CC0/CC-BY（R&D），116 种
+# taxonomy 默认 IdentityTaxonomy（label=学名小写，跨源按学名合并物种类）；
+# eBird crosswalk（区域 mask / 产品稳定码 / genus-family aux）为后续细化，给各源 overrides.taxonomy_csv 即切。
