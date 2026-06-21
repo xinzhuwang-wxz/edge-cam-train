@@ -1,0 +1,31 @@
+{
+  "model_name": "nanodet_plus_320",
+  "num_classes": 5,
+  "manifest": "feeder 4src v1 (74978)",
+  "levels": [
+    {
+      "name": "fp32",
+      "top1": 0.0,
+      "top5": 0.0,
+      "n": 0,
+      "note": "FP32 ONNX",
+      "metrics": {
+        "map_50": 0.6786,
+        "map_5095": 0.4591
+      },
+      "primary": "map_5095"
+    },
+    {
+      "name": "int8_sim",
+      "top1": 0.0,
+      "top5": 0.0,
+      "n": 0,
+      "note": "ORT-QDQ 模拟，非板子实测",
+      "metrics": {
+        "map_50": 0.6303,
+        "map_5095": 0.4133
+      },
+      "primary": "map_5095"
+    }
+  ]
+}

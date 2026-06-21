@@ -1,0 +1,24 @@
+{
+  "fp32": {
+    "map_50": 0.6786,
+    "map_5095": 0.4591,
+    "per_class_ap": {
+      "bird": 0.341,
+      "squirrel": 0.58,
+      "cat": 0.623,
+      "person": 0.187,
+      "other_animal": 0.564
+    }
+  },
+  "int8_sim": {
+    "map_50": 0.6303,
+    "map_5095": 0.4133,
+    "per_class_ap": {
+      "bird": 0.316,
+      "squirrel": 0.531,
+      "cat": 0.548,
+      "person": 0.17,
+      "other_animal": 0.501
+    }
+  }
+}
