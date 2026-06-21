@@ -1,0 +1,32 @@
+TAG=int8 ONNX=outputs/detect/feeder_416.int8.onnx threads=112
+num_classes=5 class_names=['bird', 'squirrel', 'cat', 'person', 'other_animal']
+catid2cls={1: 0, 2: 1, 3: 2, 4: 3, 5: 4}
+loading annotations into memory...
+Done (t=0.60s)
+creating index...
+index created!
+val images total = 6633, 评估子集 = 前 800 张
+model size is  1.0x
+init weights...
+=> loading pretrained model https://download.pytorch.org/models/shufflenetv2_x1-5666bf0f80.pth
+Finish initialize NanoDet-Plus Head.
+  推理 200/800
+  推理 400/800
+  推理 600/800
+  推理 800/800
+实际评估图数 = 800
+
+=== 每类召回率（int8 ONNX, score>=0.30, IoU>=0.50, 类别正确, 子集 800 图）===
+| 类 | GT | TP | 召回率 |
+|---|---|---|---|
+| bird | 201 | 177 | 0.8806 |
+| squirrel | 114 | 96 | 0.8421 |
+| cat | 17 | 14 | 0.8235 |
+| person | 0 | 0 | 0.0000 |
+| other_animal | 530 | 471 | 0.8887 |
+| **总体** | 862 | 758 | 0.8794 |
+
+RESULT tag=int8 bird_recall=0.8806 (GT=201 TP=177) | overall_recall=0.8794 | imgs=800 | score_thr=0.30 iou_thr=0.50
+=== DETECT BIRD RECALL int8 416 DONE ===
+/root/miniconda3/lib/python3.8/site-packages/torch/functional.py:568: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at  ../aten/src/ATen/native/TensorShape.cpp:2228.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
