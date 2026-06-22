@@ -1,0 +1,22 @@
+{
+  "DK": {
+    "in_region": 303,
+    "of_total": 360,
+    "country_species": 1197
+  },
+  "GB": {
+    "in_region": 328,
+    "of_total": 360,
+    "country_species": 1513
+  },
+  "US": {
+    "in_region": 259,
+    "of_total": 360,
+    "country_species": 3000
+  },
+  "AU": {
+    "in_region": 99,
+    "of_total": 360,
+    "country_species": 1396
+  }
+}

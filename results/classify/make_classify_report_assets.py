@@ -103,6 +103,29 @@ for b, v in zip(bars, vals):
 ax.set_xlim(0, 45)
 save(fig, "fig3_bird_coverage.png")
 
+# fig4: 地域 mask off vs on（按 coverage 排序，看"区域越窄增益越大"）
+import json
+
+reg_path = ROOT / "regional" / "regional_results.json"
+if reg_path.exists():
+    reg = json.loads(reg_path.read_text())
+    reg.sort(key=lambda r: -r["coverage"])  # 宽→窄
+    labels_r = [f"{r['region']}\ncov {r['coverage']:.2f}\n({r['region_classes']}/360)" for r in reg]
+    xr = np.arange(len(reg))
+    fig, ax = plt.subplots(figsize=(8, 4.6))
+    ax.bar(xr - w / 2, [r["top1_off"] for r in reg], w, label="mask OFF", color="#8c8c8c")
+    ax.bar(xr + w / 2, [r["top1_on"] for r in reg], w, label="mask ON (regional)", color="#1f77b4")
+    ax.set_xticks(xr)
+    ax.set_xticklabels(labels_r, fontsize=9)
+    ax.set_ylabel("in-region top-1")
+    ax.set_ylim(0.7, 0.85)
+    ax.set_title("Regional mask gain scales with how much the region narrows candidates")
+    ax.grid(alpha=0.3, axis="y")
+    ax.legend()
+    for xi, r in zip(xr, reg):
+        ax.annotate(f"+{r['gain'] * 100:.1f}pt", (xi + w / 2, r["top1_on"] + 0.004), ha="center", fontsize=9, color="#1f77b4", fontweight="bold")
+    save(fig, "fig4_regional_mask.png")
+
 # CSV：envelope 对比机读
 with open(ROOT / "envelope_v1_vs_v2.csv", "w", newline="") as f:
     w_ = csv.writer(f)
