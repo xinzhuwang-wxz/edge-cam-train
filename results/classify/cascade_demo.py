@@ -62,23 +62,27 @@ def pick_bird_samples(manifest, n, data_root):
 
 
 def draw(img, det, padbox, lines, color):
-    """画 ① 检测框（绿/红）+ ② 外扩框（黄）+ 顶部多行步骤标注。"""
-    im = img.convert("RGB").copy()
-    W = im.width
+    """① 检测框（绿/红）+ ② 外扩框（黄）画在图上；步骤标注放**图上方的黑色标题条**（不压图）。"""
+    im0 = img.convert("RGB")
+    W, H = im0.size
     fsz = max(15, W // 36)
     f = _font(fsz)
-    d = ImageDraw.Draw(im)
-    if padbox is not None:  # ② 外扩框（黄，分类器实际输入区域）
-        d.rectangle(padbox, outline=(255, 210, 0), width=max(2, W // 320))
+    bar_h = len(lines) * (fsz + 7) + 10
+    # 加高画布：顶部 bar_h 黑条放标注，原图贴在下方 → 标注与图不重叠
+    canvas = Image.new("RGB", (W, H + bar_h), (0, 0, 0))
+    canvas.paste(im0, (0, bar_h))
+    d = ImageDraw.Draw(canvas)
+    if padbox is not None:  # ② 外扩框（黄）—— 坐标整体下移 bar_h
+        x1, y1, x2, y2 = padbox
+        d.rectangle([x1, y1 + bar_h, x2, y2 + bar_h], outline=(255, 210, 0), width=max(2, W // 320))
     if det is not None:  # ① 检测框（绿=种对/红=种错或回退）
-        d.rectangle(det, outline=color, width=max(3, W // 200))
-    bar_h = len(lines) * (fsz + 7) + 8  # 顶部黑条放步骤标注
-    d.rectangle([0, 0, W, bar_h], fill=(0, 0, 0))
-    y = 5
+        x1, y1, x2, y2 = det
+        d.rectangle([x1, y1 + bar_h, x2, y2 + bar_h], outline=color, width=max(3, W // 200))
+    y = 6
     for txt, col in lines:
         d.text((8, y), txt, fill=col, font=f)
         y += fsz + 7
-    return im
+    return canvas
 
 
 def main():
