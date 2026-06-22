@@ -28,7 +28,8 @@ def export_onnx(
     model 须已 eval()；输入约定 NCHW=1×3×size×size（端侧串行单帧）。"""
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    model = model.eval()
+    # 导出在 CPU：模型可能在 GPU（如 load_from_checkpoint 后），dummy 在 CPU → 设备不匹配会崩。
+    model = model.eval().cpu()
     dummy = torch.randn(1, 3, input_size, input_size)
 
     torch.onnx.export(
@@ -82,7 +83,7 @@ def check_onnx_matches_torch(
     import numpy as np
     import onnxruntime as ort
 
-    model = model.eval()
+    model = model.eval().cpu()  # 对齐校验在 CPU；模型可能在 GPU → 统一搬回 CPU
     dummy = torch.randn(1, 3, input_size, input_size)
     with torch.no_grad():
         ref = model(dummy).numpy()

@@ -25,6 +25,16 @@ optim:
   label_smoothing: 0.1
   class_weighted: false # true=反频类权重喂 CE 治长尾；与 data.balanced_sampler 二选一
 
+# best-on-val 检查点（导出/评估用最优轮，非过拟合末轮）
+checkpoint:
+  monitor: val_top1
+  mode: max
+  save_top_k: 1
+# 早停（val 指标 patience 轮不升即停，省 GPU + 防过拟合）；enabled=false 关
+early_stop:
+  enabled: true
+  patience: 8
+
 trainer:
   max_epochs: 80
   accelerator: auto # 本地 smoke 用 cpu；AutoDL 用 gpu

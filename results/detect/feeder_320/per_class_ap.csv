@@ -1,0 +1,16 @@
+epoch,class,AP50,mAP
+10,bird,51.0,29.7
+10,squirrel,68.3,47.0
+10,cat,75.6,53.6
+10,person,31.8,15.0
+10,other_animal,70.1,48.0
+20,bird,56.3,33.4
+20,squirrel,78.6,56.1
+20,cat,83.0,60.9
+20,person,36.5,18.0
+20,other_animal,77.4,54.8
+30,bird,57.2,34.1
+30,squirrel,80.6,58.0
+30,cat,84.7,62.3
+30,person,37.9,18.7
+30,other_animal,78.9,56.4

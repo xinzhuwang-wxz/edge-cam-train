@@ -1,0 +1,107 @@
+num_classes(from cfg)=5  class_names=['bird', 'squirrel', 'cat', 'person', 'other_animal']
+loading annotations into memory...
+Done (t=0.05s)
+creating index...
+index created!
+val images = 6633
+model size is  1.0x
+init weights...
+=> loading pretrained model https://download.pytorch.org/models/shufflenetv2_x1-5666bf0f80.pth
+Finish initialize NanoDet-Plus Head.
+calib samples collected = 120
+[root][06-21 06:33:39]WARNING:Please consider to run pre-processing before quantization. Refer to example: https://github.com/microsoft/onnxruntime-inference-examples/blob/main/quantization/image_classification/cpu/ReadMe.md 
+[root][06-21 06:34:15]WARNING:Please consider pre-processing before quantization. See https://github.com/microsoft/onnxruntime-inference-examples/blob/main/quantization/image_classification/cpu/ReadMe.md 
+量化模式: per-channel(opset13)
+SANITY cls_logit_maxdiff=0.00007 reg_maxdiff=0.00002 (pt-eval vs onnx-delogit)
+  [fp32_onnx] 500/6633
+  [fp32_onnx] 1000/6633
+  [fp32_onnx] 1500/6633
+  [fp32_onnx] 2000/6633
+  [fp32_onnx] 2500/6633
+  [fp32_onnx] 3000/6633
+  [fp32_onnx] 3500/6633
+  [fp32_onnx] 4000/6633
+  [fp32_onnx] 4500/6633
+  [fp32_onnx] 5000/6633
+  [fp32_onnx] 5500/6633
+  [fp32_onnx] 6000/6633
+  [fp32_onnx] 6500/6633
+/root/miniconda3/lib/python3.8/site-packages/torch/functional.py:568: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at  ../aten/src/ATen/native/TensorShape.cpp:2228.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+[NanoDet][06-21 07:44:10]INFO:
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.459
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.679
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.496
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.009
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.080
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.535
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.427
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.559
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.595
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.021
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.284
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.687
+
+[NanoDet][06-21 07:44:10]INFO:
+| class        | AP50   | mAP   | class    | AP50   | mAP   |
+|:-------------|:-------|:------|:---------|:-------|:------|
+| bird         | 57.2   | 34.1  | squirrel | 80.6   | 58.0  |
+| cat          | 84.7   | 62.3  | person   | 37.9   | 18.7  |
+| other_animal | 78.9   | 56.4  |          |        |       |
+Loading and preparing results...
+DONE (t=1.80s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=22.69s).
+Accumulating evaluation results...
+DONE (t=3.47s).
+[fp32_onnx] mAP=0.4591 AP_50=0.6786
+  [int8_onnx] 500/6633
+  [int8_onnx] 1000/6633
+  [int8_onnx] 1500/6633
+  [int8_onnx] 2000/6633
+  [int8_onnx] 2500/6633
+  [int8_onnx] 3000/6633
+  [int8_onnx] 3500/6633
+  [int8_onnx] 4000/6633
+  [int8_onnx] 4500/6633
+  [int8_onnx] 5000/6633
+  [int8_onnx] 5500/6633
+  [int8_onnx] 6000/6633
+  [int8_onnx] 6500/6633
+[NanoDet][06-21 09:11:35]INFO:
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.413
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.630
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.444
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.007
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.073
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.486
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.401
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.526
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.567
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.017
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.274
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.656
+
+[NanoDet][06-21 09:11:35]INFO:
+| class        | AP50   | mAP   | class    | AP50   | mAP   |
+|:-------------|:-------|:------|:---------|:-------|:------|
+| bird         | 52.9   | 31.6  | squirrel | 77.1   | 53.1  |
+| cat          | 77.9   | 54.8  | person   | 34.8   | 17.0  |
+| other_animal | 72.5   | 50.1  |          |        |       |
+Loading and preparing results...
+DONE (t=3.15s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=32.82s).
+Accumulating evaluation results...
+DONE (t=4.65s).
+[int8_onnx] mAP=0.4133 AP_50=0.6303
+RESULT quant_mode=per-channel(opset13) calib=120
+RESULT fp32_mAP=0.4591 int8_mAP=0.4133 drop=0.0458
+RESULT fp32_AP50=0.6786 int8_AP50=0.6303 drop=0.0483
+=== DETECT INT8 EVAL DONE ===

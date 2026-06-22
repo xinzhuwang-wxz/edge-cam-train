@@ -35,6 +35,7 @@ class GbifBirdsAdapter(ClassifyDatasetAdapter):
         taxonomy_csv: str | None = None,
         max_per_class: int | None = None,
         split_ratios: tuple[float, float, float] = (0.8, 0.1, 0.1),
+        path_prefix: str = "",
         **spec_overrides,
     ) -> None:
         tax = EbirdTaxonomy.from_csv(taxonomy_csv) if taxonomy_csv else IdentityTaxonomy()
@@ -50,12 +51,16 @@ class GbifBirdsAdapter(ClassifyDatasetAdapter):
         )
         super().__init__(spec)
         self.index_path = Path(raw_root) / index
+        # 多源合并：index 里的 path 相对各源目录（images/...），给前缀（=源子目录）使其
+        # 相对统一 root（classify_raw），合并后 record.path 不撞名、manifest 可移植。空=不加。
+        self.path_prefix = path_prefix.strip("/")
 
     def load_raw(self) -> Iterable[ClassifyRawSample]:
         with self.index_path.open(newline="", encoding="utf-8") as fh:
             for row in csv.DictReader(fh):
+                rel = row["path"]
                 yield ClassifyRawSample(
-                    path=row["path"],
+                    path=f"{self.path_prefix}/{rel}" if self.path_prefix else rel,
                     raw_label=row["scientific_name"],
                     license=row["license"],
                     group_key=row.get("group_key") or None,

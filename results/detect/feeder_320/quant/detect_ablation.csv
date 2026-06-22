@@ -1,0 +1,3 @@
+label,map_50,map_5095,bird_recall_50
+feeder_320_fp32,0.6786,0.4591,
+feeder_320_int8_sim,0.6303,0.4133,

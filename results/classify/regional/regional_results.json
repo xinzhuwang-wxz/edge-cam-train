@@ -1,0 +1,38 @@
+[
+  {
+    "in_region_n": 8779,
+    "top1_off": 0.7507688802824923,
+    "top1_on": 0.7562364734024376,
+    "gain": 0.005467593119945324,
+    "region": "DK",
+    "region_classes": 303,
+    "coverage": 0.842
+  },
+  {
+    "in_region_n": 9243,
+    "top1_off": 0.7501893324678135,
+    "top1_on": 0.7530022719896138,
+    "gain": 0.0028129395218002813,
+    "region": "GB",
+    "region_classes": 328,
+    "coverage": 0.911
+  },
+  {
+    "in_region_n": 7375,
+    "top1_off": 0.7505084745762712,
+    "top1_on": 0.7665084745762711,
+    "gain": 0.016,
+    "region": "US",
+    "region_classes": 259,
+    "coverage": 0.719
+  },
+  {
+    "in_region_n": 3251,
+    "top1_off": 0.7603814211011997,
+    "top1_on": 0.8148262073208243,
+    "gain": 0.05444478621962473,
+    "region": "AU",
+    "region_classes": 99,
+    "coverage": 0.275
+  }
+]

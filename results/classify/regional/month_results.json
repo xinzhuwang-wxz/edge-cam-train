@@ -1,0 +1,38 @@
+[
+  {
+    "in_region_n": 6510,
+    "top1_off": 0.7403993855606759,
+    "top1_on": 0.7626728110599078,
+    "gain": 0.02227342549923195,
+    "region": "DK_01",
+    "region_classes": 196,
+    "coverage": 0.544
+  },
+  {
+    "in_region_n": 7607,
+    "top1_off": 0.7452346522939398,
+    "top1_on": 0.7599579334823189,
+    "gain": 0.014723281188379124,
+    "region": "DK_04",
+    "region_classes": 243,
+    "coverage": 0.675
+  },
+  {
+    "in_region_n": 7366,
+    "top1_off": 0.7454520771110508,
+    "top1_on": 0.7613358674993213,
+    "gain": 0.01588379038827043,
+    "region": "DK_07",
+    "region_classes": 238,
+    "coverage": 0.661
+  },
+  {
+    "in_region_n": 7538,
+    "top1_off": 0.745157866808172,
+    "top1_on": 0.7613425311753781,
+    "gain": 0.016184664367206156,
+    "region": "DK_10",
+    "region_classes": 238,
+    "coverage": 0.661
+  }
+]
