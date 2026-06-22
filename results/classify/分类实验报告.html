@@ -234,7 +234,7 @@
 <p><strong>产品含义</strong>：分类器单测 75%，但级联里靠<strong>置信门控</strong>——<strong>说种时 85% 对，不确定就退报 bird</strong>（宁粗不错，下游/云端再判）。
 这正是 plan 的分级置信策略。全部 20 例标注图见 <code>cascade_v2/</code>。</p>
 <hr />
-<h2 id="7-mask">7. 地域 mask 消融（推理期，无需重训）</h2>
+<h2 id="7-mask">7. 地域 / 月份 mask 消融（推理期，无需重训）</h2>
 <p>设计：训全局头 + <strong>推理期按区域 mask</strong>（不在区域的类 logit 置 -inf），区域清单可 OTA 换、不重训（plan §5.4）。
 用 <strong>GBIF occurrence（免 key）</strong>给 360 种建各国在场清单（学名直接对类标，无需 eBird code），对 V2 模型在
 <strong>in-region 子集</strong>比 mask on/off（<strong>正确口径</strong>：只在「真值∈区域」样本上比，避免把外地真值压 -inf 的假象）。</p>
@@ -288,16 +288,60 @@
 <p><strong>结论：地域增益与「区域收窄程度」强相关</strong>。本数据 360 种<strong>欧洲集中</strong>→欧洲区域（GB/DK）几乎不缩减、增益微小（+0.3~0.5pt）；
 区域越窄（AU 仅 99 种在场）→候选大缩→<strong>增益越大（+5.44pt，0.760→0.815）</strong>。这说明地域 mask 的价值在
 <strong>「广域模型 → 部署到较窄区域」</strong>时才充分显现，是产品按区域 OTA 下发候选清单的依据。</p>
+<h3 id="mask">月份（物候）mask —— 在地域之上叠加</h3>
+<p>同口径，用 <strong>GBIF 逐种月度 occurrence</strong> 建「某月在丹麦在场」清单（冬季缺夏候鸟 → 候选更窄）：</p>
+<table>
+<thead>
+<tr>
+<th>DK 月份</th>
+<th>在场/360</th>
+<th>mask off</th>
+<th>mask on</th>
+<th>增益</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1 月（冬）</strong></td>
+<td>196</td>
+<td>0.740</td>
+<td>0.763</td>
+<td><strong>+2.23pt</strong></td>
+</tr>
+<tr>
+<td>4 月</td>
+<td>243</td>
+<td>0.745</td>
+<td>0.760</td>
+<td>+1.47pt</td>
+</tr>
+<tr>
+<td>7 月</td>
+<td>238</td>
+<td>0.746</td>
+<td>0.761</td>
+<td>+1.59pt</td>
+</tr>
+<tr>
+<td>10 月</td>
+<td>238</td>
+<td>0.745</td>
+<td>0.761</td>
+<td>+1.62pt</td>
+</tr>
+</tbody>
+</table>
+<p><strong>月份在地域之上叠加有效</strong>：DK 全年（区域 only）+0.55pt → 加月份 <strong>+1.5~2.2pt</strong>；1 月最窄（候鸟离境）→增益最大。
+产品的「区域 ∩ 月份」候选清单可按季 OTA 下发，进一步提精度。</p>
 <blockquote>
-<p>月份 mask 同理（index 含 <code>observed_at</code>，可按「每种在场月份」建掩码），本轮未跑。
-机读 <code>regional/regional_results.json</code>；清单 <code>regional/regions/*.json</code>；crosswalk <code>regional/ebird_map.csv</code>（347/360）。</p>
+<p>机读 <code>regional/{regional_results,month_results}.json</code>；清单 <code>regional/{regions,months}/*.json</code>；crosswalk <code>regional/ebird_map.csv</code>（347/360）。</p>
 </blockquote>
 <hr />
 <h2 id="8">8. 结论 / 下一步</h2>
 <p><strong>已确立</strong>：检测裁框 + Lite0 + class_weighted + best-on-val + INT8 → <strong>端侧 75.0%/86.7%，量化免费、退化鲁棒、级联提交精度 85%</strong>。可行性成立。</p>
 <p><strong>为什么不是更高</strong>（诚实）：360 种细粒度 + 公民科学照（同种姿态/羽色/幼成差异大 + 标签噪声 + 杂交）+ 端侧小模型（Lite0 3.8M）共同决定上限。裁框已消掉「背景稀释」这一可修 confound（+15pt），剩余是任务与数据的固有难度。</p>
 <p><strong>下一步</strong>（按价值）：
-1. <strong>月份 mask</strong>——index 含 <code>observed_at</code>，按「每种在场月份」建掩码、同 §7 口径跑（<strong>地域已完成，见 §7</strong>）。
+1. <strong>区域 ∩ 月份组合 mask + OTA</strong>——地域(§7)与月份各自已验证有效；产品化为「区域∩月份」候选清单按季 OTA 下发。
 2. <strong>真实 feeder 数据</strong>（Stage 3）——自采喂鸟器 crop（遮挡/背身/夜视/多鸟），补 field 与真实场景差。
 3. <strong>长尾/近似种</strong>——置信门控阈值调优（现 species_conf=0.5 偏保守，回退率 35%）；genus/family 辅助 loss（可再提分）。
 4. <strong>真上板</strong>：ACUITY → <code>.nb</code> → VIPLite 实测 INT8 真实掉点 + 延迟。
@@ -345,11 +389,11 @@
 <td>20 例级联逐步标注图</td>
 </tr>
 <tr>
-<td><code>regional/regional_results.json</code> · <code>regions/*.json</code> · <code>ebird_map.csv</code></td>
-<td>地域 mask 结果 + 各国在场清单 + eBird crosswalk</td>
+<td><code>regional/{regional_results,month_results}.json</code> · <code>regions/*.json</code> · <code>months/*.json</code> · <code>ebird_map.csv</code></td>
+<td>地域/月份 mask 结果 + 各国/各月在场清单 + eBird crosswalk</td>
 </tr>
 <tr>
-<td><code>crop_dataset.py</code> · <code>cascade_demo.py</code> · <code>build_regions.py</code> · <code>regional_eval.py</code> · <code>make_classify_report_assets.py</code></td>
+<td><code>crop_dataset.py</code> · <code>cascade_demo.py</code> · <code>build_regions.py</code> · <code>build_months.py</code> · <code>regional_eval.py</code> · <code>make_classify_report_assets.py</code></td>
 <td>复现脚本</td>
 </tr>
 <tr>
