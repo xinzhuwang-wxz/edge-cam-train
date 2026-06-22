@@ -1,0 +1,222 @@
+[
+  {
+    "file": "ex00_bird.png",
+    "kind": "bird",
+    "gt": "ardea cinerea",
+    "det_coarse": "bird",
+    "det_conf": 0.682,
+    "level": "coarse",
+    "pred": "[coarse]",
+    "conf": 0.279,
+    "correct": false
+  },
+  {
+    "file": "ex01_bird.png",
+    "kind": "bird",
+    "gt": "erithacus rubecula",
+    "det_coarse": "bird",
+    "det_conf": 0.658,
+    "level": "species",
+    "pred": "erithacus rubecula",
+    "conf": 0.754,
+    "correct": true
+  },
+  {
+    "file": "ex02_bird.png",
+    "kind": "bird",
+    "gt": "buteo buteo",
+    "det_coarse": "bird",
+    "det_conf": 0.638,
+    "level": "species",
+    "pred": "buteo buteo",
+    "conf": 0.55,
+    "correct": true
+  },
+  {
+    "file": "ex03_bird.png",
+    "kind": "bird",
+    "gt": "cyanistes caeruleus",
+    "det_coarse": "bird",
+    "det_conf": 0.637,
+    "level": "coarse",
+    "pred": "[coarse]",
+    "conf": 0.382,
+    "correct": false
+  },
+  {
+    "file": "ex04_bird.png",
+    "kind": "bird",
+    "gt": "turdus merula",
+    "det_coarse": "bird",
+    "det_conf": 0.639,
+    "level": "coarse",
+    "pred": "[coarse]",
+    "conf": 0.345,
+    "correct": false
+  },
+  {
+    "file": "ex05_bird.png",
+    "kind": "bird",
+    "gt": "falco tinnunculus",
+    "det_coarse": "bird",
+    "det_conf": 0.652,
+    "level": "species",
+    "pred": "falco tinnunculus",
+    "conf": 0.646,
+    "correct": true
+  },
+  {
+    "file": "ex06_bird.png",
+    "kind": "bird",
+    "gt": "grus grus",
+    "det_coarse": "bird",
+    "det_conf": 0.543,
+    "level": "coarse",
+    "pred": "[coarse]",
+    "conf": 0.278,
+    "correct": false
+  },
+  {
+    "file": "ex07_bird.png",
+    "kind": "bird",
+    "gt": "dendrocopos major",
+    "det_coarse": "bird",
+    "det_conf": 0.59,
+    "level": "species",
+    "pred": "dendrocopos major",
+    "conf": 0.843,
+    "correct": true
+  },
+  {
+    "file": "ex08_bird.png",
+    "kind": "bird",
+    "gt": "parus major",
+    "det_coarse": "bird",
+    "det_conf": 0.678,
+    "level": "species",
+    "pred": "parus major",
+    "conf": 0.911,
+    "correct": true
+  },
+  {
+    "file": "ex09_bird.png",
+    "kind": "bird",
+    "gt": "ciconia ciconia",
+    "det_coarse": "bird",
+    "det_conf": 0.618,
+    "level": "coarse",
+    "pred": "[coarse]",
+    "conf": 0.311,
+    "correct": false
+  },
+  {
+    "file": "ex10_bird.png",
+    "kind": "bird",
+    "gt": "sturnus vulgaris",
+    "det_coarse": "bird",
+    "det_conf": 0.687,
+    "level": "coarse",
+    "pred": "[coarse]",
+    "conf": 0.379,
+    "correct": false
+  },
+  {
+    "file": "ex11_bird.png",
+    "kind": "bird",
+    "gt": "anas platyrhynchos",
+    "det_coarse": "bird",
+    "det_conf": 0.678,
+    "level": "species",
+    "pred": "anas platyrhynchos",
+    "conf": 0.776,
+    "correct": true
+  },
+  {
+    "file": "ex12_bird.png",
+    "kind": "bird",
+    "gt": "anser anser",
+    "det_coarse": "bird",
+    "det_conf": 0.697,
+    "level": "species",
+    "pred": "anser anser",
+    "conf": 0.905,
+    "correct": true
+  },
+  {
+    "file": "ex13_bird.png",
+    "kind": "bird",
+    "gt": "cygnus olor",
+    "det_coarse": "bird",
+    "det_conf": 0.64,
+    "level": "species",
+    "pred": "anas platyrhynchos",
+    "conf": 0.586,
+    "correct": false
+  },
+  {
+    "file": "ex14_bird.png",
+    "kind": "bird",
+    "gt": "passer domesticus",
+    "det_coarse": "bird",
+    "det_conf": 0.652,
+    "level": "species",
+    "pred": "plectrophenax nivalis",
+    "conf": 0.576,
+    "correct": false
+  },
+  {
+    "file": "ex15_bird.png",
+    "kind": "bird",
+    "gt": "fringilla coelebs",
+    "det_coarse": "bird",
+    "det_conf": 0.705,
+    "level": "species",
+    "pred": "fringilla coelebs",
+    "conf": 0.638,
+    "correct": true
+  },
+  {
+    "file": "ex16_bird.png",
+    "kind": "bird",
+    "gt": "phalacrocorax carbo",
+    "det_coarse": "bird",
+    "det_conf": 0.688,
+    "level": "species",
+    "pred": "phalacrocorax carbo",
+    "conf": 0.521,
+    "correct": true
+  },
+  {
+    "file": "ex17_bird.png",
+    "kind": "bird",
+    "gt": "carduelis carduelis",
+    "det_coarse": "bird",
+    "det_conf": 0.69,
+    "level": "species",
+    "pred": "carduelis carduelis",
+    "conf": 0.795,
+    "correct": true
+  },
+  {
+    "file": "ex18_bird.png",
+    "kind": "bird",
+    "gt": "milvus milvus",
+    "det_coarse": "bird",
+    "det_conf": 0.638,
+    "level": "coarse",
+    "pred": "[coarse]",
+    "conf": 0.638,
+    "correct": false
+  },
+  {
+    "file": "ex19_bird.png",
+    "kind": "bird",
+    "gt": "emberiza citrinella",
+    "det_coarse": "bird",
+    "det_conf": 0.681,
+    "level": "species",
+    "pred": "emberiza citrinella",
+    "conf": 0.921,
+    "correct": true
+  }
+]
