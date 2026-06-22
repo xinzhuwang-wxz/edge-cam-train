@@ -1,0 +1,22 @@
+digraph data_unify {
+  rankdir=LR; bgcolor="white"; nodesep=0.3; ranksep=0.7;
+  node [shape=box, style="rounded,filled", fontname="PingFang SC", fontsize=11, color="#27324a", fillcolor="#eef3fb"];
+  edge [color="#5b6b8c"];
+
+  subgraph cluster_det {
+    label="检测：多源 → 5 类统一"; fontname="PingFang SC"; fontsize=12; color="#1f77b4"; style="rounded"; bgcolor="#f3f8ff";
+    d1 [label="ENA24"]; d2 [label="Caltech-CT"]; d3 [label="OpenImagesV7"]; d4 [label="COCO2017\n(仅评估)", fillcolor="#f0f0f0"];
+    dadp [label="DetectionDatasetAdapter\n各源 → 5 类 merge_map\n空帧负样本 · 每类限额", fillcolor="#dff0d8"];
+    dman [label="统一 COCO manifest\n(train/val/test 防泄漏)", fillcolor="#fff3d6"];
+    d1 -> dadp; d2 -> dadp; d3 -> dadp; d4 -> dadp [style=dashed];
+    dadp -> dman;
+  }
+
+  subgraph cluster_cls {
+    label="分类：多源 → 360 种统一"; fontname="PingFang SC"; fontsize=12; color="#2ca02c"; style="rounded"; bgcolor="#f0faf2";
+    c1 [label="naturgucker"]; c2 [label="arter"]; c3 [label="inat"];
+    cadp [label="GbifBirdsAdapter\n逐图 license 过滤(CC0/CC-BY)\n学名合并(→eBird crosswalk)\nobserver 防泄漏 split", fillcolor="#dff0d8"];
+    cman [label="统一 DatasetManifest\n360 类 · 逐图署名", fillcolor="#fff3d6"];
+    c1 -> cadp; c2 -> cadp; c3 -> cadp; cadp -> cman;
+  }
+}
