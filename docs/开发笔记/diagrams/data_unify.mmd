@@ -1,0 +1,14 @@
+flowchart LR
+  subgraph det["检测：多源 → 5 类统一"]
+    d1["ENA24"] --> dadp["DetectionDatasetAdapter<br/>各源→5类 merge_map<br/>空帧负样本·每类限额"]
+    d2["Caltech-CT"] --> dadp
+    d3["OpenImagesV7"] --> dadp
+    d4["COCO2017(仅评估)"] -.-> dadp
+    dadp --> dman["统一 COCO manifest<br/>train/val/test 防泄漏"]
+  end
+  subgraph cls["分类：多源 → 360 种统一"]
+    c1["naturgucker"] --> cadp["GbifBirdsAdapter<br/>逐图license过滤(CC0/CC-BY)<br/>学名合并·observer防泄漏split"]
+    c2["arter"] --> cadp
+    c3["inat"] --> cadp
+    cadp --> cman["统一 DatasetManifest<br/>360类·逐图署名"]
+  end
