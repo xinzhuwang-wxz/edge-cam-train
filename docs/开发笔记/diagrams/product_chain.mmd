@@ -1,0 +1,8 @@
+flowchart LR
+  trig["动检触发<br/>(运动/AI-ISP)"] --> cap["采集<br/>ISP / MIPI-CSI"] --> det
+  subgraph edge["端侧 AI 识别（本文聚焦）"]
+    det["① 粗检测 NanoDet-Plus<br/>是不是鸟 / 大类"] --> crop["取 bird 框<br/>+15% 外扩裁剪"] --> cls["② 细分类 Lite0<br/>鸟种 + 置信 + top5"]
+  end
+  cls --> gate["置信门控 / 层级回退<br/>种→属→科→bird"] --> evt["结构化事件<br/>(种/置信/top5)"]
+  evt --> edgeo["端侧：常见种直接出"] --> app["App / OTA<br/>模型·区域·月份 mask"]
+  evt --> cloud["云端：长尾/疑难<br/>API 锚点(留口)"] --> app

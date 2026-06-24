@@ -1,0 +1,4 @@
+flowchart LR
+  src["数据源<br/>检测: ENA24/CCT/OIV7/COCO<br/>分类: naturgucker/arter/inat"] --> prep["数据准备<br/>DatasetAdapter · merge_map<br/>裁框 · 防泄漏split · calib"] --> train["训练<br/>检测 NanoDet-Plus<br/>分类 Lite0(timm+Lightning+Hydra)"] --> onnx["FP32 ONNX 导出<br/>onnx + onnxsim<br/>(上游唯一交付)"]
+  onnx --> qsim["本地量化模拟<br/>ORT-QDQ per-channel<br/>(掉点预估,不进部署)"] --> casc["级联推理<br/>检测→裁鸟→分类"]
+  onnx -.-> qnb["端侧量化<br/>ACUITY/pegasus PTQ→.nb<br/>(未做·W1)"] -.-> dep["端侧部署<br/>VIPLite/awnn<br/>(未上板)"] -.-> casc

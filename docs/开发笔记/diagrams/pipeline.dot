@@ -1,0 +1,20 @@
+digraph pipeline {
+  rankdir=LR; bgcolor="white"; nodesep=0.4; ranksep=0.6;
+  node [shape=box, style="rounded,filled", fontname="PingFang SC", fontsize=11, color="#27324a", fillcolor="#eef3fb"];
+  edge [color="#5b6b8c"];
+
+  src  [label="数据源\n检测: ENA24/CCT/OIV7/COCO\n分类: naturgucker/arter/inat", fillcolor="#eaf1fb"];
+  prep [label="数据准备\nDatasetAdapter · merge_map\n裁框 · 防泄漏 split · calib\n〔FiftyOne / PIL / pydantic〕"];
+  train[label="训练\n检测 NanoDet-Plus〔PyTorch〕\n分类 Lite0〔timm+Lightning+Hydra〕", fillcolor="#dff0d8"];
+  onnx [label="FP32 ONNX 导出\nonnx + onnxsim\n（上游唯一交付）", fillcolor="#dff0d8"];
+  qsim [label="本地量化模拟\nORT-QDQ per-channel\n（掉点预估，不进部署）", fillcolor="#fff3d6"];
+  qnb  [label="端侧量化\nACUITY/pegasus PTQ → .nb\n（未做 · W1）", style="rounded,filled,dashed", fillcolor="#f3eefb"];
+  dep  [label="端侧部署\nVIPLite / awnn\n（未上板）", style="rounded,filled,dashed", fillcolor="#f3eefb"];
+  casc [label="级联推理\n检测 → 裁鸟 → 分类", fillcolor="#dff0d8"];
+
+  src -> prep -> train -> onnx;
+  onnx -> qsim;
+  onnx -> qnb -> dep [style=dashed];
+  qsim -> casc;
+  dep -> casc [style=dashed, label="真上板后", fontname="PingFang SC", fontsize=9];
+}

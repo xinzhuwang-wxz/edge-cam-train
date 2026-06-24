@@ -1,0 +1,34 @@
+digraph product_chain {
+  rankdir=LR;
+  bgcolor="white";
+  node [shape=box, style="rounded,filled", fontname="PingFang SC", fontsize=12, color="#27324a", fillcolor="#eef3fb"];
+  edge [color="#5b6b8c", fontname="PingFang SC", fontsize=10];
+
+  trig [label="动检触发\n(运动/AI-ISP)", fillcolor="#fde7e7"];
+  cap  [label="采集\nISP / MIPI-CSI"];
+
+  subgraph cluster_edge {
+    label="端侧 AI 识别（本文聚焦）";
+    fontname="PingFang SC"; fontsize=13; color="#2ca02c"; style="rounded"; bgcolor="#f0faf2";
+    det [label="① 粗检测\nNanoDet-Plus\n是不是鸟 / 大类", fillcolor="#dff0d8"];
+    crop[label="取 bird 框\n+15% 外扩裁剪", fillcolor="#dff0d8"];
+    cls [label="② 细分类\nEfficientNet-Lite0\n鸟种 + 置信 + top5", fillcolor="#dff0d8"];
+    det -> crop -> cls;
+  }
+
+  gate [label="置信门控 / 层级回退\n种→属→科→bird"];
+  evt  [label="结构化事件\n(种/置信/top5)"];
+
+  subgraph cluster_cloud {
+    label="端云协同"; fontname="PingFang SC"; fontsize=12; color="#888"; style="rounded";
+    edge_o [label="端侧：常见种\n直接出结果", fillcolor="#eef3fb"];
+    cloud  [label="云端：长尾/疑难\nAPI 锚点(留口)", fillcolor="#f3eefb"];
+  }
+
+  app [label="App / OTA\n(模型·区域·月份 mask)", fillcolor="#fff3d6"];
+
+  trig -> cap -> det;
+  cls -> gate -> evt;
+  evt -> edge_o; evt -> cloud;
+  edge_o -> app; cloud -> app;
+}
