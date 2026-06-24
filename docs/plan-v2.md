@@ -15,7 +15,7 @@
 - **量化走 PTQ**（`pegasus … asymmetric_affine uint8` + 校准集）；**检测后处理（解码/NMS）放 CPU**；避开 Focus/slice 与 transformer 等量化坑。
 - **数据**：开源 + 自采为主（Open Images V7 补松鼠 / 可选 LILA 的 CC0-CC-BY 子集 / 自采；**COCO 图片非商用安全，仅借类目与作对照**）；**自训分类器**；**最终建自有真机数据集**闭合 domain gap。类别**数据驱动 + 层级头 + 地域过滤**，不预设固定大类数。
 - **精度三层口径**（验证集 / 量化后 / **现场**）；**地域过滤是最大精度杠杆**。
-- **音频（可选）**：复用同一条 NPU 图像分类通路（频谱图当图像）；**独立并行 + 晚融合**；**自训规避 BirdNET 非商用许可**。
+- **音频（可选）**：复用同一条 NPU 图像分类通路（频谱图当图像）；**独立并行 + 晚融合**；底座**首选 Perch v2（Apache 可商用）embedding + 自训地区线性头**，避开 BirdNET 非商用许可。
 
 ---
 
@@ -224,7 +224,7 @@ needCloud = (det.cls=='bird') && (cls.top1_conf < TH_species
 
 ## 9. 鸟叫识别（可选模块）
 
-> 结论：**硬件天然支持、模型可复用同一条 NPU 图像分类通路、架构走「独立并行 + 晚融合」**；**真正的红线是 BirdNET 模型与音频数据的商用许可**。建议先做 PoC + 留干净锚点，不深做。
+> 结论：**硬件天然支持、模型可复用同一条 NPU 图像分类通路、架构走「独立并行 + 晚融合」**。**选型已更新**：**Google Perch v2（Apache 2.0，2025-08）**给出了可商用的强音频 embedding（近 15,000 物种 / ~10,000 鸟，EfficientNet-B3，embedding ~12M），**首选「Perch embedding + 自训地区线性头」**——既绕开 BirdNET（CC-BY-NC-SA，降为 benchmark），又比从零自训更强。原「真正的红线是没有可商用音频模型」的前提已被 Perch 解除；剩下的红线只是 BirdNET 衍生与音频**训练数据**许可。建议先做 PoC + 留干净锚点，不深做。
 
 ### 9.1 硬件：V85x 自带音频输入（零额外 codec）
 - 片上**模拟音频 codec/ADC**：V851S/SE = 1× ADC(16/20-bit, 8–48kHz) + 1× 差分麦(`MICIN1P/N`)，SNR~95dB；V853/S = 2× ADC + 2 麦。四款均支持最多 **8 路 PDM 数字麦(DMIC)**。I2S：V851x 1 路 / V853x 2 路（仅接外部 codec / 麦阵时才需要）。
@@ -237,12 +237,15 @@ needCloud = (det.cls=='bird') && (cls.top1_conf < TH_species
 ### 9.2 模型与通路：复用 NPU 图像分类路
 - 范式 = **音频 → mel 频谱图 → 当图像 → CNN 分类**（Merlin Sound ID / BirdNET 均如此）→ 算子家族就是图像分类 CNN，**直接走相机现有 INT8 conv 通路，无需新 runtime**。
 - BirdNET v2.4 参考：EfficientNetB0-like、~6500 类、~0.83 GFLOPs（算力毫无压力；约束是**模型尺寸/内存 + 算子覆盖**）。输入 3s@48kHz → mel 频谱图（**具体 bins×frames / 通道数以 BirdNET-Analyzer 官方 config 为准，§9.6 待核实**）→ NPU 输入 shape 与 RGB 不同，pegasus/awnn 输入层须按实测 config 配。
-- **商用推荐路**：在**精选地域物种表（数十~数百种）**上**自训 EfficientNet-Lite0 / MobileNetV3-Large**（去 swish/SE，最 NPU 安全；与视觉路复用同骨干）→ 同时**绕开 BirdNET 的非商用许可**。
+- **商用推荐路（更新）**：**首选 Perch v2（Apache 2.0）作 embedding 底座**——近 15,000 物种 / ~10,000 鸟、EfficientNet-B3（embedding ~12M / 分类头 ~91M）、社区已有 ONNX/TFLite。官方最佳实践 = **取它的强 embedding、在上面训一个轻量线性头**适配精选地域物种（它的 logits **未校准、稀有种不可靠**，须用自己的数据调阈值）。
+- **from-scratch 退路**：仍可在**精选地域物种表（数十~数百种）**上**自训 EfficientNet-Lite0 / MobileNetV3-Large**（去 swish/SE，最 NPU 安全；与视觉路复用同骨干）。两条都**绕开 BirdNET 的非商用许可**。
+- **上端注意**：Perch backbone 是 **EfficientNet-B3（带 SE/swish）**，直接上 V85x INT8 NPU 有回退软算子风险 → 端侧要么 op 实测，要么把 Perch 当 teacher / embedding 源**蒸馏到 NPU 安全的 Lite0 频谱图小头**再落端；音频独立晚融合、不争主 NPU 路。
 - 可行性背书：BirdNET-Go/Pi 在 Pi 级 CPU FP32 50–550ms/3s（<1500ms 实时预算）；BirdNET-STM32 已 INT8 PTQ 部署到 NPU。
 - 精度现实：精选数百种、干净叫声 top-1 ~80–90%；**真实重叠/噪声/远场会大幅崩**（BirdCLEF 现场 ROC-AUC ~0.52–0.56）→ 必加「非鸟/背景」拒识类 + 置信阈值 + 3s 窗时序投票。
 
 ### 9.3 数据与许可（承重红线）
-- **BirdNET 模型 = CC BY-NC-SA 4.0（非商用 + 传染性 ShareAlike）→ 不能出货，连微调衍生权重都被传染**。源码 MIT 但权重不是。商用唯一途径是找 Cornell 单独授权。→ **BirdNET 仅限内部原型 / benchmark**。
+- **Perch v2（Apache 2.0）= 现在有可商用的音频底座了**：权重 Apache、明确允许商用 → 解除了「没有可商用音频模型、只能从零自训」这个前提。⚠️ 训练数据含 Xeno-Canto/iNat 等，weights 授权为操作性 grant，**与 SpeciesNet 同属「输出授权灰区」**——蒸馏进出货权重时按下方铁律（teacher 含 NC → student 不可商用）谨慎核。
+- **BirdNET 模型 = CC BY-NC-SA 4.0（非商用 + 传染性 ShareAlike）→ 不能出货，连微调衍生权重都被传染**。源码 MIT 但权重不是。商用唯一途径是找 Cornell 单独授权。→ **BirdNET 仅限内部原型 / benchmark**（Perch 已可替代其商用角色）。
 - **Xeno-canto**：>100万录音 / >12900 种，但 **~99% 是 NC 和/或 ND，仅 ~0.7% CC0/CC-BY**。商用须用 API v3 按 `lic` **只留 CC0/CC-BY、硬排 -nc/-nd**，并维护逐录音署名清单。
 - **BirdCLEF(Kaggle) = 研究专用**；**Macaulay = 授权付费**（仅补缺）。
 - **taxonomy** 用 **eBird/Clements（带版本）**作规范键、与视觉物种集对齐；但 **eBird 数据/API/checklist 的商用性须法务确认**。
@@ -259,11 +262,11 @@ needCloud = (det.cls=='bird') && (cls.top1_conf < TH_species
 1. **可选模块、先 PoC 不深做**；晚融合只留薄薄一层时间戳重叠规则。
 2. **先落「共享锚点」**：位置 + 日期 + 地域物种 allowlist + 统一事件时间戳——**对纯视觉的地域过滤(§5.4)同样立即有用**，并为音频零成本接入。
 3. feature-level 紧融合**推迟**，且仅当干净精度成唯一瓶颈才做（明知其在缺模态/噪声下更脆）。
-4. **商用许可硬门**：不出货 BirdNET 及衍生权重；训练数据只 CC0/CC-BY；eBird 商用性法务确认；推荐**自训 EfficientNet-Lite0**。
+4. **商用许可硬门**：不出货 BirdNET 及衍生权重；训练数据只 CC0/CC-BY；eBird 商用性法务确认；音频底座**首选 Perch v2（Apache）embedding + 自训地区线性头**，自训 EfficientNet-Lite0 为 from-scratch 退路。
 5. **早做工具链尽调**：pegasus 跑通 EfficientNet-Lite0 INT8 端到端、确认无算子 fallback、测掉点、profiling A7 上 mel 前端 + 视频负载合并成本。
 
 ### 9.6 关键待解（音频）
-E907 是否真有 FPU（文档自相矛盾，决定能否 float-FFT）；V85x A7 上双 96×511 mel/3s 的实测成本；pegasus 对 EfficientNet-Lite0 全算子映射实证；Cornell BirdNET/Macaulay 商用授权条款；目标物种逐种的 CC0/CC-BY 现存量；出货麦配置（单麦无向 vs 麦阵测向）与续航预算。
+E907 是否真有 FPU（文档自相矛盾，决定能否 float-FFT）；V85x A7 上双 96×511 mel/3s 的实测成本；pegasus 对 EfficientNet-Lite0 全算子映射实证；Cornell BirdNET/Macaulay 商用授权条款；目标物种逐种的 CC0/CC-BY 现存量；出货麦配置（单麦无向 vs 麦阵测向）与续航预算；**Perch v2 的 EfficientNet-B3 在 Vivante NPU 的 SE/swish 算子覆盖**（端侧直跑 vs 蒸馏到 Lite0 小头）；**Perch 权重「输出授权灰区」对蒸馏出货权重的影响**（同 SpeciesNet）；Perch 的 mel / 输入 config 与端侧前端对齐。
 
 ---
 
@@ -285,7 +288,7 @@ E907 是否真有 FPU（文档自相矛盾，决定能否 float-FFT）；V85x A7
 |---|---|---|
 | **NPU 工具链不成熟**（文档零散/版本易错配/Ubuntu-only） | **高** | W1 通路先行；锁定 pegasus↔VIPLite 版本；必要时绕开 Tina-SDK 自建 C app |
 | 算子回退软算子/CPU（Focus/SE/transformer） | 高 | 选 anchor-free + 纯 conv backbone；逐算子实测；后处理放 CPU |
-| **商用许可**（iNat 非商用 / Ultralytics AGPL / BirdNET 非商用） | **高** | 检测器用 Apache(NanoDet/PicoDet)；数据用 CC0/CC-BY+自采；音频自训或授权 |
+| **商用许可**（iNat 非商用 / Ultralytics AGPL / BirdNET 非商用） | **高** | 检测器用 Apache(NanoDet/PicoDet)；数据用 CC0/CC-BY+自采；音频用 **Perch v2(Apache)** / 自训 |
 | **domain gap**（网图→真机，99.5%→88%） | 高 | 尽早自采真机帧；crop 域统一；强增强；最小尺寸门控 |
 | 芯片未定（0.5T–1T / RAM） | 中 | 按 0.5T/128MB 下限设计；实验矩阵覆盖两档 |
 | 小样本/长尾 | 中 | 微调+蒸馏+类平衡+地域过滤+层级回退 |
@@ -309,7 +312,7 @@ E907 是否真有 FPU（文档自相矛盾，决定能否 float-FFT）；V85x A7
 | 分类器 | EfficientNet-Lite0 / MobileNetV3-L / RepVGG-A0 | **EfficientNet-Lite0**，RepVGG 兜底 |
 | 地域过滤 | 启用 / 不启用 | **启用**（推理期，低成本大收益） |
 | 片上类规模 | 数据驱动数百级 + 层级/地域 | **数据驱动，不预设固定大数** |
-| 音频模块 | 做 / 不做 / PoC | 硬件已确认支持(§9.1)；建议 **先 PoC**：自训 EfficientNet-Lite0 频谱图分类 + 晚融合 + 声学唤醒；**不出货 BirdNET** |
+| 音频模块 | 做 / 不做 / PoC | 硬件已确认支持(§9.1)；建议 **先 PoC**：**Perch v2(Apache) embedding + 自训地区线性头**（自训 Lite0 为退路）+ 晚融合 + 声学唤醒；**不出货 BirdNET** |
 | 供电模式 | 电池/太阳能 ↔ 常供电 | **须显式声明**（决定功耗/分辨率/常开策略，见 C.11） |
 | 帧率/节拍目标 | 区间(待校准) | ≤200ms / ≥5fps@0.5T 作硬门(C.2) |
 
@@ -419,6 +422,7 @@ pegasus export ovxlib ... --pack-nbg-unify        # 产出 .nb (NBG)
 | iNaturalist 数据 | CC BY-NC | ❌ 进出货权重 | **NC 传染**：用其训练/蒸馏的权重不可商用 |
 | NABirds 数据 | 研究授权 | ❌ 进出货权重 | 仅研究 |
 | BirdNET 权重 | CC BY-NC-SA | ❌ | NC + **SA 传染**，微调衍生也被锁 |
+| **Perch v2 权重**（google-research）| **Apache-2.0** | ✅（带义务）| 可商用音频底座（替 BirdNET 商用角色）；保留版权声明；训练数据 provenance 属「输出授权灰区」，蒸馏出货权重按下方铁律谨慎 |
 | COCO 图片 | Flickr ToU（杂） | ⚠️ 风险 | 标注 CC BY，但图片版权不统一 |
 | Open Images V7 图片 | 逐图 CC-BY | ✅（带义务） | 强制署名+链接；Google 不担保，须复核 |
 | Xeno-canto / LILA | 逐条/逐子集混 | 仅 CC0/CC-BY | 硬排 -nc/-nd；逐项登记署名 |
