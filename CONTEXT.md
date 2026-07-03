@@ -85,8 +85,12 @@ B.2 PicoDet 对照(#8) / B.3 distill(#7) / B.5 季节 mask(#10)。
 - **acquire seam**：`AcquireSpec` 进 `DatasetSpec`（数据来源单一事实源）+ `adapter.acquire()`（manual
   校验/幂等/收据）+ CLI `acquire --list`（全源来源清单）；OIV7 折进 `_fetch` **删** `fetch_oiv7_direct.py`，
   4 源全声明来源。232 测试绿。
-- **待续（需 box：网络/GPU）**：iNat S3 采集器(CC0/CC-BY) + MD 伪标注独立阶段 + Label Studio 人审、
-  Roboflow bird-feeder（补 feeder 域）。
+- **新源 adapter 已建（代码就绪，PR #47）**：`RoboflowFeederAdapter`（补 feeder 域，#1 短板）+
+  `InatMdAdapter`（读 MD 伪标注 COCO，框 md_pseudo/md_human_verified 信任分层）+ `select_inat`
+  选图过滤（纯函数可测）。7 源均在 `acquire --list`。
+- **待 box（数据拉取，非代码）**：Roboflow 需账号 + `ROBOFLOW_API_KEY` 真下（类目/许可 box 上
+  `audit_unmapped` 核）；iNat 多步 box 流程（S3 拉图 → MD GPU 伪标 → Label Studio 人审）。
+  加源 = box 上 `acquire` + `build`，零改代码。
 
 **2026-06-21~22 · 检测 5 类首训（feeder_320 / feeder_416）**（[[ADR-0004]]）
 - **数据**：4 源经 DatasetAdapter 归一到 5 类闭集 → train **74,978** / test 24,791 / eval_feasibility 3,035（COCO，仅评估）。
