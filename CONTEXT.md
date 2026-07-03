@@ -75,6 +75,19 @@ B.2 PicoDet 对照(#8) / B.3 distill(#7) / B.5 季节 mask(#10)。
 
 ## 变更记录（Changelog）
 
+**2026-07-04 · 检测数据集管线完全重写**（[[ADR-0006]]：标准化获取 + 透明化溯源 + JSONL）
+- **原则 D0**：不新旧并存——新管线上线即替换旧路径（经 critic 独立 verify：REVISE→并入 3 MAJOR + 遗漏项）。
+- **透明化**：逐图 `author/original_url/source_media_id/asset_sha256` + 逐框 `label_provenance` 流；
+  `license_manifest.csv` 扩 7 列 → **真兑现 CC-BY 逐图署名**（§4，此前只 source+license 不足）。
+- **清旧路径（关 #18）**：打标契约 `detection.py` 迁 5 类；删 `detection_classes`(11类)/`merge_map`/
+  `detection_ingest`/`detection_feeder.yaml`；`FEEDER5_CATEGORIES` 提为 contracts 层规范。
+- **JSONL 唯一格式**：`DetectionManifest` → JSONL + `.meta.json` sidecar（移除旧单文件 JSON）。
+- **acquire seam**：`AcquireSpec` 进 `DatasetSpec`（数据来源单一事实源）+ `adapter.acquire()`（manual
+  校验/幂等/收据）+ CLI `acquire --list`（全源来源清单）；OIV7 折进 `_fetch` **删** `fetch_oiv7_direct.py`，
+  4 源全声明来源。232 测试绿。
+- **待续（需 box：网络/GPU）**：iNat S3 采集器(CC0/CC-BY) + MD 伪标注独立阶段 + Label Studio 人审、
+  Roboflow bird-feeder（补 feeder 域）。
+
 **2026-06-21~22 · 检测 5 类首训（feeder_320 / feeder_416）**（[[ADR-0004]]）
 - **数据**：4 源经 DatasetAdapter 归一到 5 类闭集 → train **74,978** / test 24,791 / eval_feasibility 3,035（COCO，仅评估）。
   ENA24 + Caltech CT(ECCV18 sm) + OIV7 商用可训（OIV7 补 bird/person/平衡）；COCO `eval_only` 防许可传染。
