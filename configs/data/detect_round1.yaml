@@ -1,0 +1,21 @@
+# 检测实验 round1（零样本基线 + 2 路微调 bake-off）数据组装（见 docs/detect/检测实验计划.md §4）。
+# 三源全带框：ENA24+CCT 可商用(bake-off 训练)、COCO eval_only(零样本 eval + feeder 客串干净评测)。
+# test 比例调大到 30% → 零样本模型 / bake-off 模型 / feeder 客串都在同一 test + COCO 上公平比。
+# 跑：python -m edge_cam.data.adapters.detect.build --config configs/data/detect_round1.yaml
+name: detect_round1
+version: v1
+raw_root: data/raw/detect
+out_dir: data/processed/detect_round1
+
+datasets:
+  # ── 可商用 → bake-off 训练 + eval（split train/val/test，test 调大）──
+  ena24:
+    negative_quota: 0 # 全带框、~无空图
+    split_ratios: [0.5, 0.2, 0.3] # test 30%（实验计划 §4）
+  caltech_ct:
+    negative_quota: 8000 # empty 空帧负样本（计划抽 ~5-8k）
+    max_per_class: { other_animal: 12000 } # 压 other_animal 到 ~bird 量级
+    split_ratios: [0.5, 0.2, 0.3]
+
+  # ── 仅可行性 → 零样本 eval + feeder 客串"干净"评测（不进 bake-off 训练，§4）──
+  coco2017: {}
