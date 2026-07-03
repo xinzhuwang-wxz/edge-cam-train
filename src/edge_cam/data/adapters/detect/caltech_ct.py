@@ -74,6 +74,7 @@ class CaltechCtAdapter(CocoJsonAdapter):
         **spec_overrides,
     ) -> None:
         self._base = Path(raw_root) / self.SUBPATH
+        self._raw_root = str(raw_root)  # 缩放框时定位实际图（sm 下采样，见 load_raw）
         spec = DatasetSpec(
             name="caltech_ct",
             raw_format="coco_camera_traps_eccv18",
@@ -101,6 +102,25 @@ class CaltechCtAdapter(CocoJsonAdapter):
             image_root=f"{self.SUBPATH}/{self.IMAGE_SUBDIR}",
             group_key_field="location",
         )
+
+    def load_raw(self):
+        """⚠️ ECCV18 注解坐标是**原图分辨率**，但 `eccv_18_all_images_sm` 是**下采样图**（实测 0.5×，
+        如 2048×1494 → 1024×747）→ 若不缩放，GT 框会大 ~2 倍、与图/预测对不上（毁评测**和训练**）。
+        本重写按**实际图尺寸 / 注解尺寸**逐图缩放框（per-image 比例，稳；空帧无框不受影响）。"""
+        from PIL import Image
+
+        base = Path(self._raw_root)
+        for s in super().load_raw():
+            try:
+                aw, ah = Image.open(base / s.path).size
+            except Exception:  # noqa: BLE001 — 坏图/缺图跳过缩放，原样出（下游按存在过滤）
+                yield s
+                continue
+            if s.width and s.height and (aw, ah) != (s.width, s.height):
+                sx, sy = aw / s.width, ah / s.height
+                s.boxes = [(n, [b[0] * sx, b[1] * sy, b[2] * sx, b[3] * sy]) for n, b in s.boxes]
+                s.width, s.height = aw, ah
+            yield s
 
     def _load_coco(self) -> dict:
         """合并 5 个 ECCV18 split 注解 → 单 coco dict（images 去重、annotations 并集）。"""
