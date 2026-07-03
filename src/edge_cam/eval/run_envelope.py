@@ -66,25 +66,27 @@ def run(cfg: DictConfig) -> tuple[Path, Path]:
 
 
 def _publish_card(cfg: DictConfig, report, gate, manifest: DatasetManifest) -> None:
-    """据 cfg.register 把评估结论发布到 registry（架构审查 A 的接线点）。"""
-    from edge_cam.registry.promotion import build_model_card, provenance_from_manifest, publish
-    from edge_cam.registry.store import ModelRegistry
+    """据 cfg.register 把评估结论发布到 registry（架构审查 A 的接线点）。
+
+    走三折共用的 publish_report（task="classify"）——与 detect/cascade 同一条发布路。"""
+    from edge_cam.registry.promotion import provenance_from_manifest, publish_report
 
     reg = cfg.register
-    card = build_model_card(
+    card = publish_report(
         report,
         gate,
+        registry_index=reg.get("index", str(Path(cfg.output_dir) / "models.yaml")),
         name=reg.get("name", cfg.model_name),
         version=reg.get("version", "v0"),
         backbone=cfg.model_name,
         num_classes=manifest.num_classes,
         input_size=cfg.input_size,
+        task="classify",
         platform=reg.get("platform", "dev"),
         artifact_path=reg.get("artifact_path", cfg.get("fp32_onnx") or ""),
         provenance=provenance_from_manifest(manifest),
+        promote=bool(reg.get("promote", False)),
     )
-    registry = ModelRegistry(reg.get("index", str(Path(cfg.output_dir) / "models.yaml")))
-    card = publish(registry, card, promote=bool(reg.get("promote", False)) and gate.passed)
     print(
         f"[publish] {card.name} v{card.version} → channel={card.channel} gate_pass={card.gate_pass}"
     )

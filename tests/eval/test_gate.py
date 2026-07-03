@@ -69,3 +69,47 @@ def test_from_yaml_rejects_unknown_key(tmp_path: Path) -> None:
     cfg.write_text("max_int8_drop: 0.05\ntypo_key: 1\n", encoding="utf-8")
     with pytest.raises(ValueError, match="未知键"):
         GateThresholds.from_yaml(cfg)
+
+
+# --- 级联折（cascade）门：fp32 级 cascade_top1/bird_hit_rate 下限 + int8 组合掉点上限 ---
+
+
+def _cascade_report(fp32=0.8, int8=0.75, hit=0.9) -> EnvelopeReport:
+    return EnvelopeReport(
+        model_name="nanodet_320+lite0",
+        num_classes=525,
+        manifest="feeder v1",
+        levels=[
+            LevelResult(
+                name="fp32",
+                metrics={"cascade_top1": fp32, "bird_hit_rate": hit, "fallback_rate": 0.1},
+                primary="cascade_top1",
+                n=1000,
+            ),
+            LevelResult(
+                name="int8_sim",
+                metrics={"cascade_top1": int8, "bird_hit_rate": hit - 0.02, "fallback_rate": 0.12},
+                primary="cascade_top1",
+                n=1000,
+            ),
+        ],
+    )
+
+
+def test_cascade_thresholds_pass_fail() -> None:
+    r = _cascade_report(fp32=0.8, int8=0.75, hit=0.9)  # int8 掉点 0.05
+    assert evaluate_gate(
+        r, GateThresholds(min_cascade_top1=0.7, min_bird_hit_rate=0.85, max_int8_cascade_drop=0.06)
+    ).passed
+    assert not evaluate_gate(r, GateThresholds(min_cascade_top1=0.85)).passed  # 0.8 < 0.85
+    assert not evaluate_gate(r, GateThresholds(min_bird_hit_rate=0.95)).passed  # 0.9 < 0.95
+    assert not evaluate_gate(r, GateThresholds(max_int8_cascade_drop=0.03)).passed  # 0.05 > 0.03
+
+
+def test_cascade_keys_from_yaml(tmp_path: Path) -> None:
+    cfg = tmp_path / "g.yaml"
+    cfg.write_text("min_cascade_top1: 0.7\nmax_int8_cascade_drop: 0.05\n", encoding="utf-8")
+    thr = GateThresholds.from_yaml(cfg)
+    assert thr.min_cascade_top1 == 0.7
+    assert thr.max_int8_cascade_drop == 0.05
+    assert thr.min_bird_hit_rate is None

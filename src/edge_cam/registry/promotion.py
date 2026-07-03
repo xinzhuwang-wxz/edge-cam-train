@@ -7,6 +7,8 @@ registry.promote 的 gate 门恒拒、右半边（registry/OTA）够不着。本
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from edge_cam.contracts.schemas.dataset import DatasetManifest, provenance_summary
 from edge_cam.contracts.schemas.detection_manifest import DetectionManifest
 from edge_cam.contracts.schemas.eval_report import EnvelopeReport
@@ -80,3 +82,43 @@ def publish(registry: ModelRegistry, card: ModelCard, *, promote: bool = False) 
     if promote:
         card = registry.promote(card.name, card.version)
     return card
+
+
+def publish_report(
+    report: EnvelopeReport,
+    gate: GateResult,
+    *,
+    registry_index: str | Path,
+    name: str,
+    version: str,
+    backbone: str,
+    num_classes: int,
+    input_size: int,
+    task: Task = "classify",
+    precision: Precision = "fp32",
+    platform: Platform = "dev",
+    artifact_path: str = "",
+    provenance: Provenance | None = None,
+    promote: bool = False,
+) -> ModelCard:
+    """三折共用的一处接线：report+gate → ModelCard(task) → registry →（过门则）promote。
+
+    `promote and gate.passed`：请求 promote 但未过门 → 只登记（candidate），不抛（与
+    run_envelope._publish_card 同语义）；registry.promote 内部再校验 gate_pass 双保险。
+    """
+    card = build_model_card(
+        report,
+        gate,
+        name=name,
+        version=version,
+        backbone=backbone,
+        num_classes=num_classes,
+        input_size=input_size,
+        task=task,
+        precision=precision,
+        platform=platform,
+        artifact_path=artifact_path,
+        provenance=provenance,
+    )
+    registry = ModelRegistry(str(registry_index))
+    return publish(registry, card, promote=promote and gate.passed)
