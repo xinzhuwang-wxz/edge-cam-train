@@ -19,6 +19,16 @@
 
 把「获取 → 检测数据集」做成**标准化 / 独立化 / 可插拔**。
 
+### D0. 完全替换，不新旧并存（no dual-track）
+
+本 ADR 是检测**数据集管线的完全更新**：新管线上线即**替换**旧路径，**不保留旧机制并存**。
+- 旧获取脚本（`fetch_oiv7_direct.py`）折进对应 adapter 的 `acquire()` 后**删除**，不留独立脚本。
+- 旧手动下载（散在 `docs/detect/03` 的 prose 命令）由标准 `acquire()` **取代**，prose 降级为历史。
+- 旧 11 类检测数据路径（`detection_classes` 的 11 类、`merge_map`、`detection_ingest` 的 FiftyOne 11 类拉取、旧 `detection_feeder.yaml`）**清除**（即 issue #18）；打标契约 `contracts/schemas/detection.py` **迁到 5 类**（`FEEDER5_CATEGORIES`），与新管线一致。
+- 数据集序列化**只用 JSONL**（D5），不留 JSON 双轨。
+
+原则：读到本管线任一处，看到的都应是**唯一的新做法**，不是"新的 + 兜底旧的"。
+
 ### D1. 获取元数据进 `DatasetSpec`（代码内自包含，不新增 config 文件）
 
 给 `DatasetSpec` 加一个 `acquire: AcquireSpec` 子模型（**不是** top-level `SourceSpec` —— `edge_cam.data.prep.SourceSpec` 已占用该名，避冲突）：
@@ -50,7 +60,7 @@ DetectionDatasetAdapter.acquire(self, raw_root) -> AcquireReceipt
 ### D3. 集成 = 两阶段（acquire → build），build 保持离线纯净
 
 - **独立 CLI**：`python -m edge_cam.data.adapters.detect.acquire --config <build_cfg> [--source X] [--dry-run]`。按 build config 里选中的源，逐源 `acquire()`。
-- `build.py` **不自动 acquire**（保持 build 离线、快、可在无网机跑）；沿用现有心智「先备好 raw，再 build」，只是 acquire 从"手动/脚本"变成"标准命令 + 收据"。
+- `build.py` **不自动 acquire**（保持 build 离线、快、可在无网机跑）；获取从"手动/散脚本"**替换**为唯一标准命令 `acquire` + 收据。
 - **成本闸**：每源 `select.max` 有硬上限；iNat 类大源必须设 per-taxon 配额 + 总量硬顶；`--dry-run` 只算"会下多少"不真下。
 
 ### D4. 逐图溯源透明化（明确改哪些代码）
@@ -62,7 +72,7 @@ DetectionDatasetAdapter.acquire(self, raw_root) -> AcquireReceipt
 
 ### D5. JSONL 标准化数据集（用户要求）
 
-检测数据集记录序列化为 **JSONL**（一行一 `DetImageRecord`）+ `meta.json` sidecar（`name/version/categories/root/provenance` 汇总）—— 标准化、可流式、可 diff、下游逐行可插拔。**JSONL 为标准**；`to_coco()`/`write_nanodet_labels()`（NanoDet 仍吃 COCO）为派生视图。JSON 单文件 `save()/load()` **仅保留为旧产物/测试兼容垫片**，管线主路写 JSONL（避免"两套随意选"的维护陷阱）。
+检测数据集记录序列化为 **JSONL**（一行一 `DetImageRecord`）+ `meta.json` sidecar（`name/version/categories/root/provenance` 汇总）—— 标准化、可流式、可 diff、下游逐行可插拔。**JSONL 是唯一格式**：`DetectionManifest.save/load` 迁到 JSONL+meta，**移除**旧的单文件 JSON 双轨（D0）。`to_coco()`/`write_nanodet_labels()`（NanoDet 仍吃 COCO）为派生视图，保留。现有消费方（build 写、训练/评估/promotion 读）一并迁到 JSONL。
 
 ### D6. 跨源一致性（去重 + split 防泄漏）
 
@@ -90,14 +100,21 @@ DetectionDatasetAdapter.acquire(self, raw_root) -> AcquireReceipt
 ## 影响 / 后果
 
 - `DatasetSpec` 加 `acquire: AcquireSpec` 子模型 + `select`；`DetectionDatasetAdapter` 加 `acquire()`（现有 4 源补下载声明，OIV7 收编 `fetch_oiv7_direct.py`，ENA24/CCT/COCO 声明 `method` + 校验和）。
-- `Provenanced` / `RawSample` / `DetImageRecord` 加 attribution 字段（向后兼容，默认空）。
+- `Provenanced` / `RawSample` / `DetImageRecord` 加 attribution 字段（新字段默认空，旧记录仍可解析——非"旧路径并存"，是新 schema 的缺省）。
 - `build_records()` + `_write_license_manifest()` 按 D4 改。
-- `_split_of` seed 策略改全局内容 key（D6）—— 重训需重建 split（口径变更，记入实操日志）。
-- `DetectionManifest` 加 JSONL 序列化；`license_manifest.csv` 扩列。
+- `_split_of` seed 策略改全局内容 key（D6）—— 重建 split（口径变更，记入实操日志）。
+- `DetectionManifest.save/load` 迁 JSONL+meta（移除单文件 JSON）；`license_manifest.csv` 扩列。
 - 新依赖按 §4 隔离/lazy：iNat（stdlib urllib+gzip，无 SDK）、Roboflow（`roboflow`，可选 extra）、MD（`pytorch-wildlife`，隔离 env）。
 - 新 CLI `data.adapters.detect.acquire`（+ `--list` / `--dry-run`）。
 - **DVC**：acquired raw + `_acquire.json` 收据纳入 `data/` DVC 跟踪（已 DVC 化）。
-- `docs/detect/01` 更新获取段；`configs/data/detect_feeder5.yaml` 不变结构（新源加行）。
+- `docs/detect/01` 更新获取段；`configs/data/detect_feeder5.yaml` 结构不变（新源加行）。
+
+**移除清单（D0 完全替换，不留旧路径）**：
+- `scripts/fetch_oiv7_direct.py`（折进 `Oiv7Adapter.acquire()` 后删）。
+- 旧 11 类检测路径（issue #18）：`data/detection_classes.py` 的 11 类常量/映射、`data/merge_map.py`、`data/detection_ingest.py` 的 FiftyOne 11 类拉取、`configs/data/detection_feeder.yaml` 及其关联测试。
+- `contracts/schemas/detection.py` 打标契约由 11 类 **迁 5 类**（`FEEDER5_CATEGORIES`）。
+- `DetectionManifest` 旧单文件 JSON `save/load`。
+- `docs/detect/03` 里手动下载 prose 标注为历史（获取以 adapter `acquire()` + `--list` 为准）。
 
 ## 备选与放弃理由
 
@@ -105,6 +122,6 @@ DetectionDatasetAdapter.acquire(self, raw_root) -> AcquireReceipt
 - **独立 Fetcher 注册表 / 新 `sources.yaml`**：割裂"一个源"的下载 vs 解析知识（违 [[ADR-0003]]）、与 `detect_feeder5.yaml` 双文件同步、`SourceSpec` 命名冲突。否 —— acquire 收进 `DatasetSpec`+adapter，人读清单靠 `--list` 导出。
 - **build 自动 acquire（一阶段）**：build 被网络/GPU 污染、无网机跑不了、iNat/MD 重活混进快构建。否 —— 两阶段。
 - **MD 伪标注塞进 `acquire()`**：`acquire()` 变重（要 GPU + pytorch-wildlife），违"基类只收公共 HTTP/S3"。否 —— MD 为独立阶段，产 COCO 给 `load_raw`。
-- **继续 JSON（非 JSONL）**：覆盖更多数据后全量载入笨重、不可流式、diff 噪声大。JSONL 为标准，JSON 仅兼容。
+- **继续 JSON / JSON+JSONL 双轨**：覆盖更多数据后 JSON 全量载入笨重、不可流式、diff 噪声大；双轨违 D0「不新旧并存」。JSONL 为唯一格式。
 - **iNat 直接进训练（不 MD 伪标）**：iNat 无 bbox，中心裁剪代理框差、伤 crop 完整率。否。
 - **iNat 收 CC-BY-NC（如 bird-tagger）**：商用，NC 传染上游权重（§4）。否 —— 收紧 CC0/CC-BY。
