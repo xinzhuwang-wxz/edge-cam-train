@@ -1,5 +1,5 @@
 {
-  "_note": "Round1 决策① 原始数：MegaDetector(MDV6-yolov9-c) 零样本在带框 test 上的召回。CCT 坐标 bug 修复后重跑。conf=0.3, IoU=0.5。GPU(4090D)。",
+  "_note": "Round1 决策① 原始数：MegaDetector(MDV6-yolov9-c) 零样本在带框 test 上的召回。CCT 坐标 bug 修复后重跑。conf=0.2, IoU=0.5。GPU(4090D)。",
   "eval_set": {
     "manifest_test_sub": {"desc": "ENA24+CCT test 抽样", "n": 2500},
     "manifest_coco_sub": {"desc": "COCO2017 val 抽样(eval_only)", "n": 800}

@@ -1,0 +1,21 @@
+{
+  "_note": "feeder_416（旧管线已微调5类 NanoDet-Plus ONNX）客串零样本谱。conf=0.2, IoU=0.5, input=416 拉伸。nanodet env CPU 推理。",
+  "_caveats": [
+    "泄漏：feeder 当年训在 ENA24+CCT → 这两源数偏乐观（见过分布）；COCO 才是公平泛化数。",
+    "spray：n_preds 3.15M/2500=1261框/图（COCO 1319/图）。预处理归一化经核对与训练一致（非 bug），符合项目「宁多框勿漏」；但框极多→recall 偏乐观（易蒙中 GT），作宽松上参照非干净锚点。"
+  ],
+  "manifest_test_sub": {
+    "bird":      {"ena24": 0.981, "caltech_ct": 0.773, "__all__": 0.903},
+    "squirrel":  {"ena24": 0.958, "caltech_ct": 0.628, "__all__": 0.697},
+    "cat":       {"ena24": 1.0,   "caltech_ct": 0.351, "__all__": 0.429},
+    "anyanimal": {"ena24": 0.997, "caltech_ct": 0.933, "__all__": 0.958},
+    "n_preds": 3153760
+  },
+  "manifest_coco_sub": {
+    "bird":      {"coco2017": 0.625, "__all__": 0.625},
+    "cat":       {"coco2017": 0.885, "__all__": 0.885},
+    "person":    {"coco2017": 0.817, "__all__": 0.817},
+    "anyanimal": {"coco2017": 0.684, "__all__": 0.684},
+    "n_preds": 1055352
+  }
+}
