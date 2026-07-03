@@ -14,6 +14,16 @@ from pydantic import BaseModel, Field, model_validator
 
 from edge_cam.contracts.schemas.dataset import Provenanced, Split, provenance_summary
 
+# 5 类粗检测闭集（[[ADR-0004]]）——检测域的规范事实源，contracts 层（打标契约 detection.py +
+# 数据 adapter base 均导入此处，单一来源，防漂移）。旧 11 类体系已废（ADR-0006 D0）。
+FEEDER5_CATEGORIES: dict[str, int] = {
+    "bird": 0,
+    "squirrel": 1,
+    "cat": 2,
+    "person": 3,
+    "other_animal": 4,
+}
+
 
 class DetBox(BaseModel):
     """一个检测框：COCO bbox [x,y,w,h] + 粗类 id + 框来源（ADR-0006 D7 信任分层）。"""

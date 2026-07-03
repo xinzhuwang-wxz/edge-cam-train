@@ -3,11 +3,14 @@
 与 TrainerBackend/Quantizer 同款"注册-工厂-config 派发"。每种数据源一个 ingest adapter
 (产 DatasetManifest 或 DetectionManifest),新源 register_ingest 即可,下游 caller 不改。
 
-内置两个真 adapter(≥2 = 真 seam):
-- "imagefolder"    → prep.prepare → DatasetManifest(分类)
-- "coco_detection" → detection_ingest.build_detection_manifest → DetectionManifest(检测)
+内置 adapter:
+- "imagefolder" → prep.prepare → DatasetManifest(分类)
 
-惰性导入 adapter:取用时才 import,避免拉重依赖(如 fiftyone/torch)。
+检测数据**不走本注册表**：检测有自己的可插拔 DatasetAdapter + acquire/build 系统
+（`data/adapters/detect/`，[[ADR-0003]]/[[ADR-0004]]/[[ADR-0006]]）。旧 `coco_detection`
+（FiftyOne 11 类 detection_ingest）已随旧路径移除（ADR-0006 D0）。
+
+惰性导入 adapter:取用时才 import,避免拉重依赖(如 torch)。
 """
 
 from __future__ import annotations
@@ -44,13 +47,4 @@ def _imagefolder():
     return prepare
 
 
-def _coco_detection():
-    from edge_cam.data.detection_ingest import (
-        build_detection_manifest,  # COCO 目录 → DetectionManifest
-    )
-
-    return build_detection_manifest
-
-
 register_ingest("imagefolder", _imagefolder)
-register_ingest("coco_detection", _coco_detection)

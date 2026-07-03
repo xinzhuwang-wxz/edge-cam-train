@@ -1,7 +1,7 @@
 """检测标注 pydantic 契约（LLM 批量打标的合法标签靶子 + 硬闸）。
 
 分类侧已有 DatasetManifest 闭集校验；检测侧此前走裸 COCO（无校验）→ LLM 打标会自创类名/
-bbox 乱填。本契约：① category 锁进 11 大类闭集（detection_classes.FEEDER_CAM_CLASSES）；
+bbox 乱填。本契约：① category 锁进 **5 类粗检测闭集**（[[ADR-0004]]，`FEEDER5_CATEGORIES`）；
 ② bbox 合法性校验；③ 与标准 COCO labels.json 互转，接现有 NanoDet 流水。
 
 LLM 产出 → DetImageLabels 校验（越界/幻觉当场 raise）→ to_coco → 入库训练。
@@ -13,31 +13,19 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
 
-from edge_cam.data.detection_classes import FEEDER_CAM_CLASSES
+from edge_cam.contracts.schemas.detection_manifest import FEEDER5_CATEGORIES
 
-# 11 大类闭集 = 唯一合法 category（与 detection_classes 单一事实源对齐，防 LLM 自创类名）
-CoarseLabel = Literal[
-    "bird",
-    "squirrel",
-    "cat",
-    "dog",
-    "raccoon",
-    "rabbit",
-    "deer",
-    "fox",
-    "skunk",
-    "hedgehog",
-    "bear",
-]
+# 5 类闭集 = 唯一合法 category（与 FEEDER5_CATEGORIES 单一事实源对齐，防 LLM 自创类名）
+CoarseLabel = Literal["bird", "squirrel", "cat", "person", "other_animal"]
 
-_ALLOWED = {c.name for c in FEEDER_CAM_CLASSES}
+_ALLOWED = set(FEEDER5_CATEGORIES)
 
 
 def _assert_label_set_in_sync() -> None:
-    """启动期自检：Literal 与 detection_classes 不漂移（漏一个就炸，强制同步）。"""
+    """启动期自检：Literal 与 FEEDER5_CATEGORIES 不漂移（漏一个就炸，强制同步）。"""
     literal = set(CoarseLabel.__args__)  # type: ignore[attr-defined]
     if literal != _ALLOWED:
-        raise RuntimeError(f"CoarseLabel 与 FEEDER_CAM_CLASSES 漂移：{literal ^ _ALLOWED}")
+        raise RuntimeError(f"CoarseLabel 与 FEEDER5_CATEGORIES 漂移：{literal ^ _ALLOWED}")
 
 
 _assert_label_set_in_sync()
@@ -89,7 +77,7 @@ def validate_llm_labels(raw: dict | list[dict]) -> list[DetImageLabels]:
 
 def to_coco(labels: list[DetImageLabels], *, classes: list[str] | None = None) -> dict:
     """DetImageLabels 列表 → 标准 COCO labels.json（接 NanoDet/FiftyOne 流水）。"""
-    names = classes or [c.name for c in FEEDER_CAM_CLASSES]
+    names = classes or list(FEEDER5_CATEGORIES)
     cat_id = {name: i + 1 for i, name in enumerate(names)}  # COCO category_id 从 1
     categories = [{"id": i + 1, "name": n, "supercategory": "animal"} for i, n in enumerate(names)]
     images, annotations = [], []

@@ -18,16 +18,13 @@ from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from dataclasses import dataclass, field
 
-from edge_cam.contracts.schemas.detection_manifest import DetBox, DetectionManifest, DetImageRecord
-
-# 5 类 canonical（[[ADR-0004]]）。adapter 系统与 DetectionManifest 共用此索引。
-FEEDER5_CATEGORIES: dict[str, int] = {
-    "bird": 0,
-    "squirrel": 1,
-    "cat": 2,
-    "person": 3,
-    "other_animal": 4,
-}
+# FEEDER5_CATEGORIES 规范源在 contracts 层（detection_manifest），此处导入 + 再导出（层次正确）。
+from edge_cam.contracts.schemas.detection_manifest import (
+    FEEDER5_CATEGORIES,
+    DetBox,
+    DetectionManifest,
+    DetImageRecord,
+)
 
 Role = str  # "train" | "eval_only"
 
