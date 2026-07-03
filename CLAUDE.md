@@ -12,7 +12,7 @@
 - **目标硬件**：Allwinner **V85x**（VeriSilicon Vivante VIP NPU，**0.5–1 TOPS，INT8-only，无 FP**；DDR ≤256MB，按 **0.5T / 128MB 下限**设计）。
 - **任务**：两段式级联 —— 通用**粗检测器（NanoDet-Plus，固定）** → 取 bird crop → **细分类器（timm EfficientNet-Lite0，可 OTA 换/扩）**；非鸟直接出大类；bird 命中后给「种 + 置信度 + top-5」，**高置信用片上标签，低置信/不在地域清单/稀有种 → 层级回退(属/科/bird) + 留云 API 锚点（不实现云端）**。
 - **定位**：产品的**一个 feature**，资源占用须克制；商用（海外发行）、PyTorch 系、成熟稳定可扩展。
-- **当前阶段**：**W0 scaffold** —— 目录骨架就绪，模型/部署叶子（标 ★）待实现。`pyproject.toml` 尚未创建，本地尚未 `git init`。
+- **当前阶段**：**离线可行性闭环**（W0 完成、W1 未启）—— 骨架 + 全链路 seam 落地；★ 叶子除上板段（ACUITY/pegasus→`.nb`/VIPLite，待 V85x）外均已实现。检测 NanoDet-Plus 320/416 已首训（bird 召回 87.6%），分类 v1/v2 crop 消融 + 区域评估已跑，三份实验报告成文（`results/{detect,classify,实验1}`）。下一步 = 补检测量化包络/gate 收口 + 租卡跑余下消融矩阵。详见 `CONTEXT.md`。
 
 ### 一条绕不开的平台现实
 **没有任何框架能一路覆盖到 Vivante NPU 部署端**。所以：模型/训练层**重度复用 OSS**，**上游只产 FP32 ONNX**，量化落地那段（ONNX → ACUITY/pegasus PTQ → `.nb` → VIPLite/awnn）**一定是薄自研胶水**。这不是设计缺陷，是平台事实。
