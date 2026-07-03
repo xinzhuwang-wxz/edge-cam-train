@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
+
 import pytest
 
 from edge_cam.data.adapters.detect import (
     FEEDER5_CATEGORIES,
+    AcquireSpec,
     DatasetSpec,
     DetectionDatasetAdapter,
     RawSample,
@@ -217,3 +221,81 @@ def test_attribution_defaults_backward_compat() -> None:
     assert r.author is None and r.original_url is None
     assert r.source_media_id is None and r.asset_sha256 is None
     assert r.boxes[0].label_provenance == "gt"
+
+
+# --- acquire() seam（ADR-0006 D2/D3）---
+
+
+def test_acquire_spec_rejects_bad_method() -> None:
+    with pytest.raises(ValueError, match="method 非法"):
+        AcquireSpec(method="ftp")
+
+
+def test_acquire_no_spec_raises(tmp_path) -> None:
+    with pytest.raises(ValueError, match="未声明 acquire"):
+        _FakeAdapter(_spec(), []).acquire(tmp_path, now="t")
+
+
+def test_acquire_manual_verifies_and_writes_receipt(tmp_path) -> None:
+    """manual：raw 就位 + sha256 匹配 → 落 _acquire.json 收据（可复现可审计）。"""
+    dest = tmp_path / "commercial" / "fake"  # commercial（commercial_safe=True）/<name>
+    dest.mkdir(parents=True)
+    (dest / "data.zip").write_bytes(b"payload")
+    sha = hashlib.sha256(b"payload").hexdigest()
+    a = _FakeAdapter(
+        _spec(
+            acquire=AcquireSpec(
+                method="manual",
+                urls=["http://x/data.zip"],
+                version="v1",
+                archive_sha256={"data.zip": sha},
+            )
+        ),
+        [],
+    )
+    receipt = a.acquire(tmp_path, now="2026-07-04T00:00:00")
+    assert receipt.source == "fake" and receipt.method == "manual"
+    got = json.loads((dest / "_acquire.json").read_text(encoding="utf-8"))
+    assert got["archive_sha256"]["data.zip"] == sha
+    assert got["downloaded_at"] == "2026-07-04T00:00:00"
+    assert got["version"] == "v1"
+
+
+def test_acquire_manual_missing_raises_actionable(tmp_path) -> None:
+    """manual 源缺文件 → 抛可执行错误（含下载 URL），不静默放行。"""
+    a = _FakeAdapter(
+        _spec(
+            acquire=AcquireSpec(
+                method="manual", urls=["http://x/z.zip"], archive_sha256={"z.zip": "abc"}
+            )
+        ),
+        [],
+    )
+    with pytest.raises(FileNotFoundError, match="请获取"):
+        a.acquire(tmp_path, now="t")
+
+
+def test_acquire_manual_checksum_mismatch_raises(tmp_path) -> None:
+    dest = tmp_path / "commercial" / "fake"
+    dest.mkdir(parents=True)
+    (dest / "data.zip").write_bytes(b"tampered")
+    a = _FakeAdapter(
+        _spec(acquire=AcquireSpec(method="manual", archive_sha256={"data.zip": "0" * 64})),
+        [],
+    )
+    with pytest.raises(ValueError, match="sha256 不符"):
+        a.acquire(tmp_path, now="t")
+
+
+def test_acquire_nonmanual_without_fetch_override_raises(tmp_path) -> None:
+    """非 manual 源、raw 未就位 → 走 _fetch，base 未覆写即报错（提示 adapter 需实现下载）。"""
+    a = _FakeAdapter(
+        _spec(
+            acquire=AcquireSpec(
+                method="s3_direct", urls=["s3://x"], archive_sha256={"x.zip": "abc"}
+            )
+        ),
+        [],
+    )
+    with pytest.raises(NotImplementedError, match="_fetch"):
+        a.acquire(tmp_path, now="t")

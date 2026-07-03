@@ -14,9 +14,11 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
+from pathlib import Path
 
 # FEEDER5_CATEGORIES 规范源在 contracts 层（detection_manifest），此处导入 + 再导出（层次正确）。
 from edge_cam.contracts.schemas.detection_manifest import (
@@ -28,10 +30,46 @@ from edge_cam.contracts.schemas.detection_manifest import (
 
 Role = str  # "train" | "eval_only"
 
+# acquire method 闭集（ADR-0006 D1）：数据从哪来、怎么来的规范方法。
+ACQUIRE_METHODS = frozenset(
+    {"lila_http", "s3_direct", "inat_open_data", "roboflow", "local_mirror", "manual"}
+)
+
+
+@dataclass
+class AcquireSpec:
+    """获取声明（ADR-0006 D1）：数据从哪来的单一事实源，落在 adapter 的 DatasetSpec 里。"""
+
+    method: str  # ACQUIRE_METHODS 之一
+    urls: list[str] = field(default_factory=list)  # 规范下载地址（archive/annotation/bucket 前缀）
+    version: str = ""  # 数据集快照标识（日期/release tag）
+    archive_sha256: dict[str, str] = field(default_factory=dict)  # {basename: sha256} 下载后校验
+
+    def __post_init__(self) -> None:
+        if self.method not in ACQUIRE_METHODS:
+            raise ValueError(
+                f"acquire method 非法 {self.method!r}（允许：{sorted(ACQUIRE_METHODS)}）"
+            )
+
+
+@dataclass
+class AcquireReceipt:
+    """获取收据（ADR-0006 D2）：落 `_acquire.json`，记"这批 raw 怎么来的"→ 可复现 + 可审计。"""
+
+    source: str
+    method: str
+    urls: list[str]
+    version: str
+    archive_sha256: dict[str, str]
+    downloaded_at: str  # caller 传入时间戳（纯函数化，便于测试）
+    image_count: int = 0
+    box_count: int = 0
+    tool_versions: dict[str, str] = field(default_factory=dict)
+
 
 @dataclass
 class DatasetSpec:
-    """一个数据集的声明（map/license/角色/清洗/split/负样本）。"""
+    """一个数据集的声明（map/license/角色/清洗/split/负样本/获取）。"""
 
     name: str
     raw_format: str  # "coco_json" | "fiftyone_oiv7" | "roboflow" | ...
@@ -47,6 +85,7 @@ class DatasetSpec:
     negative_quota: int | None = 0  # 保留多少无框负样本（0=不留，None=全留，N=确定性留前 N）
     split_ratios: tuple[float, float, float] = (0.7, 0.15, 0.15)  # train/val/test（可配）
     attribution: bool = False  # 是否需逐图署名清册（OIV7/Roboflow 商用）
+    acquire: AcquireSpec | None = None  # 获取声明（ADR-0006 D1）；None=该 adapter 暂未声明获取
 
     def __post_init__(self) -> None:
         bad = set(self.label_map.values()) - set(FEEDER5_CATEGORIES)
@@ -145,6 +184,74 @@ class DetectionDatasetAdapter(ABC):
                 neg.append(rec)
             # else: 非穷尽源的纯未映射图 → 丢（可能漏标真目标，§5.1 防污染负样本）
         return _cap_per_class(pos, s.max_per_class) + _cap_negatives(neg, s.negative_quota)
+
+    def raw_dir(self, raw_root: str | Path) -> Path:
+        """本源 raw 目录 raw_root/<layer>/<name>（layer=commercial|feasibility，D1）。"""
+        layer = "commercial" if self.spec.commercial_safe else "feasibility"
+        return Path(raw_root) / layer / self.name
+
+    def acquire(self, raw_root: str | Path, *, now: str) -> AcquireReceipt:
+        """按 spec.acquire 下载/校验 raw + 落 `_acquire.json` 收据（ADR-0006 D2/D3）。
+
+        method=manual：只校验 raw 就位 + archive_sha256，缺失抛可执行错误（不静默放行）。
+        其他 method：子类覆写 `_fetch()` 实下载；基类统一校验 + 收据。**幂等**（已校验则跳下载）。
+        `now` 由调用方传入（时间戳纯函数化，便于测试/复现）。
+        """
+        acq = self.spec.acquire
+        if acq is None:
+            raise ValueError(f"{self.name}: 未声明 acquire（DatasetSpec.acquire=None）")
+        dest = self.raw_dir(raw_root)
+        dest.mkdir(parents=True, exist_ok=True)
+        if acq.method != "manual" and not self._checksums_ok(dest, acq.archive_sha256):
+            self._fetch(dest)  # 子类网络下载（幂等：已通过校验则不进来）
+        self._verify_checksums(dest, acq.archive_sha256)
+        receipt = AcquireReceipt(
+            source=self.name,
+            method=acq.method,
+            urls=list(acq.urls),
+            version=acq.version,
+            archive_sha256=dict(acq.archive_sha256),
+            downloaded_at=now,
+        )
+        (dest / "_acquire.json").write_text(
+            json.dumps(asdict(receipt), ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+        return receipt
+
+    def _fetch(self, dest: Path) -> None:
+        """网络下载（非 manual 源由子类按 method 覆写）；base 未覆写即报错。"""
+        raise NotImplementedError(
+            f"{self.name}: method={self.spec.acquire.method} 需在 adapter 覆写 _fetch()"  # type: ignore[union-attr]
+        )
+
+    @staticmethod
+    def _checksums_ok(dest: Path, sha: dict[str, str]) -> bool:
+        """全部声明的 archive 均存在且 sha256 匹配（空声明视为已就位，供幂等短路）。"""
+        return all(
+            (dest / n).exists() and _sha256_file(dest / n) == want for n, want in sha.items()
+        )
+
+    def _verify_checksums(self, dest: Path, sha: dict[str, str]) -> None:
+        """校验声明的 archive：缺失抛可执行错误（含下载 URL），哈希不符抛错。"""
+        for name, want in sha.items():
+            f = dest / name
+            if not f.exists():
+                urls = self.spec.acquire.urls if self.spec.acquire else []  # type: ignore[union-attr]
+                raise FileNotFoundError(f"{self.name}: 缺 {name}（期望在 {dest}）。请获取：{urls}")
+            got = _sha256_file(f)
+            if got != want:
+                raise ValueError(
+                    f"{self.name}: {name} sha256 不符（期望 {want[:12]}… 得 {got[:12]}…）"
+                )
+
+
+def _sha256_file(path: Path, chunk: int = 1 << 20) -> str:
+    """流式分块算文件 sha256（大 archive 友好）。"""
+    h = hashlib.sha256()
+    with path.open("rb") as fh:
+        for block in iter(lambda: fh.read(chunk), b""):
+            h.update(block)
+    return h.hexdigest()
 
 
 def _hash_key(path: str) -> str:
