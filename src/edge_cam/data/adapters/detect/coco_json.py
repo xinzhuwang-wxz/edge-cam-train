@@ -39,12 +39,15 @@ class CocoJsonAdapter(DetectionDatasetAdapter):
         *,
         group_key_field: str | None = None,
         path_field: str = "file_name",
+        label_provenance: str = "gt",
     ) -> None:
         super().__init__(spec)
         self.json_path = Path(json_path)
         self.image_root = Path(image_root) if image_root is not None else None
         self.group_key_field = group_key_field
         self.path_field = path_field
+        # 框来源（ADR-0006 D7）：真标注=gt；MD 伪标注源传 md_pseudo/md_human_verified。
+        self.label_provenance = label_provenance
 
     def _load_coco(self) -> dict:
         return json.loads(self.json_path.read_text(encoding="utf-8"))
@@ -76,6 +79,7 @@ class CocoJsonAdapter(DetectionDatasetAdapter):
                 boxes=boxes,
                 group_key=gk,
                 is_negative=len(boxes) == 0,  # 0 标注 = 真空图（穷尽源/显式负样本才在基类保留）
+                label_provenance=self.label_provenance,  # 框来源（gt / md_pseudo…，ADR-0006 D7）
             )
 
     def audit_unmapped(self) -> dict[str, int]:
