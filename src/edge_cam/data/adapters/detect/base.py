@@ -75,6 +75,13 @@ class RawSample:
     boxes: list[tuple[str, list[float]]] = field(default_factory=list)  # (源标签, [x,y,w,h])
     group_key: str | None = None  # split 分组键（location/sequence）；None→按 path
     is_negative: bool = False  # 显式负样本（empty/no-target）
+    # 逐样本溯源（ADR-0006 D4）：adapter 有则填，流到 DetImageRecord（兑现 CC-BY 逐图署名）。
+    author: str | None = None
+    original_url: str | None = None
+    source_media_id: str | None = None
+    asset_sha256: str | None = None
+    # 该图所有框的来源（ADR-0006 D7）：gt=真标注 / md_pseudo=MD 伪标 / md_human_verified=人审通过。
+    label_provenance: str = "gt"
 
 
 def _split_of(key: str, seed: str, ratios: tuple[float, float, float] = (0.7, 0.15, 0.15)) -> str:
@@ -114,7 +121,13 @@ class DetectionDatasetAdapter(ABC):
                 tgt = s.label_map.get(src_label)
                 if tgt is None:
                     continue  # 未映射 → 丢弃（非穷尽源的未标区域留 ignore，此处不当框）
-                boxes.append(DetBox(bbox=list(bbox), category_id=FEEDER5_CATEGORIES[tgt]))
+                boxes.append(
+                    DetBox(
+                        bbox=list(bbox),
+                        category_id=FEEDER5_CATEGORIES[tgt],
+                        label_provenance=raw.label_provenance,  # 框来源（ADR-0006 D7）
+                    )
+                )
             rec = DetImageRecord(
                 path=raw.path,
                 split=_split_of(raw.group_key or raw.path, s.name, s.split_ratios),  # type: ignore[arg-type]
@@ -123,6 +136,11 @@ class DetectionDatasetAdapter(ABC):
                 boxes=boxes,
                 source=s.name,
                 license=s.license,
+                # 逐样本署名（ADR-0006 D4）：raw 有则带上，缺省回退 spec 级 source/license。
+                author=raw.author,
+                original_url=raw.original_url,
+                source_media_id=raw.source_media_id,
+                asset_sha256=raw.asset_sha256,
             )
             if boxes:
                 pos.append(rec)

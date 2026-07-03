@@ -16,10 +16,11 @@ from edge_cam.contracts.schemas.dataset import Provenanced, Split, provenance_su
 
 
 class DetBox(BaseModel):
-    """一个检测框：COCO bbox [x,y,w,h] + 粗类 id。"""
+    """一个检测框：COCO bbox [x,y,w,h] + 粗类 id + 框来源（ADR-0006 D7 信任分层）。"""
 
     bbox: list[float]
     category_id: int
+    label_provenance: str = "gt"  # gt | md_pseudo | md_human_verified（默认 gt=真标注）
 
 
 class DetImageRecord(Provenanced):

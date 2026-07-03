@@ -180,3 +180,40 @@ def test_split_ratios_configurable() -> None:
 def test_registry() -> None:
     register_adapter("fake_reg", _FakeAdapter)
     assert "fake_reg" in available_adapters()
+
+
+def test_attribution_flows_to_record_and_boxes() -> None:
+    """逐样本 attribution + 框级 label_provenance 从 RawSample 流到 DetImageRecord/DetBox
+    （ADR-0006 D4/D7：兑现 CC-BY 逐图署名 + 框来源透明）。"""
+    a = _FakeAdapter(
+        _spec(),
+        [
+            RawSample(
+                "img/a.jpg",
+                100,
+                80,
+                [("Bird", [1, 2, 3, 4])],
+                author="Jane Doe",
+                original_url="https://inat.example/photo/9",
+                source_media_id="obs-42",
+                asset_sha256="deadbeef",
+                label_provenance="md_human_verified",
+            ),
+        ],
+    )
+    r = a.build_records()[0]
+    assert r.author == "Jane Doe"
+    assert r.original_url == "https://inat.example/photo/9"
+    assert r.source_media_id == "obs-42"
+    assert r.asset_sha256 == "deadbeef"
+    assert r.boxes[0].label_provenance == "md_human_verified"
+
+
+def test_attribution_defaults_backward_compat() -> None:
+    """不给 attribution → 字段默认空 / 框 label_provenance=gt（向后兼容，旧 RawSample 不破）。"""
+    r = _FakeAdapter(
+        _spec(), [RawSample("b.jpg", 10, 10, [("Bird", [0, 0, 2, 2])])]
+    ).build_records()[0]
+    assert r.author is None and r.original_url is None
+    assert r.source_media_id is None and r.asset_sha256 is None
+    assert r.boxes[0].label_provenance == "gt"
