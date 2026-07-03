@@ -43,14 +43,16 @@ def test_build_writes_manifests_labels_and_license(tmp_path) -> None:
     )
     build(cfg)
 
-    # 三份 manifest 落盘且可加载
+    # 三份 manifest 落盘(JSONL + .meta.json sidecar，ADR-0006 D5)且可加载
     for key in ("train", "test", "eval_feasibility"):
-        m = DetectionManifest.load(out / f"manifest_{key}.json")
+        assert (out / f"manifest_{key}.jsonl").exists()
+        assert (out / f"manifest_{key}.meta.json").exists()
+        m = DetectionManifest.load(out / f"manifest_{key}.jsonl")
         assert m.root == str(raw_root)
     # ena24 进 train/test（可商用），coco2017 仅 eval_feasibility
-    feas = DetectionManifest.load(out / "manifest_eval_feasibility.json")
+    feas = DetectionManifest.load(out / "manifest_eval_feasibility.jsonl")
     assert feas.records and all(r.source == "coco2017" for r in feas.records)
-    train = DetectionManifest.load(out / "manifest_train.json")
+    train = DetectionManifest.load(out / "manifest_train.jsonl")
     assert all(r.source == "ena24" for r in train.records)
 
     # NanoDet labels 至少有 train split（COCO dict 结构）

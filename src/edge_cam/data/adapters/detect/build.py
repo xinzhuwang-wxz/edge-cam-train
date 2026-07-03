@@ -85,7 +85,7 @@ def build(cfg: DetectBuildConfig) -> Path:
     summary: dict[str, dict] = {}
     for key, m in manifests.items():
         m.root = cfg.raw_root  # 训练时 manifest.root + record.path 定位图片
-        m.save(out / f"manifest_{key}.json")
+        m.save(out / f"manifest_{key}.jsonl")  # JSONL + .meta.json sidecar（ADR-0006 D5）
         for split in _SPLITS:
             if any(r.split == split for r in m.records):
                 m.write_nanodet_labels(split, out / "labels" / f"{key}_{split}.json")

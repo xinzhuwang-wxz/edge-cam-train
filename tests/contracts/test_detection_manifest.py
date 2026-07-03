@@ -73,10 +73,18 @@ def test_shared_provenance_summary() -> None:
     assert _manifest().counts_by_split() == {"train": 1, "val": 1, "test": 0}
 
 
-def test_save_load_roundtrip(tmp_path) -> None:
-    p = tmp_path / "det.json"
-    _manifest().save(p)
-    assert DetectionManifest.load(p).num_classes == 2
+def test_save_load_roundtrip_jsonl(tmp_path) -> None:
+    p = tmp_path / "det.jsonl"
+    m = _manifest()
+    m.save(p)
+    # ADR-0006 D5：JSONL(逐行一 record) + .meta.json sidecar，无旧单文件 JSON
+    assert (tmp_path / "det.meta.json").exists()
+    lines = [ln for ln in p.read_text(encoding="utf-8").splitlines() if ln.strip()]
+    assert len(lines) == len(m.records)  # 逐行一 record
+    back = DetectionManifest.load(p)
+    assert back.num_classes == 2
+    assert len(back.records) == len(m.records)
+    assert back.categories == m.categories  # meta sidecar 复原 categories
 
 
 def test_distillation_soft_label_field() -> None:
