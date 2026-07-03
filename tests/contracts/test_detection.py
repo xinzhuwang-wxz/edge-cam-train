@@ -56,7 +56,8 @@ def test_validate_llm_labels_batch() -> None:
             "file_name": "a.jpg",
             "width": 64,
             "height": 64,
-            "annotations": [{"label": "dog", "bbox": {"x": 1, "y": 1, "w": 10, "h": 10}}],
+            # dog 属长尾哺乳动物 → 5 类映射为 other_animal（[[ADR-0004]]）
+            "annotations": [{"label": "other_animal", "bbox": {"x": 1, "y": 1, "w": 10, "h": 10}}],
         },
         {"file_name": "b.jpg", "width": 64, "height": 64, "annotations": []},
     ]

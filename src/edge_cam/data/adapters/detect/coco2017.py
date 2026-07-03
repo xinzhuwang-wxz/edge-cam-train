@@ -13,8 +13,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from edge_cam.data.adapters.detect.base import DatasetSpec, register_adapter
+from edge_cam.data.adapters.detect.base import AcquireSpec, DatasetSpec, register_adapter
 from edge_cam.data.adapters.detect.coco_json import CocoJsonAdapter
+
+_COCO = "http://images.cocodataset.org"
 
 # COCO 原类目（小写）→ 5 类。dog→other_animal；其余动物（horse/cow/elephant/bear/…）喂食器
 # 见不到 → 丢。squirrel COCO 无。
@@ -51,6 +53,14 @@ class Coco2017Adapter(CocoJsonAdapter):
             role="eval_only",
             exhaustive=True,
             split_unit="image",
+            acquire=AcquireSpec(  # cocodataset.org（或 /autodl-pub 镜像）；manual 校验就位 + 给 URL
+                method="manual",
+                urls=[
+                    f"{_COCO}/annotations/annotations_trainval2017.zip",
+                    f"{_COCO}/zips/val2017.zip",
+                ],
+                version="2017",
+            ),
             negative_quota=negative_quota,
             max_per_class=max_per_class,
             **spec_overrides,

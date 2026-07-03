@@ -43,14 +43,16 @@ def test_build_writes_manifests_labels_and_license(tmp_path) -> None:
     )
     build(cfg)
 
-    # 三份 manifest 落盘且可加载
+    # 三份 manifest 落盘(JSONL + .meta.json sidecar，ADR-0006 D5)且可加载
     for key in ("train", "test", "eval_feasibility"):
-        m = DetectionManifest.load(out / f"manifest_{key}.json")
+        assert (out / f"manifest_{key}.jsonl").exists()
+        assert (out / f"manifest_{key}.meta.json").exists()
+        m = DetectionManifest.load(out / f"manifest_{key}.jsonl")
         assert m.root == str(raw_root)
     # ena24 进 train/test（可商用），coco2017 仅 eval_feasibility
-    feas = DetectionManifest.load(out / "manifest_eval_feasibility.json")
+    feas = DetectionManifest.load(out / "manifest_eval_feasibility.jsonl")
     assert feas.records and all(r.source == "coco2017" for r in feas.records)
-    train = DetectionManifest.load(out / "manifest_train.json")
+    train = DetectionManifest.load(out / "manifest_train.jsonl")
     assert all(r.source == "ena24" for r in train.records)
 
     # NanoDet labels 至少有 train split（COCO dict 结构）
@@ -61,6 +63,9 @@ def test_build_writes_manifests_labels_and_license(tmp_path) -> None:
     csv_text = (out / "license_manifest.csv").read_text(encoding="utf-8")
     assert "ena24" in csv_text and "CDLA-Permissive" in csv_text
     assert "coco2017" not in csv_text  # 可行性不进训练 → 不入署名清册
+    # ADR-0006 D4：署名清册扩到逐图 author/URL/media_id/sha256（兑现 CC-BY，§4）
+    header = csv_text.splitlines()[0]
+    assert header == "path,source,license,author,original_url,source_media_id,asset_sha256"
 
     summary = json.loads((out / "summary.json").read_text(encoding="utf-8"))
     assert set(summary) == {"train", "test", "eval_feasibility"}

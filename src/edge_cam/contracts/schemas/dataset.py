@@ -23,8 +23,13 @@ class Provenanced(BaseModel):
     schema 上 → 蒸馏 = 加字段、数据管线复用(默认 None,不影响现有数据)。"""
 
     source: str = "unknown"
-    license: str = "unknown"
+    license: str = "unknown"  # SPDX 标识优先（ADR-0006 D4）
     taxon_key: str | None = None
+    # 逐样本署名（ADR-0006 D4）：兑现 CC-BY 逐图清册（§4）。默认 None → 向后兼容，不影响现有数据。
+    author: str | None = None  # 原作者（CC-BY 署名要求）
+    original_url: str | None = None  # 原图/原记录 URL（署名 + 可追溯）
+    source_media_id: str | None = None  # 源侧媒体 id（如 iNat photo_id）→ 去重/防泄漏 join
+    asset_sha256: str | None = None  # 图内容哈希 → 跨源去重 + 完整性
     # 教师 logits/概率:**前瞻 hook**,暂无消费方,待蒸馏(distill #7)落地;默认 None 不影响现有数据。
     soft_label: list[float] | None = None  # noqa: E501 (issue #16 决策:保留为 hook)
 

@@ -2,6 +2,8 @@
 
 from edge_cam.data.adapters.detect.base import (
     FEEDER5_CATEGORIES,
+    AcquireReceipt,
+    AcquireSpec,
     DatasetSpec,
     DetectionDatasetAdapter,
     RawSample,
@@ -15,6 +17,8 @@ from edge_cam.data.adapters.detect.coco_json import CocoJsonAdapter
 
 __all__ = [
     "FEEDER5_CATEGORIES",
+    "AcquireSpec",
+    "AcquireReceipt",
     "DatasetSpec",
     "RawSample",
     "DetectionDatasetAdapter",

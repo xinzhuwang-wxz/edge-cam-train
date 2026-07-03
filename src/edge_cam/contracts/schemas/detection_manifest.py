@@ -7,6 +7,7 @@ provenance 不丢。新检测源经 DatasetAdapter(源标签 → 5 类，[[ADR-0
 
 from __future__ import annotations
 
+import json
 from collections import Counter
 from pathlib import Path
 
@@ -14,12 +15,23 @@ from pydantic import BaseModel, Field, model_validator
 
 from edge_cam.contracts.schemas.dataset import Provenanced, Split, provenance_summary
 
+# 5 类粗检测闭集（[[ADR-0004]]）——检测域的规范事实源，contracts 层（打标契约 detection.py +
+# 数据 adapter base 均导入此处，单一来源，防漂移）。旧 11 类体系已废（ADR-0006 D0）。
+FEEDER5_CATEGORIES: dict[str, int] = {
+    "bird": 0,
+    "squirrel": 1,
+    "cat": 2,
+    "person": 3,
+    "other_animal": 4,
+}
+
 
 class DetBox(BaseModel):
-    """一个检测框：COCO bbox [x,y,w,h] + 粗类 id。"""
+    """一个检测框：COCO bbox [x,y,w,h] + 粗类 id + 框来源（ADR-0006 D7 信任分层）。"""
 
     bbox: list[float]
     category_id: int
+    label_provenance: str = "gt"  # gt | md_pseudo | md_human_verified（默认 gt=真标注）
 
 
 class DetImageRecord(Provenanced):
@@ -141,8 +153,39 @@ class DetectionManifest(BaseModel):
         return cls(name=name, version=version, root=root, categories=cats, records=records)
 
     def save(self, path: str | Path) -> None:
-        Path(path).write_text(self.model_dump_json(indent=2), encoding="utf-8")
+        """JSONL（逐行一 DetImageRecord）+ `<stem>.meta.json` sidecar（ADR-0006 D5 唯一格式）。
+
+        path = records 的 .jsonl 路径；meta（name/version/seed/root/categories）落同名 sidecar。
+        可流式、可 diff、规模友好；`to_coco`/`write_nanodet_labels` 仍为派生视图。"""
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        meta = {
+            "name": self.name,
+            "version": self.version,
+            "seed": self.seed,
+            "root": self.root,
+            "categories": self.categories,
+        }
+        _meta_path(path).write_text(
+            json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+        with path.open("w", encoding="utf-8") as f:
+            for r in self.records:
+                f.write(r.model_dump_json() + "\n")
 
     @classmethod
     def load(cls, path: str | Path) -> DetectionManifest:
-        return cls.model_validate_json(Path(path).read_text(encoding="utf-8"))
+        """读 JSONL records + `<stem>.meta.json` sidecar → DetectionManifest（ADR-0006 D5）。"""
+        path = Path(path)
+        meta = json.loads(_meta_path(path).read_text(encoding="utf-8"))
+        records = [
+            DetImageRecord.model_validate_json(line)
+            for line in path.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+        return cls(**meta, records=records)
+
+
+def _meta_path(path: Path) -> Path:
+    """records 文件 → 同名 meta sidecar（`manifest_train.jsonl` → `manifest_train.meta.json`）。"""
+    return path.with_name(path.stem + ".meta.json")

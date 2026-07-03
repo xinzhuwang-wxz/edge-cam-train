@@ -17,8 +17,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from edge_cam.data.adapters.detect.base import DatasetSpec, register_adapter
+from edge_cam.data.adapters.detect.base import AcquireSpec, DatasetSpec, register_adapter
 from edge_cam.data.adapters.detect.coco_json import CocoJsonAdapter
+
+_LILA = "https://storage.googleapis.com/public-datasets-lila/ena24"
 
 # ENA24 原类目（精确字符串）→ 5 类。Vehicle/Horse 不映射（喂食器见不到 → 丢）。
 # Dog/各野生哺乳 → other_animal（ADR-0004：非 bird/squirrel/cat 哺乳动物归并）。
@@ -73,6 +75,11 @@ class Ena24Adapter(CocoJsonAdapter):
             role="train",
             exhaustive=True,
             split_unit="image",
+            acquire=AcquireSpec(  # LILA（暂无自动下载器 → manual：acquire 校验就位 + 给下载 URL）
+                method="manual",
+                urls=[f"{_LILA}/ena24_public.json", f"{_LILA}/ena24.zip"],
+                version="lila",
+            ),
             negative_quota=negative_quota,
             max_per_class=max_per_class,
             **spec_overrides,

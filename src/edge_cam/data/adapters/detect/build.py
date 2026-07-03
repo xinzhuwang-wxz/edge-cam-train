@@ -38,16 +38,38 @@ class DetectBuildConfig:
         return cls(**raw)
 
 
+_LICENSE_COLS = [
+    "path",
+    "source",
+    "license",
+    "author",
+    "original_url",
+    "source_media_id",
+    "asset_sha256",
+]
+
+
 def _write_license_manifest(manifests: dict[str, DetectionManifest], path: Path) -> None:
-    """逐图 path/source/license 署名清册（训练集，商用披露要求，docs/detect/01 §3）。"""
+    """逐图署名清册（训练集，商用披露要求，docs/detect/01 §3 + ADR-0006 D4）。
+
+    扩到 author/original_url/source_media_id/asset_sha256 → **真正兑现 CC-BY 逐图署名**
+    （旧版只 path/source/license 不足以满足 CC-BY 署名要求）。"""
     rows = {
-        (r.path, r.source or "", r.license or "")
+        (
+            r.path,
+            r.source or "",
+            r.license or "",
+            r.author or "",
+            r.original_url or "",
+            r.source_media_id or "",
+            r.asset_sha256 or "",
+        )
         for key in ("train", "test")
         for r in manifests[key].records
     }
     with path.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["path", "source", "license"])
+        w.writerow(_LICENSE_COLS)
         w.writerows(sorted(rows))
 
 
@@ -63,7 +85,7 @@ def build(cfg: DetectBuildConfig) -> Path:
     summary: dict[str, dict] = {}
     for key, m in manifests.items():
         m.root = cfg.raw_root  # 训练时 manifest.root + record.path 定位图片
-        m.save(out / f"manifest_{key}.json")
+        m.save(out / f"manifest_{key}.jsonl")  # JSONL + .meta.json sidecar（ADR-0006 D5）
         for split in _SPLITS:
             if any(r.split == split for r in m.records):
                 m.write_nanodet_labels(split, out / "labels" / f"{key}_{split}.json")

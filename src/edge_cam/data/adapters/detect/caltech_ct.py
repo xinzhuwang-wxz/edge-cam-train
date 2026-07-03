@@ -24,8 +24,10 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from edge_cam.data.adapters.detect.base import DatasetSpec, register_adapter
+from edge_cam.data.adapters.detect.base import AcquireSpec, DatasetSpec, register_adapter
 from edge_cam.data.adapters.detect.coco_json import CocoJsonAdapter
+
+_LILA = "https://storage.googleapis.com/public-datasets-lila/caltechcameratraps"
 
 # CCT 原类目（小写，精确）→ 5 类。empty/car/cow/pig/lizard/insect 不映射
 # （empty→无框负样本；其余 DROP）。insect-only 图经 exhaustive 成困难负样本。
@@ -81,6 +83,14 @@ class CaltechCtAdapter(CocoJsonAdapter):
             role="train",
             exhaustive=True,
             split_unit="location",
+            acquire=AcquireSpec(  # LILA ECCV18 子集（manual：acquire 校验就位 + 给下载 URL）
+                method="manual",
+                urls=[
+                    f"{_LILA}/eccv_18_annotations.tar.gz",
+                    f"{_LILA}/eccv_18_all_images_sm.tar.gz",
+                ],
+                version="eccv18",
+            ),
             negative_quota=negative_quota,
             max_per_class=max_per_class,
             **spec_overrides,

@@ -11,14 +11,13 @@ from edge_cam.data.ingest_registry import (
 )
 
 
-def test_builtin_two_real_adapters() -> None:
-    # ≥2 真 adapter = 真 seam(分类 imagefolder / 检测 coco_detection)
-    assert {"imagefolder", "coco_detection"} <= set(available_ingests())
-    from edge_cam.data.detection_ingest import build_detection_manifest
+def test_builtin_imagefolder_adapter() -> None:
+    # 分类走 imagefolder；检测不走本注册表（有自己的 adapter/build，ADR-0006 D0）
+    assert "imagefolder" in set(available_ingests())
+    assert "coco_detection" not in set(available_ingests())  # 旧 11 类路径已移除
     from edge_cam.data.prep import prepare
 
     assert get_ingest("imagefolder") is prepare
-    assert get_ingest("coco_detection") is build_detection_manifest
 
 
 def test_unknown_source_raises() -> None:
