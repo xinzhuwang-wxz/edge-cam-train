@@ -10,9 +10,12 @@ from edge_cam.contracts.schemas.detection_manifest import (
 )
 from edge_cam.eval.zeroshot_eval import (
     ANIMAL_CLASSES,
+    COCO_FOLD,
+    MD_FOLD,
     Pred,
     bird_recall_curve,
     class_recall,
+    preds_from_coco,
     recall_at_conf,
     recall_rate,
 )
@@ -53,6 +56,29 @@ def _manifest():
     return DetectionManifest(
         name="t", version="v0", categories=dict(FEEDER5_CATEGORIES), records=recs
     )
+
+
+def test_preds_from_coco_fold_and_drop():
+    """COCO-80 预测 → 折叠对比标签；未在 fold 的类(car)丢弃;squirrel 无 COCO 类=盲区之源。"""
+    cats = {16: "bird", 3: "car", 18: "dog", 1: "person"}
+    raw = [
+        {"image_id": 0, "category_id": 16, "bbox": [1, 1, 5, 5], "score": 0.9},  # bird→bird
+        {"image_id": 0, "category_id": 18, "bbox": [2, 2, 5, 5], "score": 0.8},  # dog→other_animal
+        {"image_id": 1, "category_id": 3, "bbox": [0, 0, 9, 9], "score": 0.7},  # car→丢
+    ]
+    preds = preds_from_coco(raw, cats, COCO_FOLD)
+    assert {p.label for p in preds} == {"bird", "other_animal"}  # car 丢弃
+    assert len(preds) == 2
+
+
+def test_md_fold_animal_person():
+    cats = {0: "animal", 1: "person", 2: "vehicle"}
+    raw = [
+        {"image_id": 0, "category_id": 0, "bbox": [1, 1, 5, 5], "score": 0.9},  # animal
+        {"image_id": 0, "category_id": 2, "bbox": [2, 2, 5, 5], "score": 0.8},  # vehicle→丢
+    ]
+    preds = preds_from_coco(raw, cats, MD_FOLD)
+    assert [p.label for p in preds] == ["animal"]  # vehicle 不在 MD_FOLD → 丢
 
 
 def test_recall_at_conf_iou_and_threshold():

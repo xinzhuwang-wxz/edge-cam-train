@@ -23,6 +23,16 @@ from edge_cam.eval.megadetector import iou_xywh
 # 折叠口径：非人动物 4 类（any-animal 用）；person 单列。
 ANIMAL_CLASSES: frozenset[str] = frozenset({"bird", "squirrel", "cat", "other_animal"})
 
+# COCO-80 → 对比标签（实验计划 §5）。COCO **无 squirrel** → 零样本 squirrel 盲区。
+COCO_FOLD: dict[str, str] = {
+    "bird": "bird",
+    "cat": "cat",
+    "person": "person",
+    "dog": "other_animal",
+}
+# MegaDetector → 对比标签（不分种，animal 通吃）。
+MD_FOLD: dict[str, str] = {"animal": "animal", "person": "person"}
+
 
 @dataclass
 class Pred:
@@ -32,6 +42,28 @@ class Pred:
     label: str
     bbox: list[float]
     score: float
+
+
+def preds_from_coco(
+    pred_records: list[dict], cat_names: dict[int, str], fold: dict[str, str]
+) -> list[Pred]:
+    """模型 COCO 预测 [{image_id,category_id,bbox,score}] + {cat_id:name} + fold(name→对比标签)
+    → [Pred]。**未在 fold 的类丢弃**（COCO 的 car / MD 的 vehicle）。bbox=COCO xywh。"""
+    out: list[Pred] = []
+    for p in pred_records:
+        name = cat_names.get(p["category_id"])
+        label = fold.get(name) if name is not None else None
+        if label is None:
+            continue
+        out.append(
+            Pred(
+                image_id=int(p["image_id"]),
+                label=label,
+                bbox=[float(v) for v in p["bbox"]],
+                score=float(p["score"]),
+            )
+        )
+    return out
 
 
 def recall_at_conf(
