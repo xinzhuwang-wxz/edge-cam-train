@@ -73,7 +73,11 @@ DetectionDatasetAdapter.acquire(self, raw_root) -> AcquireReceipt
 ### D7. 覆盖更多数据（首批新源，按可插拔契约接入）
 
 - **iNat Open Data S3**（`method: inat_open_data`）：搬 bird-tagger 采集器思路（免鉴权流式 TSV → research-grade + geo + per-taxon 配额），**收紧 CC0/CC-BY**（去一切 NC）。iNat `taxon_id → eBird key` 走 crosswalk 填 `taxon_key`（检测层 bird 单一类，taxon_key 为次要、best-effort）。
-- **MegaDetector 伪标注 = 独立 GPU 阶段**（**不在** `acquire()` 内）：iNat 无 bbox → 先跑 MD（`pytorch-wildlife`，隔离 env，MDV6-mit/apa）产 **COCO JSON**（自带 `_mdlabel.json` 收据）→ iNat 的 adapter 是个 `CocoJsonAdapter` 子类，`load_raw()` 吃这份 COCO。MD 权重不进产物、不发行、只出框坐标（框坐标非版权物，不传染）。
+- **MegaDetector 伪标注 = 独立 GPU 阶段**（**不在** `acquire()` 内）：iNat 无 bbox → 先跑 MD（`pytorch-wildlife`，隔离 env，MDV6-mit/apa）产 **COCO JSON**（自带 `_mdlabel.json` 收据）→ iNat 的 adapter 是个 `CocoJsonAdapter` 子类，`load_raw()` 吃这份 COCO。MD 权重不进产物、不发行、只出框坐标（框坐标非版权物，不传染）。伪标注是把 MD 知识迁进小 student 的**蒸馏**载体（比 soft-label KD 更实用）。
+  - **先量 MD 可信度**：在**有框源**（ENA24/Caltech/OIV7/Roboflow）上跑 `eval/megadetector.py` 得 MD 的 AP/bird 召回 → 决定信任阈值。
+  - **分层 QA（不全人审，保规模）**：MD 框按置信分三层 —— **高**→自动收；**中**→ Label Studio 人审（MMDetection 有官方半自动标注集成）；**低**→丢。
+  - **信任分层入溯源**：每框记 `label_provenance ∈ {gt, md_pseudo, md_human_verified}`（见 D4）→ 训练可按信任加权/分阶段，且透明可审。
+- **框级溯源**：`DetBox` 加 `label_provenance`（默认 `gt`）——与逐图 attribution 一并兑现"每个框哪来的"透明度。
 - **Roboflow bird-feeder**（`method: roboflow`）：补 feeder 真实域（当前 0）。逐个核 license（要 CC-BY/Public）。API key 走 **`ROBOFLOW_API_KEY` 环境变量**（不入库）。
 - **eBird 区域过滤**：`select.region`，把 bird 覆盖对齐下游区域 mask（[[ADR-0002]]）。
 
