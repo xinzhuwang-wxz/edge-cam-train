@@ -14,6 +14,7 @@ from edge_cam.registry.promotion import (
     metrics_from_report,
     provenance_from_manifest,
     publish,
+    publish_report,
 )
 from edge_cam.registry.store import ModelRegistry
 
@@ -102,3 +103,70 @@ def test_publish_chain_gate_drives_promote(tmp_path: Path) -> None:
         publish(registry, bad, promote=True)  # gate 未过 → promote 拒
     # 但 register 已发生：仍在 candidate
     assert registry.get("bad", channel="candidate") is not None
+
+
+def test_publish_report_helper_three_tasks(tmp_path: Path) -> None:
+    """三折共用的 publish_report：一处 build_card+register+promote，task 由调用方定。"""
+    idx = tmp_path / "models.yaml"
+    gate_ok = evaluate_gate(_report(), GateThresholds(max_int8_drop=0.05))  # 掉点 0.04 < 0.05
+
+    clf = publish_report(
+        _report(),
+        gate_ok,
+        registry_index=idx,
+        name="clf",
+        version="v0",
+        backbone="efficientnet_lite0",
+        num_classes=3,
+        input_size=224,
+        task="classify",
+        promote=True,
+    )
+    assert clf.task == "classify" and clf.channel == "stable"
+
+    det = publish_report(
+        _report(),
+        gate_ok,
+        registry_index=idx,
+        name="det",
+        version="v0",
+        backbone="nanodet_320",
+        num_classes=5,
+        input_size=320,
+        task="detect",
+        promote=False,
+    )
+    assert det.task == "detect" and det.channel == "candidate"  # promote=False
+
+    casc = publish_report(
+        _report(),
+        gate_ok,
+        registry_index=idx,
+        name="casc",
+        version="v0",
+        backbone="nanodet_320+lite0",
+        num_classes=525,
+        input_size=224,
+        task="cascade",
+        promote=True,
+    )
+    assert casc.task == "cascade" and casc.channel == "stable"
+
+
+def test_publish_report_gate_fail_registers_only(tmp_path: Path) -> None:
+    """未过门 + promote=True → 不 promote（不抛），仅登记为 candidate（同 _publish_card）。"""
+    idx = tmp_path / "models.yaml"
+    gate_bad = evaluate_gate(_report(), GateThresholds(max_int8_drop=0.02))  # 0.04 > 0.02
+    card = publish_report(
+        _report(),
+        gate_bad,
+        registry_index=idx,
+        name="bad",
+        version="v0",
+        backbone="x",
+        num_classes=3,
+        input_size=224,
+        task="detect",
+        promote=True,
+    )
+    assert card.gate_pass is False and card.channel == "candidate"

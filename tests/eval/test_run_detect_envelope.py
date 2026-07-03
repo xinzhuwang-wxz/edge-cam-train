@@ -88,3 +88,45 @@ def test_run_detect_envelope_gate_fail(tmp_path) -> None:
         gate=GateThresholds(min_map_5095=0.6),  # 0.459 < 0.6 → fail
     )
     assert not gate.passed
+
+
+def test_run_detect_envelope_publishes_card(tmp_path) -> None:
+    """检测接发布链：register 给定 → build_model_card(task=detect) → registry → promote。"""
+    from edge_cam.registry.store import ModelRegistry
+
+    idx = tmp_path / "models.yaml"
+    _report, _gate, _jp = run_detect_envelope(
+        _levels(),
+        model_name="nanodet_320",
+        num_classes=5,
+        manifest="feeder v1",
+        label="feeder_320",
+        output_dir=tmp_path,
+        gate=GateThresholds(min_map_5095=0.4),  # 0.459 ≥ 0.4 → pass
+        register={
+            "name": "detector_feeder",
+            "version": "v1",
+            "backbone": "nanodet_320",
+            "input_size": 320,
+            "index": str(idx),
+            "promote": True,
+        },
+    )
+    card = ModelRegistry(idx).get("detector_feeder", version="v1")
+    assert card is not None
+    assert card.task == "detect"
+    assert card.metrics["fp32_map_5095"] == 0.459
+    assert card.gate_pass and card.channel == "stable"  # 过门 + promote
+
+
+def test_run_detect_envelope_no_register_skips_publish(tmp_path) -> None:
+    """不给 register → 只出 report/csv，不碰 registry（向后兼容）。"""
+    _r, _g, _j = run_detect_envelope(
+        _levels(),
+        model_name="m",
+        num_classes=5,
+        manifest="x",
+        label="t",
+        output_dir=tmp_path,
+    )
+    assert not (tmp_path / "models.yaml").exists()

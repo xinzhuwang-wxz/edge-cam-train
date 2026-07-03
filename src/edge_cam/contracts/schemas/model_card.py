@@ -10,7 +10,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-Task = Literal["detect", "classify"]
+Task = Literal["detect", "classify", "cascade"]  # cascade=级联产品级评估卡（检测+分类组合）
 Platform = Literal["v85x", "dev"]  # 边侧平台 Literal（engineering §6）
 Channel = Literal["candidate", "stable"]
 Precision = Literal["fp32", "int8"]

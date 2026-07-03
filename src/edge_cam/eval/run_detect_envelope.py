@@ -23,6 +23,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from edge_cam.contracts.schemas.eval_report import EnvelopeReport
+from edge_cam.contracts.schemas.model_card import Provenance
 from edge_cam.eval.detect_metrics import DetectionMetrics, append_detection_row
 from edge_cam.eval.evaluators.detect import build_detection_report
 from edge_cam.eval.gates.gate import GateResult, GateThresholds, evaluate_gate
@@ -77,12 +78,18 @@ def run_detect_envelope(
     label: str,
     output_dir: str | Path,
     gate: GateThresholds | None = None,
+    register: dict | None = None,
+    provenance: Provenance | None = None,
 ) -> tuple[EnvelopeReport, GateResult, Path]:
-    """组装检测包络 + gate，落盘 report.json/md + detect_ablation.csv。
+    """组装检测包络 + gate，落盘 report.json/md + detect_ablation.csv，可选发布到 registry。
 
     返回 (report, gate, json_path)。
     levels 形如 {"fp32": DetectionMetrics, "int8_sim": DetectionMetrics}；首级作掉点 baseline。
-    每级写一行进 detect_ablation.csv（label 加级后缀区分），与分类消融总表对等。"""
+    每级写一行进 detect_ablation.csv（label 加级后缀区分），与分类消融总表对等。
+    register 给定则接发布链（对等分类 run_envelope）：build_model_card(task="detect") → registry
+    →（promote 且过门）升 stable。register 键：name/version/backbone/input_size/index/promote/
+    platform/artifact_path。provenance 建议由 provenance_from_manifest(DetectionManifest) 传入
+    （许可红线随卡披露，§4）。"""
     report = build_detection_report(
         levels, model_name=model_name, num_classes=num_classes, manifest=manifest
     )
@@ -98,7 +105,42 @@ def run_detect_envelope(
     for name, dm in levels.items():
         append_detection_row(dm, f"{label}_{name}", out)
 
+    if register is not None:
+        _publish_detection(report, gate_res, register, num_classes, model_name, out, provenance)
+
     return report, gate_res, json_path
+
+
+def _publish_detection(
+    report: EnvelopeReport,
+    gate: GateResult,
+    reg: dict,
+    num_classes: int,
+    model_name: str,
+    out_dir: Path,
+    provenance: Provenance | None,
+) -> None:
+    """接发布链（[[ADR-0003]] C3：检测走统一脊柱）。惰性 import 免测试拉 registry 依赖。"""
+    from edge_cam.registry.promotion import publish_report
+
+    card = publish_report(
+        report,
+        gate,
+        registry_index=reg.get("index", str(out_dir / "models.yaml")),
+        name=reg.get("name", model_name),
+        version=reg.get("version", "v0"),
+        backbone=reg.get("backbone", model_name),
+        num_classes=num_classes,
+        input_size=int(reg.get("input_size", 320)),
+        task="detect",
+        platform=reg.get("platform", "dev"),
+        artifact_path=reg.get("artifact_path", ""),
+        provenance=provenance,
+        promote=bool(reg.get("promote", False)),
+    )
+    print(
+        f"[publish] {card.name} v{card.version} → channel={card.channel} gate_pass={card.gate_pass}"
+    )
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -113,11 +155,45 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--label", required=True)
     p.add_argument("--out", required=True)
     p.add_argument("--gate", default=None, help="gate 阈值 yaml(可选)")
+    # 发布链（可选）：给 --register 即接 registry
+    p.add_argument("--register", default=None, help="发布卡名（给定即接 registry）")
+    p.add_argument("--reg-version", default="v0")
+    p.add_argument("--backbone", default=None, help="缺省=model-name")
+    p.add_argument("--input-size", type=int, default=320)
+    p.add_argument(
+        "--registry-index", default=None, help="models.yaml 路径（缺省=out/models.yaml）"
+    )
+    p.add_argument("--platform", default="dev", choices=["dev", "v85x"])
+    p.add_argument("--artifact", default="", help="FP32 ONNX 路径（补 sha256）")
+    p.add_argument("--promote", action="store_true", help="过门则升 stable")
+    p.add_argument(
+        "--manifest-json", default=None, help="DetectionManifest 路径（派生 provenance，许可披露）"
+    )
     args = p.parse_args(argv)
 
     raw = json.loads(Path(args.eval_json).read_text(encoding="utf-8"))
     levels = {k: metrics_from_eval_dict(v) for k, v in raw.items()}
     gate = GateThresholds.from_yaml(args.gate) if args.gate else None
+
+    register = provenance = None
+    if args.register:
+        register = {
+            "name": args.register,
+            "version": args.reg_version,
+            "backbone": args.backbone or args.model_name,
+            "input_size": args.input_size,
+            "platform": args.platform,
+            "artifact_path": args.artifact,
+            "promote": args.promote,
+        }
+        if args.registry_index:
+            register["index"] = args.registry_index
+        if args.manifest_json:  # 许可红线随卡披露（§4）
+            from edge_cam.contracts.schemas.detection_manifest import DetectionManifest
+            from edge_cam.registry.promotion import provenance_from_manifest
+
+            provenance = provenance_from_manifest(DetectionManifest.load(args.manifest_json))
+
     report, gate_res, jp = run_detect_envelope(
         levels,
         model_name=args.model_name,
@@ -126,6 +202,8 @@ def main(argv: list[str] | None = None) -> None:
         label=args.label,
         output_dir=args.out,
         gate=gate,
+        register=register,
+        provenance=provenance,
     )
     print(detect_envelope_markdown(report))
     print()

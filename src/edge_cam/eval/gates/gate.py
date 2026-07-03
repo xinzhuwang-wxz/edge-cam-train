@@ -22,6 +22,9 @@ _THRESHOLD_KEYS = {
     "min_map_50",
     "min_bird_recall_50",
     "max_int8_map_drop",
+    "min_cascade_top1",  # 级联（检测+分类组合，[[ADR-0003]] C2）
+    "min_bird_hit_rate",
+    "max_int8_cascade_drop",
 }
 
 
@@ -37,6 +40,10 @@ class GateThresholds:
     min_map_50: float | None = None
     min_bird_recall_50: float | None = None
     max_int8_map_drop: float | None = None
+    # 级联（fp32 级 级联 top-1/bird 检出率 下限 + int8 组合的级联 top-1 掉点上限）
+    min_cascade_top1: float | None = None
+    min_bird_hit_rate: float | None = None
+    max_int8_cascade_drop: float | None = None
 
     @classmethod
     def from_yaml(cls, path: str | Path) -> GateThresholds:
@@ -91,19 +98,35 @@ def evaluate_gate(report: EnvelopeReport, thr: GateThresholds) -> GateResult:
     check_max_drop("int8_drop", report.drop_from_baseline("int8_sim"), thr.max_int8_drop)
     check_max_drop("field_drop", report.drop_from_baseline("field"), thr.max_field_drop)
 
+    # 检测 / 级联共用「fp32」基线级（检测存 map_*、级联存 cascade_top1，各读各的指标）
+    fp32_base = report.get("fp32")
     # 检测：fp32 级 map/recall 下限 + int8 的 mAP@.5:.95 掉点上限
-    fp32_det = report.get("fp32")
-    check_min("map_5095", fp32_det.value("map_5095") if fp32_det else None, thr.min_map_5095)
-    check_min("map_50", fp32_det.value("map_50") if fp32_det else None, thr.min_map_50)
+    check_min("map_5095", fp32_base.value("map_5095") if fp32_base else None, thr.min_map_5095)
+    check_min("map_50", fp32_base.value("map_50") if fp32_base else None, thr.min_map_50)
     check_min(
         "bird_recall_50",
-        fp32_det.value("bird_recall_50") if fp32_det else None,
+        fp32_base.value("bird_recall_50") if fp32_base else None,
         thr.min_bird_recall_50,
     )
     check_max_drop(
         "int8_map_drop",
         report.drop_from_baseline("int8_sim", baseline="fp32", metric="map_5095"),
         thr.max_int8_map_drop,
+    )
+
+    # 级联：fp32 级 级联 top-1 / bird 检出率 下限 + int8 组合的级联 top-1 掉点上限
+    check_min(
+        "cascade_top1", fp32_base.value("cascade_top1") if fp32_base else None, thr.min_cascade_top1
+    )
+    check_min(
+        "bird_hit_rate",
+        fp32_base.value("bird_hit_rate") if fp32_base else None,
+        thr.min_bird_hit_rate,
+    )
+    check_max_drop(
+        "int8_cascade_drop",
+        report.drop_from_baseline("int8_sim", baseline="fp32", metric="cascade_top1"),
+        thr.max_int8_cascade_drop,
     )
 
     passed = all(ok for _, ok, _ in checks) if checks else True
