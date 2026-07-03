@@ -7,8 +7,11 @@
 
 **问题**：在没有 V85x 板子的前提下，回答「**微调后的模型能不能达成目标**」。
 **策略**：精度问题可在 dev/GPU（AutoDL 租卡）离线闭环；上板只影响延迟/内存/INT8 实测三列。
-**进度**：检测 + 分类**双侧均已为租卡备齐**——可行性包络 ①→④、消融 harness、发布链（promotion）全接通；
-检测数据/config/评测汇表、地域过滤（US eBird 包）就绪。下一步 = 租卡跑 B.2/B.3/B.4(模拟)/B.5。
+**进度**：检测 + 分类**双侧均已租卡首训**——检测 NanoDet-Plus 320/416 已训（bird 召回 fp32 87.6%↑ / int8 84.1%，命门守住）；
+分类 v1/v2 crop 消融 + 区域评估已跑（field top-1 0.37→0.63）；可行性包络 ①→④、消融 harness、发布链（promotion）全接通；
+地域过滤（US eBird 包）就绪；三份实验报告成文（`results/{detect,classify,实验1}`）。
+下一步 = 补检测量化包络/gate 收口（缺端到端入口，见 `results/detect/feeder_320/README` 流程位置）+ 租卡跑余下
+B.2 PicoDet 对照(#8) / B.3 distill(#7) / B.5 季节 mask(#10)。
 
 ## 可行性包络（「能否达标」的判定链）
 
@@ -68,9 +71,20 @@
 - 不追商用数据合规闭环（当前数据仅作可行性）。
 - 已 defer 的增量：蒸馏（#7）、PicoDet 对照（#8）、地域 mask 季节频率版（#10）。
 
-> 注：检测器**已不在「不做」之列**——本轮已为其备齐数据/config/评测/搭建脚本（issue #2 已闭）。
+> 注：检测器**已不在「不做」之列**——数据/config/评测/搭建脚本备齐（issue #2 已闭），且 320/416 两档**已首训**（见下 Changelog）。
 
 ## 变更记录（Changelog）
+
+**2026-06-21~22 · 检测 5 类首训（feeder_320 / feeder_416）**（[[ADR-0004]]）
+- **数据**：4 源经 DatasetAdapter 归一到 5 类闭集 → train **74,978** / test 24,791 / eval_feasibility 3,035（COCO，仅评估）。
+  ENA24 + Caltech CT(ECCV18 sm) + OIV7 商用可训（OIV7 补 bird/person/平衡）；COCO `eval_only` 防许可传染。
+  分布 bird≈other_animal 37~38k、person 30k、cat 8.7k、**squirrel 3.9k 最低**（数据可得上限）。逐图 `license_manifest.csv`。
+- **训练**（3090 box · NanoDet-Plus/ShuffleNetV2 1.0x · fp32 · COCO 权重 warm start · batch96/AdamW 余弦）：
+  feeder_320@30ep **mAP 0.459 / AP50 0.679**；feeder_416@70ep **mAP 0.498 / AP50 0.716**。
+- **命门反转**：bird 召回 fp32 **87.56%**（实验1 64.5% → **+23pt**），int8(ORT-QDQ 模拟) 84.08%（−3.5pt，守住）；
+  AP 偏低 = 320 定位不精 + 误报（召回涨、框准欠），喂鸟器「宁多框勿漏、后接分类器」可接受。FP32 ONNX 导出零损耗。
+- **待收口**：量化包络/gate/检测总表缺端到端入口（类比分类 `run_envelope`，见 `results/detect/feeder_320/README` 流程位置）；
+  PicoDet 对照(#8) 未跑。产物：`results/detect/{feeder_320,feeder_416}/` + `docs/detect/03-实操日志.md`。
 
 **2026-06-20 · 可行性实验1 + 架构成熟化**（[[ADR-0003]]）
 - **实验1**（双卡 GPU 全链路可行性）：分类 eff_lite0@224 test 0.921 / int8 −0.19pt（已发布 stable）；
