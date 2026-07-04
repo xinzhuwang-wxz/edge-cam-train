@@ -1,9 +1,26 @@
-# 检测 round2 · 数据扩展计划（扩数据 → 教师打框 → LS 复核 → 分布收口）
+# 检测正式训练轮 · 数据 + 训练安排（单轮最佳实践）
 
-> 承 round1（[[决策① MD 教师 PASS]]、[[决策② 留 NanoDet-416]]，报告 `results/detect/round1/`）。
-> round1 只在 ENA24+CCT（相机陷阱域）训、分布失衡；round2 **补真实喂食器域 + bird 覆盖 + person，并把分布拉合理**。
-> 相关：[[ADR-0004]]（5 类）、[[ADR-0005]]（teacher+区域）、[[ADR-0006]]（acquire seam + iNat/Roboflow adapter）、
-> [[ADR-0007]]（ONNX logits，已落地 #59）、`docs/classify/01-数据集.md`（iNat/物种/区域先验）。
+> **定位**：round1 的零样本谱 + bake-off 是**选型预实验**（已定 骨干 NanoDet-Plus-m 416 · MD 当教师 ·
+> 修了 decode/预处理的缝），**不是最终训练**。本轮 = **一次性在全量数据上的最佳实践训练**（不再"接力"）。
+> 相关：[[ADR-0004]]（5 类）· [[ADR-0005]]（teacher+区域）· [[ADR-0006]]（acquire seam + iNat/Roboflow adapter）·
+> [[ADR-0007]]（ONNX logits，#59 落地）· `results/detect/round1/`（选型结论）· `docs/classify/01-数据集.md`。
+
+## 0. 单轮流水线（best practice，一条龙）
+
+```
+① 数据装配 → ② 数据门 → ③ 训练(主模型 + scaling 扫) → ④ 评估 → ⑤ 收口
+```
+
+| 步 | 做什么 | 用什么件 |
+|---|---|---|
+| ① **装配** | 全源合一（ENA24+CCT 复用 + OIV7 + iNat-MD + Roboflow）→ 一 JSONL、确定性 split、**test 固定** | `build`（§2/§4） |
+| ② **数据门** | 量+质量过关（bird≥8k/person≥4k/均衡/框合理/许可/署名），**不 pass 不训** | `data/gate.py`（§6） |
+| ③ **训练** | 主模型 NanoDet-416（COCO warm-start · **域增强** · 单一真值源预处理 · logits 导出 · SwanLab）+ **scaling 扫**（数据量×参数 两曲线，100%-1.0x=主模型） | `patch_nanodet_config`·`subsample_train`·`swanlab_nanodet`·`DetectorPreprocess`·`onnx_postproc`（§7） |
+| ④ **评估** | 固定 test：命门 bird AP50/召回/查准 + 逐类 + mAP。对参照 round1 NanoDet-FT 0.774 | 原生 COCOeval + `zeroshot_eval` |
+| ⑤ **收口** | 量化包络 + gate → registry（发布链）+ 报告 | `eval/`·`registry/` |
+
+> **为何 scaling 内嵌一个 round**：主模型就是 scaling 的 100%-1.0x 点，不额外花训练——一箭双雕。
+> **全程 SwanLab**：`project=edge-cam` / `workspace=maxen`，train loss + val bird AP50 同 run（`SWANLAB_API_KEY` env）。
 
 ## 1. 目标
 
