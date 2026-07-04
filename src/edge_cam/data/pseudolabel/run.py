@@ -79,7 +79,6 @@ def _pull_and_label(args: argparse.Namespace, base: Path) -> None:
     print(f"[md] ③ MegaDetector({args.md_version}) 伪标注（conf≥{args.conf_lo}）…", flush=True)
     coco = run_pseudolabel(
         img_dir,
-        raw_root=args.raw_root,
         out_json=base / "inat_md_raw_coco.json",
         version=args.md_version,
         conf=args.conf_lo,
