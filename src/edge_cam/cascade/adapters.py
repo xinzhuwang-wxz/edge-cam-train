@@ -144,8 +144,14 @@ class OnnxDetector:
         conf_thr: float = 0.3,
         nms_iou: float = 0.6,
     ) -> None:
+        import onnx
         import onnxruntime as ort
 
+        from edge_cam.train.detect.onnx_postproc import assert_cls_logits
+
+        # ADR-0007：检测 ONNX 必须出 logits（sigmoid 留 CPU，decode 负责）。喂 sigmoid'd 图 →
+        # decode 双重 sigmoid → 背景也过阈值 → 喷框。此门在 init 就拦（防呆，同 FP32-only 门）。
+        assert_cls_logits(onnx.load(onnx_path))
         self.sess = ort.InferenceSession(onnx_path, providers=["CPUExecutionProvider"])
         self.iname = self.sess.get_inputs()[0].name
         self.input_size = input_size

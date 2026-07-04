@@ -35,7 +35,8 @@ def export_nanodet_onnx(
 ) -> int:
     """调 NanoDet 自带 export_onnx.py 导 FP32 ONNX（后处理 decode/NMS 留 CPU，本仓负责）。
 
-    导出成功（returncode 0）后跑结构契约校验（FP32 静态 shape，与 classify 同一契约）。
+    导出成功后：① 剥 cls 头 Sigmoid → ONNX 出 **logits**（[[ADR-0007]]：sigmoid 留 A7 CPU，
+    否则 decode 双重 sigmoid 喷框）；② 结构契约校验（FP32 静态 shape，与 classify 同一契约）。
     """
     repo = Path(nanodet_repo)
     cmd = [
@@ -52,8 +53,13 @@ def export_nanodet_onnx(
     ]
     print(f"[nanodet] $ {' '.join(cmd)}")
     code = subprocess.run(cmd, cwd=str(repo), check=False).returncode
-    if code == 0 and verify:
-        _verify_exported(out_onnx)
+    if code == 0:
+        from edge_cam.train.detect.onnx_postproc import strip_and_verify
+
+        n = strip_and_verify(out_onnx)  # ADR-0007：剥 cls Sigmoid → logits + 契约门
+        print(f"[nanodet] ADR-0007 剥 cls Sigmoid {n} 个 → ONNX 出 logits（sigmoid 留 CPU）")
+        if verify:
+            _verify_exported(out_onnx)
     return code
 
 
