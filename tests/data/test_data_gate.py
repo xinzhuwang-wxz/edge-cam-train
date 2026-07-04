@@ -41,6 +41,23 @@ def test_gate_pass_all_good():
     assert r.passed, r.summary()
 
 
+def test_gate_imbalance_exempts_primary_bird():
+    """命门 bird 大幅主导**不**触发均衡；但次要类互相失衡（person≫squirrel）触发。"""
+    mb = {"bird": 1, "squirrel": 1, "person": 1}
+    # bird 50（命门主导）、squirrel 2、person 3 → 次要类 3/2=1.5 ≤ 6 → 均衡过
+    recs = [_rec("bird", [1, 1, 5, 5]) for _ in range(50)]
+    recs += [_rec("squirrel", [1, 1, 5, 5]) for _ in range(2)]
+    recs += [_rec("person", [1, 1, 5, 5]) for _ in range(3)]
+    r = gate(_mani(recs), min_boxes=mb, max_imbalance=6.0)
+    assert all(ok for n, ok, _ in r.checks if "均衡" in n), r.summary()  # bird 主导不算失衡
+    # 次要类失衡：person 20 vs squirrel 2 = 10 > 6 → 触发
+    recs2 = [_rec("bird", [1, 1, 5, 5]) for _ in range(50)]
+    recs2 += [_rec("squirrel", [1, 1, 5, 5]) for _ in range(2)]
+    recs2 += [_rec("person", [1, 1, 5, 5]) for _ in range(20)]
+    r2 = gate(_mani(recs2), min_boxes=mb, max_imbalance=6.0)
+    assert any("均衡" in n and not ok for n, ok, _ in r2.checks)
+
+
 def test_gate_fails_volume_shortfall():
     """bird 框不够 → 量检查 FAIL。"""
     recs = [_rec("bird", [10, 10, 20, 20])] + [_rec("squirrel", [10, 10, 20, 20])]  # bird 1<2

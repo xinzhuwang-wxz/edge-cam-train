@@ -54,6 +54,7 @@ class RoboflowFeederAdapter(CocoJsonAdapter):
         label_map: dict[str, str] | None = None,
         catch_all_label: str | None = None,  # 整集同粗类（feeder 集 N 鸟种全→bird）时设 "bird"
         license: str = "CC-BY-4.0",  # 逐个核（§4）
+        default_author: str | None = None,  # 缺省=数据集级 CC-BY 署名（聚合集无逐图作者）
         negative_quota: int | None = 0,
         max_per_class: int | dict[str, int] | None = None,
         **spec_overrides,
@@ -66,6 +67,8 @@ class RoboflowFeederAdapter(CocoJsonAdapter):
             raw_format="roboflow_coco",
             label_map=label_map or self.DEFAULT_LABEL_MAP,
             catch_all_label=catch_all_label,
+            # 聚合集无逐图作者 → 数据集级署名兑现 CC-BY（§4）：引 Roboflow 数据集本身
+            default_author=default_author or f"Roboflow Universe {workspace}/{project} (CC-BY-4.0)",
             license=license,
             commercial_safe=True,
             role="train",
