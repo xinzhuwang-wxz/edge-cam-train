@@ -81,9 +81,20 @@ def class_recall_by_any(
     return matched / total if total else 0.0
 
 
-def run_megadetector(records: list, raw_root: str, version: str, conf: float = 0.2) -> list[dict]:
+def run_megadetector(
+    records: list,
+    raw_root: str,
+    version: str,
+    conf: float = 0.2,
+    *,
+    weights: str | None = None,
+    device: str = "cuda",
+) -> list[dict]:
     """跑 MDV6（lazy import pytorch-wildlife，隔离 env）→ COCO 结果列表
     [{image_id, category_id, bbox[x,y,w,h], score}]。image_id 与 build_gt_coco_collapsed 对齐。
+
+    `weights`：本地权重路径。传了 → **离线直接加载**（绕开 pytorch-wildlife 用 wget 下 zenodo
+    权重，GFW 下被拒）；version 仍需传（PW 高层要它校验）。留空则按 version 走在线下载。
 
     ⚠️ pytorch-wildlife 版本间 API 略有差异；上 box 跑时按其文档核对 version 串与返回结构。
     """
@@ -91,7 +102,9 @@ def run_megadetector(records: list, raw_root: str, version: str, conf: float = 0
     from PIL import Image
     from PytorchWildlife.models import detection as pw_detection
 
-    model = pw_detection.MegaDetectorV6(pretrained=True, version=version)
+    model = pw_detection.MegaDetectorV6(
+        weights=weights, pretrained=True, version=version, device=device
+    )
     preds: list[dict] = []
     for img_id, r in enumerate(records):
         img = np.array(Image.open(Path(raw_root) / r.path).convert("RGB"))

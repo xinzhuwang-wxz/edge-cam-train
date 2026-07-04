@@ -77,14 +77,16 @@ def _image_meta(image_dir: Path, photo_ids: list[str]) -> tuple[list[dict], list
 def run_pseudolabel(
     image_dir: Path,
     *,
-    raw_root: str,
     out_json: Path,
-    version: str = "MDV6-apa-rtdetr",
+    version: str = "MDV6-yolov9-c",
     conf: float = 0.2,
+    weights: str | None = None,
+    device: str = "cuda",
 ) -> dict:
     """box/GPU：对 image_dir 下 iNat 图跑 MD → 写 inat_md_coco.json（保 score）。
 
     conf=0.2 作**下限**（低于此不出框，对齐 triage 的 conf_lo）；分层在 ③ 做。
+    `weights` 传本地权重路径 → 离线加载（绕 zenodo 下载，见 run_megadetector）。
     ⚠️ 上 box 前确认隔离 env 装了 pytorch-wildlife，且 version 串与其文档一致。
     """
     from edge_cam.eval.megadetector import run_megadetector
@@ -94,7 +96,11 @@ def run_pseudolabel(
     # run_megadetector 的 image_id = records 下标 → 与 images[].id 对齐（_image_meta 同序构建）
     for i, img in enumerate(images):
         img["id"] = i
-    preds = run_megadetector(records, raw_root, version, conf=conf)
+    # file_name 相对 SUBPATH（如 images/<id>.jpg，供 InatMdAdapter image_root=SUBPATH 读）→
+    # MD 读图根用 image_dir.parent（=raw_root/commercial/inat_md），不是外层 raw_root
+    preds = run_megadetector(
+        records, str(image_dir.parent), version, conf=conf, weights=weights, device=device
+    )
     coco = build_pseudolabel_coco(images, preds)
     out_json.write_text(json.dumps(coco, ensure_ascii=False))
     print(
