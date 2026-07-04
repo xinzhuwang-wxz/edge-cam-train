@@ -27,6 +27,10 @@ datasets:
   roboflow_meproject: {} # ★ 真 feeder-cam 定拍（时间戳），观鸟器域金标准（819）
   roboflow_birdv2: # 清晰鸟类摄影 36 种→bird（3762 源/8658 增强），cap 避增强冗余主导
     max_per_class: { bird: 4000 }
+  # ── 后院域 squirrel/cat/person（补单域+尺度短板，大尺度不滤）──
+  roboflow_csp: {} # 后院 cat/squirrel/person 大尺度（中位 25.5%），显式 3 类 map
+  roboflow_squirreldet: {} # 后院松鼠大尺度（中位 28.5%）→ squirrel
+
   # ── iNat（降级：域错配，只收 auto 清晰子集 + 选中等尺度；不做 LS 人审）──
   inat_md: # auto（md_pseudo，1209 清晰鸟），读 inat_md_coco.json
     min_box_area_frac: 0.005 # 同样选中等尺度（去 iNat 残留远景）

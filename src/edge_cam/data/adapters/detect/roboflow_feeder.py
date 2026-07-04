@@ -159,6 +159,35 @@ class RoboflowMeprojectAdapter(RoboflowFeederAdapter):
         super().__init__(raw_root, **kw)
 
 
+class RoboflowCspAdapter(RoboflowFeederAdapter):
+    """hakunamatata/cat_squirrel_person（CC-BY-4.0）：**后院域 cat/squirrel/person 大尺度**
+    （中位 25.5%，非相机陷阱远景）→ 补 squirrel/cat/person 单域+尺度短板。多类**显式 map**
+    （非 catch_all）；id0 空根类 squirrels-people-cats 丢。"""
+
+    def __init__(self, raw_root: str, **kw) -> None:
+        kw.setdefault("name", "roboflow_csp")
+        kw.setdefault("workspace", "hakunamatata")
+        kw.setdefault("project", "cat_squirrel_person")
+        kw.setdefault("version", 1)
+        kw.setdefault("label_map", {"cat": "cat", "squirrel": "squirrel", "person": "person"})
+        super().__init__(raw_root, **kw)
+
+
+class RoboflowSquirrelDetAdapter(RoboflowFeederAdapter):
+    """lennys-workspace/squirrel-detector（CC-BY-4.0）：**后院/花园松鼠大尺度**（中位 28.5%）
+    → 补 squirrel 尺度短板。Squirrel/squirrel 大小写变体全 → squirrel（catch_all）。"""
+
+    def __init__(self, raw_root: str, **kw) -> None:
+        kw.setdefault("name", "roboflow_squirreldet")
+        kw.setdefault("workspace", "lennys-workspace")
+        kw.setdefault("project", "squirrel-detector-aaeqd")
+        kw.setdefault("version", 1)
+        kw.setdefault("catch_all_label", "squirrel")  # Squirrel/squirrel → squirrel
+        super().__init__(raw_root, **kw)
+
+
 register_adapter("roboflow_feeder", RoboflowFeederAdapter)
 register_adapter("roboflow_birdv2", RoboflowBirdV2Adapter)
 register_adapter("roboflow_meproject", RoboflowMeprojectAdapter)
+register_adapter("roboflow_csp", RoboflowCspAdapter)
+register_adapter("roboflow_squirreldet", RoboflowSquirrelDetAdapter)
