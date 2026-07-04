@@ -108,9 +108,65 @@ def class_recall(
 
 
 def recall_rate(counts: tuple[int, int]) -> float:
-    """(matched, total) → 召回率（total=0 → 0.0）。"""
+    """(matched, total) → 比率（total=0 → 0.0）。召回=命中/GT；查准=TP/预测框（同式）。"""
     matched, total = counts
     return matched / total if total else 0.0
+
+
+def _greedy_match(
+    gt_boxes: list[list[float]], preds: list[Pred], *, conf: float, iou_thr: float
+) -> tuple[int, int]:
+    """(tp, n_pred)：score≥conf 的 pred 按分降序**贪心 1-to-1** 配 gt_boxes（每 GT 至多配一次）。
+
+    TP=配上的 pred 数；n_pred=参与 pred 总数（含空图无 GT 可配的误框，全记 FP）。"""
+    strong = sorted((p for p in preds if p.score >= conf), key=lambda p: p.score, reverse=True)
+    used = [False] * len(gt_boxes)
+    tp = 0
+    for p in strong:
+        best, best_iou = -1, iou_thr
+        for gi, g in enumerate(gt_boxes):
+            if used[gi]:
+                continue
+            i = iou_xywh(g, p.bbox)
+            if i >= best_iou:
+                best, best_iou = gi, i
+        if best >= 0:
+            used[best] = True
+            tp += 1
+    return tp, len(strong)
+
+
+def class_precision(
+    manifest: DetectionManifest,
+    preds: list[Pred],
+    *,
+    gt_classes: set[str] | frozenset[str],
+    match_labels: set[str] | frozenset[str],
+    conf: float = 0.3,
+    iou_thr: float = 0.5,
+) -> dict[str, tuple[int, int]]:
+    """按源+总体查准：（label∈match_labels 且 score≥conf）框里，贪心配到 gt_classes GT 的占比。
+
+    返回 `{source: (tp, n_pred), ...}`——`recall_rate` 一除即查准率。
+    **空背景图（该源无此类 GT）上的框全算 FP** → 自动惩罚"不该框的误框"，无需另算负样本误报。
+    """
+    gt_ids = {FEEDER5_CATEGORIES[c] for c in gt_classes}
+    preds_by_img: dict[int, list[Pred]] = {}
+    for p in preds:
+        if p.label in match_labels:
+            preds_by_img.setdefault(p.image_id, []).append(p)
+    agg: dict[str, list[int]] = {}
+    for img_id, r in enumerate(manifest.records):
+        img_preds = preds_by_img.get(img_id, [])
+        if not img_preds:
+            continue  # 该图没画框 → 不影响查准（查准只问"画出的框对不对"）
+        gt = [list(b.bbox) for b in r.boxes if b.category_id in gt_ids]
+        tp, npred = _greedy_match(gt, img_preds, conf=conf, iou_thr=iou_thr)
+        for key in (r.source or "unknown", "__all__"):
+            slot = agg.setdefault(key, [0, 0])
+            slot[0] += tp
+            slot[1] += npred
+    return {k: (v[0], v[1]) for k, v in agg.items()}
 
 
 def bird_recall_curve(
