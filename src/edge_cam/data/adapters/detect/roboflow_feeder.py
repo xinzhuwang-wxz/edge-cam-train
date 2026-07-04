@@ -25,6 +25,13 @@ class RoboflowFeederAdapter(CocoJsonAdapter):
 
     # 占位 label_map（上 box audit_unmapped 据实 export 校正）。喂食器常见类目 → 5 类。
     DEFAULT_LABEL_MAP: dict[str, str] = {
+        # bird-recognition/bird-feeder v4 实核 5 种鸟（audit 2026-07-04）→ bird（细分交分类器）
+        "house_sparrow": "bird",
+        "coal_tit": "bird",
+        "great_tit": "bird",
+        "blackbird": "bird",
+        "blue_tit": "bird",
+        # 通用别名（其它 feeder 项目 / 手动 override 用）
         "bird": "bird",
         "Bird": "bird",
         "squirrel": "squirrel",
