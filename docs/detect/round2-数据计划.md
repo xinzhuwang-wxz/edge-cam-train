@@ -55,9 +55,49 @@
 - **许可红线（§4）**：iNat 收紧 CC0/CC-BY（去一切 NC）；Roboflow 逐个核；teacher(MD MIT) 干净。
 - **导出 = ONNX 出 logits**（[[ADR-0007]] #59 已落地，round2 训练产的 ONNX 自动剥 Sigmoid，不再喷框）。
 
-## 6. 前置/阻塞
+## 6. 训练前**数据门**（硬 gate，不达标不训）
+
+用户要求"训练前数据质量和数据量都要过关"。`build` 后、训练前跑 `edge_cam.data.gate.gate(manifest)`
+（纯函数、6 测试，`src/edge_cam/data/gate.py`），**不 pass 就拦训练**。查：
+
+| 项 | 判据 | 抓什么 |
+|---|---|---|
+| **数据量** | 每类框数 ≥ §3 目标（bird 8k / person 4k / squirrel·cat 2k） | 命门够不够 |
+| **均衡** | max/min 类框数比 ≤ 6 | round1 曾 5:1 失衡 |
+| **框坐标合理** | 无超界 / 零负面积框 | [[CCT 坐标 bug]] 式错位（框比图大 2 倍） |
+| **许可(§4)** | 逐图 license 全商用白名单 | NC/unknown 红线 |
+| **CC-BY 署名** | CC-BY 图有 author/original_url | §4 逐图署名兑现 |
+| **伪标注信任** | md_pseudo 未审占比（提示） | MD 伪标注占比 vs LS 复核策略 |
+
+## 7. Scaling 研究（训练时看**参数 + 数据量**的 scaling）
+
+用户要求"训练时看到 scaling 状况（参数/数据量）"。两条 1D 扫（Hydra multirun，`eval/ablation` harness）：
+
+- **数据量 scaling**：NanoDet-416 固定，训练集取 **{12.5, 25, 50, 100}%**（按内容 hash 确定性子集）→
+  同一 held-out test 评 → **bird AP50 vs 数据量曲线**。答："数据够没够/边际收益还在不在"（=你的"数据量过关"）。
+- **参数 scaling**：数据固定 100%，NanoDet backbone **{0.5x, 1.0x, 1.5x}** ShuffleNet → 评 →
+  **bird AP50 vs 参数曲线**。答："1.0x 够不够 / 1.5x 值不值"（1T/128MB 尤其看这条）。
+
+**训练时可见**：① 每个 run 逐 epoch 记 bird AP50 val 曲线（NanoDet/mmdet 原生）；② 一个 scaling 汇总器
+随 run 完成**实时更新两张曲线 + 表**（数据% / 参数 → bird AP50）。产出 `results/detect/round2/scaling_报告`。
+**先过 §6 数据门再开扫**。
+
+## 8. 数据管线打磨（round2 = ADR-0006 管线首次端到端真跑）
+
+round2 是 `acquire → MD 伪标注 → LS → build → gate` 全链路**第一次在新源真跑**——很多毛边只有真跑才暴露，
+正是打磨管线的时机。**纪律：每趟真跑遇到的毛边即时修 + 补测试/文档，让管线"跑一次=稳一分"。** 已知毛边：
+
+- **Roboflow adapter `label_map` 是占位**（其 docstring 注明）→ 上 box 拿真实 export 后跑 `audit_unmapped()`
+  据实校正类目字符串 + 逐个核许可（§4）。
+- **MD 伪标注步骤未进管线**（独立 GPU 阶段）→ 打磨成可复现脚本（iNat 图 → MD → `md_pseudo` COCO + 收据）。
+- **LS 复核回流**：`md_pseudo → md_human_verified` 的 Label Studio ↔ manifest 导出/导入闭环打通。
+- **数据门进 build 尾**：`build` 后自动跑 `gate()` + 报告（gate 已建 `data/gate.py`，wire 进 build 流）。
+- **逐图 provenance/署名**：新源 author/original_url 真填（CC-BY 兑现，gate 已查缺失）。
+- **可复现**：`acquire` 收据（sha256/version）+ 确定性 split，换机零考古（ADR-0006 D1）。
+
+## 9. 前置/阻塞
 
 - **你（用户）**：申请 **Roboflow 访问 + 拿 `ROBOFLOW_API_KEY`**（feeder 域 + person 选2 卡这，最大短板源）。
-- **box GPU**：iNat MD 伪标注 + NanoDet round2 微调（GPU 已停，需重开）。
+- **box GPU**：iNat MD 伪标注 + scaling 扫（数据×参数 多 run）（GPU 已停，需重开）。
 - **LS 实例**：Label Studio 搭起来（低置信+稀有类人审）。
 - 相关 issue：#60（round2 微调，本计划的执行）。加源 = box 上 `acquire`+`build`，零改代码（ADR-0006）。

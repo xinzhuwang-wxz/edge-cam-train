@@ -96,6 +96,19 @@ def build(cfg: DetectBuildConfig) -> Path:
         json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8"
     )
     print(f"[detect-build] {out} : {summary}")
+
+    # round2 数据门（量/均衡/框合理/许可/署名，data/gate.py）——build 尾报告，训练前须 PASS。
+    # 用 round2 默认目标（bird 8k 等）；round1 数据会提示未达标，属预期。
+    from edge_cam.data.gate import gate as run_data_gate
+
+    for key, m in manifests.items():
+        if not any(r.split == "train" for r in m.records):
+            continue
+        rep = run_data_gate(m, split="train")
+        (out / f"gate_{key}.txt").write_text(rep.summary(), encoding="utf-8")
+        print(rep.summary())
+        if not rep.passed:
+            print(f"[detect-build] ⚠️ 数据门未过（{key}）：训练前须修（不达标不训）")
     return out
 
 
