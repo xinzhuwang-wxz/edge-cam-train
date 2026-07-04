@@ -14,6 +14,8 @@ from pathlib import Path
 
 import yaml
 
+from edge_cam.contracts.schemas.detect_preprocess import NANODET_PREPROCESS, DetectorPreprocess
+
 # 锁定的 NanoDet commit（engineering §2：release 停 2023-03，fork 锁版）
 NANODET_PINNED_COMMIT = "be9b4a9001d7f9b6fc89c2df31ae8d428e35b4f0"
 
@@ -34,6 +36,7 @@ def patch_nanodet_config(
     batch_size: int = 96,
     workers: int = 10,
     load_model: str | None = None,
+    preprocess: DetectorPreprocess = NANODET_PREPROCESS,
 ) -> dict:
     """在官方模板基础上覆盖我们需要的字段，返回新 config dict（不改入参）。
 
@@ -52,6 +55,12 @@ def patch_nanodet_config(
         cfg["data"][split]["img_path"] = img
         cfg["data"][split]["ann_path"] = ann
         cfg["data"][split]["input_size"] = [input_size, input_size]
+        cfg["data"][split]["keep_ratio"] = preprocess.keep_ratio
+        # 归一化从**单一真值源**写入（覆盖模板自带的另一份 → 与推理 OnnxDetector 同源，防漂移）
+        cfg["data"][split].setdefault("pipeline", {})["normalize"] = [
+            list(preprocess.mean_bgr),
+            list(preprocess.std_bgr),
+        ]
 
     cfg["device"]["gpu_ids"] = list(gpu_ids)
     cfg["device"]["batchsize_per_gpu"] = batch_size
