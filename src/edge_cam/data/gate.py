@@ -18,8 +18,9 @@ from dataclasses import dataclass, field
 
 from edge_cam.contracts.schemas.detection_manifest import DetectionManifest
 
-# round2 每类**最少**框数目标（other_animal 是压上限、不设下限；docs/detect/round2-数据计划.md §3）
-ROUND2_MIN_BOXES: dict[str, int] = {"bird": 8000, "person": 4000, "squirrel": 2000, "cat": 2000}
+# 每类**最少**框数目标——按**产品角色+检测难度**分配（非平均）：bird=命门最多、person 只需检到有人
+# （易检，够即可）、squirrel/cat 够区分、other_animal 压上限不设下限。见 round2-数据计划 §3。
+ROUND2_MIN_BOXES: dict[str, int] = {"bird": 10000, "person": 3000, "squirrel": 2000, "cat": 2000}
 
 # §4 商用许可白名单（SPDX/常见写法）；不在此列（含 unknown / 任何 NC）= 红线拦。
 COMMERCIAL_LICENSES: frozenset[str] = frozenset(
@@ -65,7 +66,7 @@ def gate(
     *,
     split: str | None = "train",
     min_boxes: dict[str, int] | None = None,
-    max_imbalance: float = 6.0,
+    max_imbalance: float = 8.0,  # 允许命门 bird 有意主导；抓的是"病态失衡"（如 round1 bird 被压）
     bounds_tol: float = 1.02,
 ) -> DataGateReport:
     """数据门：量 + 均衡 + 框合理 + 许可 + 署名 + 信任分层。返回 DataGateReport。"""

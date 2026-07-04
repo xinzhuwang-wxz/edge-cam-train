@@ -44,9 +44,13 @@
 
 | 类 | round1 框 | 问题 | **round2 目标(框)** | 来源 |
 |---|---|---|---|---|
-| **bird** | 1620 | 命门偏少 | **~8–10k** | round1 + OIV7 + iNat(MD) + Roboflow |
-| **person** | **0** | 缺一类 | **~4–6k** | OIV7(cap 8000) + Roboflow feeder 人 |
+| **bird** | 1620 | 命门偏少 | **~10–12k（最多）** | round1 + OIV7 + iNat(MD) + Roboflow(3150 feeder 域) |
+| **person** | **0** | 缺一类 | **~3k（够检到有人即可，不用认是谁）** | OIV7（cap 调至 ~3k） |
 | other_animal | 8428 | 过载 5:1 | **压到 ~4–5k**（`max_per_class` 调低） | ENA24/CCT（够，压即可） |
+
+> **分配原则**（非平均）：按**产品角色 + 检测难度**——bird=命门(漏=链路失效+要细分)故最多；person 只需
+> "检到有人→抑制告警"(不认身份、人易检)故 ~3k 够；squirrel/cat 够区分；other_animal 压上限。bird 有意
+> 主导不算失衡（数据门 `max_imbalance=8` 允许，抓的是命门被压那种病态）。
 | squirrel | 1062 | 稀缺 | 尽量补 **~2–3k** | round1 + iNat/Roboflow（数据可得上限，接受偏低） |
 | cat | 873 | 偏少 | **~2–3k** | round1 + OIV7/iNat |
 
@@ -79,7 +83,7 @@
 
 | 项 | 判据 | 抓什么 |
 |---|---|---|
-| **数据量** | 每类框数 ≥ §3 目标（bird 8k / person 4k / squirrel·cat 2k） | 命门够不够 |
+| **数据量** | 每类框数 ≥ §3 目标（bird 10k / person 3k / squirrel·cat 2k） | 命门够不够 |
 | **均衡** | max/min 类框数比 ≤ 6 | round1 曾 5:1 失衡 |
 | **框坐标合理** | 无超界 / 零负面积框 | [[CCT 坐标 bug]] 式错位（框比图大 2 倍） |
 | **许可(§4)** | 逐图 license 全商用白名单 | NC/unknown 红线 |
