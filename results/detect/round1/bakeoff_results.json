@@ -1,0 +1,30 @@
+{
+  "_note": "决策② bake-off：RTMDet-tiny vs NanoDet-Plus-m 416，各 24ep 微调 ENA24+CCT，test_sub(2500) 原生 pycocotools COCOeval。决策看命门 bird。",
+  "native_cocoeval_test_sub": {
+    "nanodet_plus_m_416": {
+      "params_M": 1.2, "input": 416,
+      "bird_AP50": 0.774, "bird_mAP": 0.491,
+      "squirrel_AP50": 0.516, "cat_AP50": 0.244, "other_animal_AP50": 0.725, "person_AP50": null,
+      "overall_mAP": 0.354, "overall_AP50": 0.565
+    },
+    "rtmdet_tiny": {
+      "params_M": 4.8, "input": 640,
+      "bird_AP50": 0.483, "bird_mAP": 0.324,
+      "squirrel_mAP": 0.412, "cat_mAP": 0.415, "other_animal_mAP": 0.460, "person_mAP": null,
+      "overall_mAP": 0.403, "overall_AP50": 0.631
+    }
+  },
+  "rtmdet_tiny_ft_clean_recall_detinferencer": {
+    "_note": "RTMDet 走 mmdet 原生后处理，干净(2.5框/图)。conf=0.2 IoU=0.5。",
+    "bird_recall": {"ena24": 0.97, "caltech_ct": 0.651, "__all__": 0.85},
+    "bird_precision": {"ena24": 0.707, "caltech_ct": 0.289, "__all__": 0.50},
+    "anyanimal_recall": {"__all__": 0.888}, "anyanimal_precision": {"__all__": 0.402},
+    "squirrel_recall": {"__all__": 0.713}, "n_preds": 6165
+  },
+  "nanodet_ft_onnx_recall": {
+    "_note": "⚠️ 不可信：decode_nanodet spray，n_preds 348万(1394框/图)、查准 0.001。见报告 §7。决策用上面原生 COCOeval。",
+    "n_preds": 3485117, "bird_precision__all__": 0.001
+  },
+  "decision": "留 NanoDet-Plus-m 416（命门 bird AP50 0.774 vs RTMDet 0.483，+29pt；且 4× 小 1.2M vs 4.8M）",
+  "caveats": ["输入 416 vs 640 不同（RTMDet 分辨率更高仍输 bird，结论更稳）", "都 24ep 微调（RTMDet 或欠拟合）"]
+}
