@@ -128,3 +128,13 @@ def test_new_feeder_adapters_registered() -> None:
         assert ad.spec.name == name and ad.spec.catch_all_label == "bird"
         assert ad.spec.acquire.urls[0].startswith(f"https://universe.roboflow.com/{ws}/")
         assert ad._subpath == f"commercial/{name}"  # 各自独立盘位，不撞
+
+
+def test_backyard_squirrel_cat_adapters() -> None:
+    """后院 squirrel/cat/person 补域集：csp 显式 3 类 map、squirreldet catch_all=squirrel。"""
+    csp = build_adapter("roboflow_csp", "raw")
+    assert csp.spec.name == "roboflow_csp" and csp.spec.catch_all_label is None
+    assert csp.spec.label_map == {"cat": "cat", "squirrel": "squirrel", "person": "person"}
+    sd = build_adapter("roboflow_squirreldet", "raw")
+    assert sd.spec.catch_all_label == "squirrel"
+    assert sd._subpath == "commercial/roboflow_squirreldet"
