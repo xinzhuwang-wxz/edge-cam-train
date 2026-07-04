@@ -21,6 +21,8 @@ from edge_cam.data.adapters.detect.base import AcquireSpec, DatasetSpec, registe
 from edge_cam.data.adapters.detect.coco_json import CocoJsonAdapter
 from edge_cam.data.adapters.detect.fiftyone_oiv7 import OIV7_LABEL_MAP
 
+csv.field_size_limit(10**7)  # OIV6 bbox CSV 大/长行 → 抬 csv 字段上限（默认 128KB 会 _csv.Error）
+
 # 目标 MID → OIV7 display name（核验；只取动物 Mouse，不取 Computer mouse）。
 OIV7_MIDS: dict[str, str] = {
     "/m/015p6": "Bird",
