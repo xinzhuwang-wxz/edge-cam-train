@@ -45,3 +45,6 @@ lightning_logs/
 third_party/
 weights/
 results/**/*.pth
+
+# 本地审查产物（大，含内嵌图，不入库）
+检测数据集_*.html
