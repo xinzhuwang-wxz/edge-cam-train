@@ -14,6 +14,7 @@ from edge_cam.eval.zeroshot_eval import (
     MD_FOLD,
     Pred,
     bird_recall_curve,
+    class_precision,
     class_recall,
     preds_from_coco,
     recall_at_conf,
@@ -123,6 +124,29 @@ def test_md_animal_hits_bird_gt():
     # any-animal：bird+squirrel 都被 animal 命中
     anyani = class_recall(m, preds, gt_classes=ANIMAL_CLASSES, match_labels={"animal"}, conf=0.3)
     assert anyani["ena24"] == (2, 2)  # e0 bird + e1 squirrel 都命中
+
+
+def test_class_precision_tp_fp_and_empty_image_false_alarm():
+    """查准：画出的框里几成对。含"空图误框全算 FP"（e0 有 bird GT，c0/e1 无 bird GT）。"""
+    m = _manifest()  # e0=bird GT, e1=squirrel GT, c0=bird GT
+    preds = [
+        Pred(0, "bird", [11, 11, 20, 20], 0.9),  # e0：命中 bird GT → TP
+        Pred(1, "bird", [50, 50, 20, 20], 0.9),  # e1：该图无 bird GT（是 squirrel）→ 误框 FP
+    ]
+    p = class_precision(m, preds, gt_classes={"bird"}, match_labels={"bird"}, conf=0.3)
+    assert p["ena24"] == (1, 2)  # e0 TP + e1 FP → 查准 1/2
+    assert recall_rate(p["ena24"]) == 0.5
+
+
+def test_class_precision_two_preds_one_gt_greedy():
+    """两个框蒙同一只鸟：贪心 1-to-1 → 只 1 个算对，另一个 FP（不双记）。"""
+    m = _manifest()
+    preds = [
+        Pred(0, "bird", [11, 11, 20, 20], 0.9),  # 命中 e0 bird → TP
+        Pred(0, "bird", [12, 12, 20, 20], 0.8),  # 同一 GT 已被占 → FP
+    ]
+    p = class_precision(m, preds, gt_classes={"bird"}, match_labels={"bird"}, conf=0.3)
+    assert p["ena24"] == (1, 2)  # 1 TP / 2 预测框
 
 
 def test_bird_recall_curve_over_confs():
