@@ -202,8 +202,13 @@ class DetectionDatasetAdapter(ABC):
             raise ValueError(f"{self.name}: 未声明 acquire（DatasetSpec.acquire=None）")
         dest = self.raw_dir(raw_root)
         dest.mkdir(parents=True, exist_ok=True)
-        if acq.method != "manual" and not self._checksums_ok(dest, acq.archive_sha256):
-            self._fetch(dest)  # 子类网络下载（幂等：已通过校验则不进来）
+        # 幂等门：**有声明 checksum 且全通过**才跳下载；否则必 fetch。
+        # 修 bug：动态源 archive_sha256 空 → `_checksums_ok` 空真 → 曾误跳 `_fetch` 致 0 图。
+        # 无 checksum=无法证明已下完 → 必 fetch（`_fetch` 内部自幂等：跳已下）。
+        if acq.method != "manual" and not (
+            acq.archive_sha256 and self._checksums_ok(dest, acq.archive_sha256)
+        ):
+            self._fetch(dest)  # 子类网络下载
         self._verify_checksums(dest, acq.archive_sha256)
         receipt = AcquireReceipt(
             source=self.name,
