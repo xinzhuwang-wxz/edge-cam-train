@@ -68,7 +68,8 @@ def select_images(csv_path: Path, caps: dict[str, int]) -> dict[str, list[tuple[
     counts: dict[str, int] = dict.fromkeys(caps, 0)
     kept: set[str] = set()
     with csv_path.open(newline="", encoding="utf-8") as fh:
-        reader = csv.reader(fh)
+        # QUOTE_NONE：OIV6 CSV 无引号字段；默认解析遇杂引号会读到下个引号=巨字段（_csv.Error）
+        reader = csv.reader(fh, quoting=csv.QUOTE_NONE)
         next(reader, None)  # header
         for row in reader:
             name = OIV7_MIDS.get(row[2])
