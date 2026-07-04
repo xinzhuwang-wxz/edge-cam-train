@@ -13,12 +13,13 @@ import numpy as np
 from PIL import Image
 
 from edge_cam.cascade.pipeline import Detection
+from edge_cam.contracts.schemas.detect_preprocess import NANODET_PREPROCESS
 
 _IM_MEAN = np.array([0.485, 0.456, 0.406], np.float32)
 _IM_STD = np.array([0.229, 0.224, 0.225], np.float32)
-# NanoDet 输入归一(BGR,plan/config)
-_DET_MEAN = np.array([103.53, 116.28, 123.675], np.float32)
-_DET_STD = np.array([57.375, 57.12, 58.395], np.float32)
+# NanoDet 输入归一(BGR)——**从单一真值源派生**（train/inference 不漂移，见 detect_preprocess）
+_DET_MEAN = np.array(NANODET_PREPROCESS.mean_bgr, np.float32)
+_DET_STD = np.array(NANODET_PREPROCESS.std_bgr, np.float32)
 
 
 def _softmax(x: np.ndarray, axis: int = -1) -> np.ndarray:
@@ -139,7 +140,7 @@ class OnnxDetector:
     def __init__(
         self,
         onnx_path: str,
-        input_size: int = 416,
+        input_size: int = NANODET_PREPROCESS.input_size,  # 单一真值源（不再散写 416）
         num_classes: int = 11,
         conf_thr: float = 0.3,
         nms_iou: float = 0.6,
