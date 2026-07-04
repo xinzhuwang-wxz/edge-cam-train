@@ -3,15 +3,17 @@
 > Stage 2「定靶」产物：沉淀领域语言 + 已锁定决策。配合 `docs/decisions/`（ADR）一起读。
 > 文档背景见 `docs/plan-v2.md`（what/why）、`docs/engineering.md`（how）。
 
-## 当前焦点（2026-06）
+## 当前焦点（2026-07）
 
 **问题**：在没有 V85x 板子的前提下，回答「**微调后的模型能不能达成目标**」。
 **策略**：精度问题可在 dev/GPU（AutoDL 租卡）离线闭环；上板只影响延迟/内存/INT8 实测三列。
-**进度**：检测 + 分类**双侧均已租卡首训**——检测 NanoDet-Plus 320/416 已训（bird 召回 fp32 87.6%↑ / int8 84.1%，命门守住）；
-分类 v1/v2 crop 消融 + 区域评估已跑（field top-1 0.37→0.63）；可行性包络 ①→④、消融 harness、发布链（promotion）全接通；
-地域过滤（US eBird 包）就绪；三份实验报告成文（`results/{detect,classify,实验1}`）。
-下一步 = 补检测量化包络/gate 收口（缺端到端入口，见 `results/detect/feeder_320/README` 流程位置）+ 租卡跑余下
-B.2 PicoDet 对照(#8) / B.3 distill(#7) / B.5 季节 mask(#10)。
+**进度**：检测 + 分类**双侧均已租卡首训**；分类 v1/v2 crop 消融 + 区域评估已跑（field top-1 0.37→0.63）；
+可行性包络 ①→④、消融 harness、发布链（promotion）全接通；地域过滤（US eBird 包）就绪。
+**检测 round1 收官（2026-07-04）**：决策① MD 教师 PASS、决策② **留 NanoDet-Plus-m 416**（命门 bird AP50
+0.774 ≫ RTMDet 0.483）、CCT 坐标 bug 修复、**decode 喷框根因定位 → [[ADR-0007]]**（ONNX 出 logits、
+sigmoid 留 CPU）。报告 `results/detect/round1/`。
+**下一步（round2）** = ① 落地 ADR-0007（导出剥 Sigmoid + logits 契约门，修 cascade `OnnxDetector` 喷框隐患）；
+② 用 MD 教师给 iNat/feeder 新源伪标注 → NanoDet-416 round2 微调（补域覆盖）；③ 检测量化包络/gate 收口。
 
 ## 可行性包络（「能否达标」的判定链）
 
@@ -74,6 +76,26 @@ B.2 PicoDet 对照(#8) / B.3 distill(#7) / B.5 季节 mask(#10)。
 > 注：检测器**已不在「不做」之列**——数据/config/评测/搭建脚本备齐（issue #2 已闭），且 320/416 两档**已首训**（见下 Changelog）。
 
 ## 变更记录（Changelog）
+
+**2026-07-04 · 检测 round1：零样本谱 + bake-off 决策② + decode 根因**（[[ADR-0007]]；报告 `results/detect/round1/`）
+- **决策① MD 能当教师 = PASS**：带框 test_sub(ENA24+CCT) 上 MD any-animal 召回 **0.83**、bird 0.851、
+  squirrel 0.783 → round2 敢用 MD 给 iNat 伪标注。（过程挖出 **CCT 坐标 bug**：ECCV18 注解原分辨率 vs sm
+  图 0.5× → GT 框大 2 倍、零重叠 → 召回全 0；`CaltechCtAdapter.load_raw` 逐图缩放修复 + 3 测试，PR #51。）
+- **决策② round2 骨干 = 留 NanoDet-Plus-m 416**：2 路微调 bake-off（各 24ep，原生 COCOeval）——
+  **命门 bird AP50 NanoDet 0.774 ≫ RTMDet-tiny 0.483（+29pt）**，且 4× 小（1.2M vs 4.8M）。整体 mAP
+  RTMDet 略高（0.403 vs 0.354）但把 bird 稀释了——**"整体 mAP 不直观"的活例**，按命门 bird 判 NanoDet 赢。
+  （用 RTMDet-tiny/RTMDet-s 因性能优先入选，非部署友好性；MMDet env 装成 mmdet3.3/mmcv2.1/torch2.1，
+  坑：aliyun 不镜像 openmmlab→走 pypi、**numpy2 与 torch `.numpy()` bridge 不兼容**→降 numpy1.26。）
+- **decode_nanodet 喷框根因定位 → [[ADR-0007]]**：本仓 numpy 解码在真实 ONNX 上喷 ~1300 框/图、查准≈0.001。
+  诊断（非猜）：**NanoDet export 把 sigmoid 烤进图**（cls 输出 [0,1]），decode 又 sigmoid → 双重 → 背景
+  0→0.5 也过阈值。**框是对的、是分数被压平**。修法（ADR-0007）：ONNX 出 logits、sigmoid 留 CPU（收紧 §4）；
+  验证去双 sigmoid 后 feeder 框数 1261→**0.57/图**、查准 0.001→**0.896**。cascade `OnnxDetector` 同款隐患。
+- **eval 增强**：`class_precision`（贪心 1-to-1 查准，空图误框自动 FP）配 `class_recall`（用户反馈 mAP 不直观，
+  出"召回+查准"两列，PR #54）；`zeroshot_eval` 泛化任意检测器（MD/NanoDet/RTMDet 同一把尺子）。
+- **三方对比（bird）**：MD(25M) 召回 0.851 ≈ NanoDet-416-FT(1.2M) 估 ~0.80-0.85 → **片上小模型本域追平大教师**
+  （教师优势在泛化非本域精度，验证两段式+微调路线）。产物：`results/detect/round1/`（报告 + 6 json）。
+- **round2 follow-up**：ADR-0007 落地（导出剥 Sigmoid 节点 + logits 契约门）；补 feeder/iNat 新源数据（box）；
+  RTMDet 若翻盘可加长训练。
 
 **2026-07-04 · 检测数据集管线完全重写**（[[ADR-0006]]：标准化获取 + 透明化溯源 + JSONL）
 - **原则 D0**：不新旧并存——新管线上线即替换旧路径（经 critic 独立 verify：REVISE→并入 3 MAJOR + 遗漏项）。
