@@ -73,8 +73,11 @@
 
 用户要求"训练时看到 scaling 状况（参数/数据量）"。两条 1D 扫（Hydra multirun，`eval/ablation` harness）：
 
-- **数据量 scaling**：NanoDet-416 固定，训练集取 **{12.5, 25, 50, 100}%**（按内容 hash 确定性子集）→
-  同一 held-out test 评 → **bird AP50 vs 数据量曲线**。答："数据够没够/边际收益还在不在"（=你的"数据量过关"）。
+- **数据量 scaling**：NanoDet-416 固定，训练集取 **{12.5, 25, 50, 100}%** → 同一 held-out test 评 →
+  **bird AP50 vs 数据量曲线**。答："数据够没够/边际收益还在不在"（=你的"数据量过关"）。
+  **机制**（`data/scaling.py` `subsample_train`，纯函数+4 测试）：**图存一份**（raw_root），JSONL manifest 只存
+  引用 → 子集 = records 子集、**零图复制**；**只抽 train、val/test 固定**（同一 held-out 才可比）；按 `path`
+  hash 确定性取前 frac、**嵌套**（20%⊂50%⊂100%，"加数据"是真加）。每 run 一个 frac，不改原始文件。
 - **参数 scaling**：数据固定 100%，NanoDet backbone **{0.5x, 1.0x, 1.5x}** ShuffleNet → 评 →
   **bird AP50 vs 参数曲线**。答："1.0x 够不够 / 1.5x 值不值"（1T/128MB 尤其看这条）。
 
