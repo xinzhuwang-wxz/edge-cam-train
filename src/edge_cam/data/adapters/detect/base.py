@@ -85,12 +85,17 @@ class DatasetSpec:
     negative_quota: int | None = 0  # 保留多少无框负样本（0=不留，None=全留，N=确定性留前 N）
     split_ratios: tuple[float, float, float] = (0.7, 0.15, 0.15)  # train/val/test（可配）
     attribution: bool = False  # 是否需逐图署名清册（OIV7/Roboflow 商用）
+    # 未在 label_map 命中的源标签的兜底映射（None=丢弃）。用于"整集同一粗类"的源
+    # （如 Roboflow feeder 集 36 鸟种全 → bird），免逐个硬列、免漏种。
+    catch_all_label: str | None = None
     acquire: AcquireSpec | None = None  # 获取声明（ADR-0006 D1）；None=该 adapter 暂未声明获取
 
     def __post_init__(self) -> None:
         bad = set(self.label_map.values()) - set(FEEDER5_CATEGORIES)
         if bad:
             raise ValueError(f"{self.name}: label_map 目标含非 5 类 {sorted(bad)}")
+        if self.catch_all_label is not None and self.catch_all_label not in FEEDER5_CATEGORIES:
+            raise ValueError(f"{self.name}: catch_all_label 非 5 类 {self.catch_all_label!r}")
         if self.role not in ("train", "eval_only"):
             raise ValueError(f"{self.name}: role 须 train|eval_only，得 {self.role!r}")
         if self.split_unit not in ("image", "location", "sequence"):
@@ -154,9 +159,9 @@ class DetectionDatasetAdapter(ABC):
         for raw in self.load_raw():
             boxes: list[DetBox] = []
             for src_label, bbox in raw.boxes:
-                tgt = s.label_map.get(src_label)
+                tgt = s.label_map.get(src_label, s.catch_all_label)
                 if tgt is None:
-                    continue  # 未映射 → 丢弃（非穷尽源的未标区域留 ignore，此处不当框）
+                    continue  # 未映射且无兜底 → 丢弃（非穷尽源未标区域留 ignore，此处不当框）
                 boxes.append(
                     DetBox(
                         bbox=list(bbox),

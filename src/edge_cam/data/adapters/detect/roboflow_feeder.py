@@ -46,21 +46,26 @@ class RoboflowFeederAdapter(CocoJsonAdapter):
         self,
         raw_root: str,
         *,
+        name: str = "roboflow_feeder",
+        subpath: str | None = None,  # 缺省 = commercial/<name>（多 Roboflow 集各自独立盘位）
         workspace: str = "bird-recognition",
         project: str = "bird-feeder",
         version: int = 1,
         label_map: dict[str, str] | None = None,
+        catch_all_label: str | None = None,  # 整集同粗类（feeder 集 N 鸟种全→bird）时设 "bird"
         license: str = "CC-BY-4.0",  # 逐个核（§4）
         negative_quota: int | None = 0,
         max_per_class: int | dict[str, int] | None = None,
         **spec_overrides,
     ) -> None:
-        self._base = Path(raw_root) / self.SUBPATH
+        self._subpath = subpath or f"commercial/{name}"
+        self._base = Path(raw_root) / self._subpath
         self._rf = (workspace, project, version)
         spec = DatasetSpec(
-            name="roboflow_feeder",
+            name=name,
             raw_format="roboflow_coco",
             label_map=label_map or self.DEFAULT_LABEL_MAP,
+            catch_all_label=catch_all_label,
             license=license,
             commercial_safe=True,
             role="train",
@@ -76,7 +81,7 @@ class RoboflowFeederAdapter(CocoJsonAdapter):
             max_per_class=max_per_class,
             **spec_overrides,
         )
-        super().__init__(spec, json_path=self._base, image_root=self.SUBPATH)
+        super().__init__(spec, json_path=self._base, image_root=self._subpath)
 
     def _load_coco(self) -> dict:
         """合并 Roboflow export 下所有 `*/_annotations.coco.json` → 单 coco。
@@ -125,4 +130,32 @@ class RoboflowFeederAdapter(CocoJsonAdapter):
         )
 
 
+class RoboflowBirdV2Adapter(RoboflowFeederAdapter):
+    """leem-pf8fb/bird-v2（CC-BY-4.0）：清晰鸟类摄影 36 鸟种 → bird（catch_all）。域比 iNat 近
+    （清晰、尺度合适），作 feeder 域清晰鸟补充。id0 空根类 bird-types 无框、无碍。"""
+
+    def __init__(self, raw_root: str, **kw) -> None:
+        kw.setdefault("name", "roboflow_birdv2")
+        kw.setdefault("workspace", "leem-pf8fb")
+        kw.setdefault("project", "bird-v2")
+        kw.setdefault("version", 2)
+        kw.setdefault("catch_all_label", "bird")  # 36 鸟种全 → bird
+        super().__init__(raw_root, **kw)
+
+
+class RoboflowMeprojectAdapter(RoboflowFeederAdapter):
+    """meproject-pcsly/bird-feeder（CC-BY-4.0）：**真 feeder-cam 定拍**（时间戳水印）花园鸟种
+    → bird。观鸟器域金标准。id0 空根类 birds 无框。"""
+
+    def __init__(self, raw_root: str, **kw) -> None:
+        kw.setdefault("name", "roboflow_meproject")
+        kw.setdefault("workspace", "meproject-pcsly")
+        kw.setdefault("project", "bird-feeder-hhjks")
+        kw.setdefault("version", 6)
+        kw.setdefault("catch_all_label", "bird")  # blue_tit/great_tit/robin/sparrow → bird
+        super().__init__(raw_root, **kw)
+
+
 register_adapter("roboflow_feeder", RoboflowFeederAdapter)
+register_adapter("roboflow_birdv2", RoboflowBirdV2Adapter)
+register_adapter("roboflow_meproject", RoboflowMeprojectAdapter)
