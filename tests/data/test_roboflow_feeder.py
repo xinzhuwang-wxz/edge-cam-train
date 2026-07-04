@@ -86,3 +86,45 @@ def test_audit_unmapped_flags_unknown(tmp_path) -> None:
     ad = RoboflowFeederAdapter(str(tmp_path), label_map={"bird": "bird"})  # 只认 bird
     unmapped = ad.audit_unmapped()
     assert "squirrel" in unmapped  # 未映射 → 上线前据此校正
+
+
+def test_catch_all_label_maps_all_species_to_bird(tmp_path) -> None:
+    """catch_all_label：整集多鸟种全 → bird（免逐个硬列 36 种、免漏种）。"""
+    base = tmp_path / "commercial" / "roboflow_birdv2"
+    d = base / "train"
+    d.mkdir(parents=True)
+    (d / "_annotations.coco.json").write_text(
+        json.dumps(
+            {
+                "images": [{"id": 0, "file_name": "a.jpg", "width": 100, "height": 100}],
+                "annotations": [
+                    {"id": 0, "image_id": 0, "category_id": 1, "bbox": [1, 1, 5, 5]},
+                    {"id": 1, "image_id": 0, "category_id": 2, "bbox": [2, 2, 6, 6]},
+                ],
+                # 完全没在 label_map 里的两种鸟 + id0 空根类
+                "categories": [
+                    {"id": 0, "name": "bird-types"},
+                    {"id": 1, "name": "blue-jay"},
+                    {"id": 2, "name": "northern-cardinal"},
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    # 空 label_map + catch_all=bird → 两种鸟都进 bird
+    ad = RoboflowFeederAdapter(
+        str(tmp_path), name="roboflow_birdv2", label_map={}, catch_all_label="bird"
+    )
+    recs = ad.build_records()
+    cids = {b.category_id for r in recs for b in r.boxes}
+    assert cids == {FEEDER5_CATEGORIES["bird"]}  # blue-jay + cardinal 全 → bird
+    assert len(recs[0].boxes) == 2
+
+
+def test_new_feeder_adapters_registered() -> None:
+    """两个新 feeder 集自注册 + 各自独立盘位 + catch_all=bird。"""
+    for name, ws in (("roboflow_birdv2", "leem-pf8fb"), ("roboflow_meproject", "meproject-pcsly")):
+        ad = build_adapter(name, "raw")
+        assert ad.spec.name == name and ad.spec.catch_all_label == "bird"
+        assert ad.spec.acquire.urls[0].startswith(f"https://universe.roboflow.com/{ws}/")
+        assert ad._subpath == f"commercial/{name}"  # 各自独立盘位，不撞

@@ -19,10 +19,13 @@ datasets:
 
   # ── 新源 ──
   open_images_v7: {} # bird 6k(网图) + person 3k（下载脚本 caps 覆写，避网图域主导）
-  roboflow_feeder: {} # feeder 真实域 bird（3150，species→bird）
-  # ── iNat 教师伪标注（信任分层两行；跑 pseudolabel.run 产出后取消注释）──
-  # inat_md: {}                 # 高置信自动收（md_pseudo），读 inat_md_coco.json
-  # inat_md_verified: {}        # 中置信 LS 人审通过（md_human_verified），读 inat_verified_coco.json
+  # ── feeder 域 bird（观鸟器场景主力，按域优先）──
+  roboflow_feeder: {} # feeder-cam（bird-recognition，3135，5 种→bird）
+  roboflow_meproject: {} # ★ 真 feeder-cam 定拍（时间戳），观鸟器域金标准（813）
+  roboflow_birdv2: # 清晰鸟类摄影 36 种→bird（3762 源/8658 增强），cap 避增强冗余主导
+    max_per_class: { bird: 4000 }
+  # ── iNat 教师伪标注（降级：域错配，只收 auto 清晰子集作多样性补充；不做 LS 人审）──
+  inat_md: {} # auto（md_pseudo，1209 清晰鸟），读 inat_md_coco.json
 
   # ── eval_only（防许可传染）──
   coco2017: {}
