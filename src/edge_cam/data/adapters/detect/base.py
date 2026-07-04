@@ -137,6 +137,19 @@ def _split_of(key: str, seed: str, ratios: tuple[float, float, float] = (0.7, 0.
     return "train" if h < t else "val" if h < t + ratios[1] * 100 else "test"
 
 
+def _clip_bbox(bbox: list[float], w: int, h: int) -> list[float] | None:
+    """COCO [x,y,bw,bh] 裁到图内（抓 CCT 式越界/负坐标）；裁后退化(零负面积)→ None（丢）。
+    图尺寸未知(w/h≤0)时原样返回（无从裁）。"""
+    if w <= 0 or h <= 0:
+        return bbox
+    x, y, bw, bh = bbox
+    x2, y2 = min(x + bw, float(w)), min(y + bh, float(h))
+    x, y = max(0.0, x), max(0.0, y)
+    if x2 - x <= 0 or y2 - y <= 0:
+        return None
+    return [x, y, x2 - x, y2 - y]
+
+
 class DetectionDatasetAdapter(ABC):
     """检测数据集 adapter 基类。子类只实现 load_raw()；映射/负样本/划分/溯源在基类。"""
 
@@ -173,6 +186,11 @@ class DetectionDatasetAdapter(ABC):
                 filter_on = s.min_box_area_frac > 0 and img_area > 0
                 if filter_on and (bbox[2] * bbox[3]) / img_area < s.min_box_area_frac:
                     continue  # 远景小框 → 滤（贴合喂食器中等尺度）
+                bbox = _clip_bbox(
+                    bbox, raw.width, raw.height
+                )  # 裁到图内（抓 CCT 式越界，退化则丢）
+                if bbox is None:
+                    continue
                 boxes.append(
                     DetBox(
                         bbox=list(bbox),

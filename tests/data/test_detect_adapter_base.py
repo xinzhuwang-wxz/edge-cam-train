@@ -15,7 +15,12 @@ from edge_cam.data.adapters.detect import (
     RawSample,
     assemble,
 )
-from edge_cam.data.adapters.detect.base import _split_of, available_adapters, register_adapter
+from edge_cam.data.adapters.detect.base import (
+    _clip_bbox,
+    _split_of,
+    available_adapters,
+    register_adapter,
+)
 
 
 class _FakeAdapter(DetectionDatasetAdapter):
@@ -62,6 +67,28 @@ def test_build_records_maps_and_drops_unmapped() -> None:
     assert len(recs[0].boxes) == 1  # Cow 未映射→丢
     assert recs[0].boxes[0].category_id == FEEDER5_CATEGORIES["bird"]
     assert recs[0].source == "fake" and recs[0].license == "CDLA"
+
+
+def test_clip_bbox_in_bounds_unchanged() -> None:
+    assert _clip_bbox([10, 10, 20, 30], 100, 100) == [10, 10, 20, 30]
+
+
+def test_clip_bbox_out_of_bounds_clipped() -> None:
+    """CCT 式越界（框比图大）→ 裁到图内。"""
+    assert _clip_bbox([-5, -5, 200, 200], 100, 100) == [0.0, 0.0, 100.0, 100.0]
+
+
+def test_clip_bbox_degenerate_dropped() -> None:
+    """框完全在图外 → 裁后零面积 → None（丢）。"""
+    assert _clip_bbox([200, 200, 10, 10], 100, 100) is None
+
+
+def test_build_records_clips_out_of_bounds_box() -> None:
+    """build 裁掉越界框（数据门"框坐标合理"由此过）。"""
+    a = _FakeAdapter(_spec(), [RawSample("a.jpg", 100, 100, [("Bird", [50, 50, 200, 200])])])
+    recs = a.build_records()
+    x, y, w, h = recs[0].boxes[0].bbox
+    assert x + w <= 100 and y + h <= 100  # 裁到图内
 
 
 def test_min_box_area_frac_drops_tiny_boxes() -> None:

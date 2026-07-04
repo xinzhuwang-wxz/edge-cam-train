@@ -98,17 +98,17 @@ def build(cfg: DetectBuildConfig) -> Path:
     print(f"[detect-build] {out} : {summary}")
 
     # round2 数据门（量/均衡/框合理/许可/署名，data/gate.py）——build 尾报告，训练前须 PASS。
-    # 用 round2 默认目标（bird 8k 等）；round1 数据会提示未达标，属预期。
+    # **只门训练 manifest**（key=='train'）；eval_feasibility 是 role=eval_only 的 COCO，
+    # 拿训练目标/许可套它是误报（它本就非训练用、许可有意隔离）。
     from edge_cam.data.gate import gate as run_data_gate
 
-    for key, m in manifests.items():
-        if not any(r.split == "train" for r in m.records):
-            continue
+    m = manifests.get("train")
+    if m is not None and any(r.split == "train" for r in m.records):
         rep = run_data_gate(m, split="train")
-        (out / f"gate_{key}.txt").write_text(rep.summary(), encoding="utf-8")
+        (out / "gate_train.txt").write_text(rep.summary(), encoding="utf-8")
         print(rep.summary())
         if not rep.passed:
-            print(f"[detect-build] ⚠️ 数据门未过（{key}）：训练前须修（不达标不训）")
+            print("[detect-build] ⚠️ 数据门未过（train）：训练前须修（不达标不训）")
     return out
 
 
