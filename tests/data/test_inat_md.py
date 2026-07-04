@@ -5,7 +5,11 @@ from __future__ import annotations
 import json
 
 from edge_cam.data.adapters.detect import FEEDER5_CATEGORIES, build_adapter
-from edge_cam.data.adapters.detect.inat_md import InatMdAdapter, InatObs, select_inat
+from edge_cam.data.adapters.detect.inat_md import (
+    InatMdAdapter,
+    InatObs,
+    select_inat,
+)
 
 
 def _obs(pid, taxon, lic="CC-BY-4.0", lat=1.0, lon=2.0, grade="research"):
@@ -77,4 +81,25 @@ def test_human_verified_provenance_override(tmp_path) -> None:
         encoding="utf-8",
     )
     recs = InatMdAdapter(str(tmp_path), label_provenance="md_human_verified").build_records()
+    assert recs[0].boxes[0].label_provenance == "md_human_verified"
+
+
+def test_verified_adapter_reads_separate_coco(tmp_path) -> None:
+    """inat_md_verified 注册：读 inat_verified_coco.json，框默认 md_human_verified（信任分层）。"""
+    base = tmp_path / "commercial" / "inat_md"
+    base.mkdir(parents=True)
+    (base / "inat_verified_coco.json").write_text(
+        json.dumps(
+            {
+                "images": [{"id": 1, "file_name": "v.jpg", "width": 40, "height": 40}],
+                "annotations": [{"id": 1, "image_id": 1, "category_id": 1, "bbox": [1, 1, 4, 4]}],
+                "categories": [{"id": 1, "name": "animal"}],
+            }
+        ),
+        encoding="utf-8",
+    )
+    adapter = build_adapter("inat_md_verified", str(tmp_path))
+    recs = adapter.build_records()
+    assert len(recs) == 1
+    assert recs[0].boxes[0].category_id == FEEDER5_CATEGORIES["bird"]
     assert recs[0].boxes[0].label_provenance == "md_human_verified"

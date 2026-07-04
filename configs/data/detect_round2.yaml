@@ -18,9 +18,11 @@ datasets:
     split_ratios: [0.7, 0.15, 0.15]
 
   # ── 新源 ──
-  open_images_v7: {} # bird 15k + person 3k（adapter caps）
+  open_images_v7: {} # bird 6k(网图) + person 3k（下载脚本 caps 覆写，避网图域主导）
   roboflow_feeder: {} # feeder 真实域 bird（3150，species→bird）
-  # inat_md: {}       # ← MD 伪标注后加：bird 命门主力
+  # ── iNat 教师伪标注（信任分层两行；跑 pseudolabel.run 产出后取消注释）──
+  # inat_md: {}                 # 高置信自动收（md_pseudo），读 inat_md_coco.json
+  # inat_md_verified: {}        # 中置信 LS 人审通过（md_human_verified），读 inat_verified_coco.json
 
   # ── eval_only（防许可传染）──
   coco2017: {}

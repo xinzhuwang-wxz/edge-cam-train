@@ -26,7 +26,11 @@ INAT_OPEN_LICENSES: frozenset[str] = frozenset({"CC0", "CC0-1.0", "CC-BY", "CC-B
 
 @dataclass
 class InatObs:
-    """一条 iNat 观测（S3 open-data join 后）：图 id + taxon + 许可 + geo + 作者。"""
+    """一条 iNat 观测（S3 open-data join 后，或 API 一页解析）：图 id + taxon + 许可 + geo + 作者。
+
+    `photo_url` 为 API 路线下的照片直链（medium 档，用于并行下图）；S3 dump 路线可为 None
+    （按 photo_id 拼 S3 键）。
+    """
 
     photo_id: str
     taxon_id: str
@@ -35,6 +39,7 @@ class InatObs:
     lon: float | None = None
     author: str | None = None
     quality_grade: str = "research"
+    photo_url: str | None = None
 
 
 def select_inat(
@@ -75,6 +80,8 @@ class InatMdAdapter(CocoJsonAdapter):
         self,
         raw_root: str,
         *,
+        coco_name: str
+        | None = None,  # 默认 inat_md_coco.json（md_pseudo）；人审份传 inat_verified_coco.json
         label_map: dict[str, str] | None = None,
         license: str = "CC-BY-4.0",  # 源级；逐图真实许可经 attribution 流（CC0/CC-BY）
         label_provenance: str = "md_pseudo",  # 人审通过后传 md_human_verified
@@ -108,7 +115,7 @@ class InatMdAdapter(CocoJsonAdapter):
         )
         super().__init__(
             spec,
-            json_path=base / self.MD_COCO,
+            json_path=base / (coco_name or self.MD_COCO),
             image_root=self.SUBPATH,
             label_provenance=label_provenance,
         )
@@ -124,4 +131,20 @@ class InatMdAdapter(CocoJsonAdapter):
         )
 
 
+class InatMdVerifiedAdapter(InatMdAdapter):
+    """iNat 人审通过份（Label Studio 后）：读 `inat_verified_coco.json`，框 md_human_verified。
+
+    与 `inat_md`(自动收/md_pseudo) 同源同图，作**独立一行**进 build → 训练可按信任分层加权
+    （数据管线 §7）。config 里两行并列：`inat_md: {}` + `inat_md_verified: {}`。
+    """
+
+    VERIFIED_COCO = "inat_verified_coco.json"
+
+    def __init__(self, raw_root: str, **kw) -> None:
+        kw.setdefault("coco_name", self.VERIFIED_COCO)
+        kw.setdefault("label_provenance", "md_human_verified")
+        super().__init__(raw_root, **kw)
+
+
 register_adapter("inat_md", InatMdAdapter)
+register_adapter("inat_md_verified", InatMdVerifiedAdapter)
