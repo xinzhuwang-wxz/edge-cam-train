@@ -41,7 +41,7 @@ OIV7_MIDS: dict[str, str] = {
 # 每类**含该类图**上限（补 CCT 缺口：bird/person 多，other_animal 少——CCT 已 ~26k）。
 DEFAULT_CAPS: dict[str, int] = {
     "Bird": 15000,
-    "Person": 8000,
+    "Person": 3000,  # person 只需检到有人(不认身份、易检)→ ~3k 够（round2 分布：bird 命门优先）
     "Squirrel": 6000,
     "Cat": 5000,
     "Dog": 1500,
