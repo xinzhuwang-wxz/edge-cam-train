@@ -1,0 +1,26 @@
+# 检测正式训练轮 · 全源装配（docs/detect/round2-数据计划.md）。
+# 源：round1 复用(ena24+caltech_ct) + OIV7(person 3k+bird) + Roboflow(feeder 域 bird) + COCO(eval_only)。
+# iNat(MD 伪标注 bird) MD 打框后再加一行 inat_md。分布：bird 命门最多、person~3k、other_animal 压。
+# 跑：python -m edge_cam.data.adapters.detect.build --config configs/data/detect_round2.yaml
+name: detect_round2
+version: v1
+raw_root: /root/autodl-tmp/detect_raw
+out_dir: /root/autodl-tmp/detect_round2
+
+datasets:
+  # ── round1 复用（相机陷阱域）──
+  ena24:
+    negative_quota: 0
+    split_ratios: [0.7, 0.15, 0.15] # 固定 test（scaling 同一 held-out）
+  caltech_ct:
+    negative_quota: 6000
+    max_per_class: { other_animal: 5000 } # 压 other_animal（round1 过载）
+    split_ratios: [0.7, 0.15, 0.15]
+
+  # ── 新源 ──
+  open_images_v7: {} # bird 15k + person 3k（adapter caps）
+  roboflow_feeder: {} # feeder 真实域 bird（3150，species→bird）
+  # inat_md: {}       # ← MD 伪标注后加：bird 命门主力
+
+  # ── eval_only（防许可传染）──
+  coco2017: {}
