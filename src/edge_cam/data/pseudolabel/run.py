@@ -1,8 +1,10 @@
 """iNat → MD 伪标注 → 置信分层 → Label Studio 人审：一条命令串起（box/GPU 上跑）。
 
     python -m edge_cam.data.pseudolabel.run \
-        --raw-root /root/autodl-tmp/detect_raw --max-obs 4000 \
-        --md-version MDV6-apa-rtdetr --conf-hi 0.7 --conf-lo 0.2 --per-taxon-cap 40
+        --raw-root /root/autodl-tmp/detect_raw --max-obs 4000 --per-taxon-cap 40 \
+        --md-version MDV6-yolov9-c \
+        --md-weights ~/.cache/torch/hub/checkpoints/MDV6-yolov9-c.pt \
+        --conf-hi 0.7 --conf-lo 0.2
 
 分四步产物落 raw_root/commercial/inat_md/：
   ① images/*.jpg                    iNat 拉图（CC0/CC-BY/research/geo）
@@ -58,14 +60,21 @@ def render_previews(coco: dict, image_root: Path, out_dir: Path, *, limit: int =
 
 def _pull_and_label(args: argparse.Namespace, base: Path) -> None:
     img_dir = base / "images"
-    print(f"[inat] ① API 枚举 Aves(CC0/CC-BY/research/geo) max_obs={args.max_obs} …", flush=True)
-    obs: list[InatObs] = fetch_inat_aves_obs(max_obs=args.max_obs, sleep=args.api_sleep)
-    kept = select_inat(obs, per_taxon_cap=args.per_taxon_cap)
-    print(
-        f"[inat] 枚举 {len(obs)} → 过滤后 {len(kept)}（per-taxon≤{args.per_taxon_cap}）", flush=True
-    )
-    ok = download_inat_photos(kept, img_dir, jobs=args.jobs)
-    print(f"[inat] ② 下图 {len(ok)}/{len(kept)} → {img_dir}", flush=True)
+    if args.skip_fetch:
+        n_have = len(list(img_dir.glob("*.jpg"))) if img_dir.exists() else 0
+        print(f"[inat] ①② 跳过拉图（--skip-fetch），复用已下 {n_have} 图", flush=True)
+    else:
+        print(
+            f"[inat] ① API 枚举 Aves(CC0/CC-BY/research/geo) max_obs={args.max_obs} …", flush=True
+        )
+        obs: list[InatObs] = fetch_inat_aves_obs(max_obs=args.max_obs, sleep=args.api_sleep)
+        kept = select_inat(obs, per_taxon_cap=args.per_taxon_cap)
+        print(
+            f"[inat] 枚举 {len(obs)} → 过滤后 {len(kept)}（per-taxon≤{args.per_taxon_cap}）",
+            flush=True,
+        )
+        ok = download_inat_photos(kept, img_dir, jobs=args.jobs)
+        print(f"[inat] ② 下图 {len(ok)}/{len(kept)} → {img_dir}", flush=True)
 
     print(f"[md] ③ MegaDetector({args.md_version}) 伪标注（conf≥{args.conf_lo}）…", flush=True)
     coco = run_pseudolabel(
@@ -74,6 +83,8 @@ def _pull_and_label(args: argparse.Namespace, base: Path) -> None:
         out_json=base / "inat_md_raw_coco.json",
         version=args.md_version,
         conf=args.conf_lo,
+        weights=args.md_weights or None,
+        device=args.device,
     )
     tri = triage_by_confidence(coco, conf_hi=args.conf_hi, conf_lo=args.conf_lo)
     print(f"[triage] {tri.stats}", flush=True)
@@ -111,7 +122,12 @@ def main() -> None:
     ap.add_argument("--per-taxon-cap", type=int, default=40)
     ap.add_argument("--jobs", type=int, default=16)
     ap.add_argument("--api-sleep", type=float, default=1.0)
-    ap.add_argument("--md-version", default="MDV6-apa-rtdetr")
+    ap.add_argument("--md-version", default="MDV6-yolov9-c")
+    ap.add_argument(
+        "--md-weights", default="", help="本地权重路径 → 离线加载（绕 zenodo 下载被拒）"
+    )
+    ap.add_argument("--device", default="cuda")
+    ap.add_argument("--skip-fetch", action="store_true", help="复用已下图，直接从 MD 开始")
     ap.add_argument("--conf-hi", type=float, default=0.7)
     ap.add_argument("--conf-lo", type=float, default=0.2)
     ap.add_argument("--preview-limit", type=int, default=40)
