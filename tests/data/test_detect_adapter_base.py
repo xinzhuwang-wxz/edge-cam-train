@@ -299,3 +299,38 @@ def test_acquire_nonmanual_without_fetch_override_raises(tmp_path) -> None:
     )
     with pytest.raises(NotImplementedError, match="_fetch"):
         a.acquire(tmp_path, now="t")
+
+
+def test_acquire_empty_checksum_still_fetches(tmp_path) -> None:
+    """修 bug：动态源（s3/roboflow/inat）archive_sha256 为空 → **必 _fetch**（此前空真 _checksums_ok
+    致误跳、0 图）。"""
+    calls = []
+
+    class _FetchAdapter(_FakeAdapter):
+        def _fetch(self, dest):
+            calls.append(dest)
+
+    a = _FetchAdapter(
+        _spec(acquire=AcquireSpec(method="s3_direct", urls=["s3://x"], archive_sha256={})), []
+    )
+    a.acquire(tmp_path, now="t")
+    assert len(calls) == 1  # _fetch 被调（不再空真跳过）
+
+
+def test_acquire_valid_checksum_skips_fetch(tmp_path) -> None:
+    """有声明 checksum 且全通过 → 幂等跳 _fetch（不重下）。"""
+    dest = tmp_path / "commercial" / "fake"
+    dest.mkdir(parents=True)
+    (dest / "f.bin").write_bytes(b"x")
+    sha = hashlib.sha256(b"x").hexdigest()
+    calls = []
+
+    class _FetchAdapter(_FakeAdapter):
+        def _fetch(self, dest):
+            calls.append(dest)
+
+    a = _FetchAdapter(
+        _spec(acquire=AcquireSpec(method="s3_direct", archive_sha256={"f.bin": sha})), []
+    )
+    a.acquire(tmp_path, now="t")
+    assert not calls  # checksum 通过 → 跳 fetch
