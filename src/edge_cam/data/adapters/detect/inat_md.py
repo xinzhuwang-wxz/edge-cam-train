@@ -95,6 +95,8 @@ class InatMdAdapter(CocoJsonAdapter):
             raw_format="inat_md_coco",
             # iNat 观测已筛 Aves → MD 的 animal/bird 框即 bird（多物种/误框靠 Label Studio 人审兜）
             label_map=label_map or {"animal": "bird", "bird": "bird"},
+            # 逐图作者可从 iNat API 拿（parse_inat_api_page 已取）→ 发行前串进；此处数据集级兜底
+            default_author="iNaturalist observers (CC0/CC-BY-4.0)",
             license=license,
             commercial_safe=True,
             role="train",

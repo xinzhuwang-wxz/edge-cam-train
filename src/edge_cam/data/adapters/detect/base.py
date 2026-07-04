@@ -88,6 +88,11 @@ class DatasetSpec:
     # 未在 label_map 命中的源标签的兜底映射（None=丢弃）。用于"整集同一粗类"的源
     # （如 Roboflow feeder 集 36 鸟种全 → bird），免逐个硬列、免漏种。
     catch_all_label: str | None = None
+    # 框最小面积占图比（0=不滤）。滤掉远景小框，贴合观鸟器"鸟落镜头前"的中等尺度。
+    # 安全：正样本图若因滤空 → 丢弃该图（非负样本），防假负污染。
+    min_box_area_frac: float = 0.0
+    # 数据集级署名（逐图 author 缺省时的回退，如 Roboflow 聚合集 → 引数据集本身，兑现 CC-BY §4）。
+    default_author: str | None = None
     acquire: AcquireSpec | None = None  # 获取声明（ADR-0006 D1）；None=该 adapter 暂未声明获取
 
     def __post_init__(self) -> None:
@@ -158,10 +163,16 @@ class DetectionDatasetAdapter(ABC):
         neg: list[DetImageRecord] = []
         for raw in self.load_raw():
             boxes: list[DetBox] = []
+            had_mapped = False  # 该图是否**原本**有映射框（滤 tiny 前）→ 防滤空当假负
+            img_area = raw.width * raw.height
             for src_label, bbox in raw.boxes:
                 tgt = s.label_map.get(src_label, s.catch_all_label)
                 if tgt is None:
                     continue  # 未映射且无兜底 → 丢弃（非穷尽源未标区域留 ignore，此处不当框）
+                had_mapped = True
+                filter_on = s.min_box_area_frac > 0 and img_area > 0
+                if filter_on and (bbox[2] * bbox[3]) / img_area < s.min_box_area_frac:
+                    continue  # 远景小框 → 滤（贴合喂食器中等尺度）
                 boxes.append(
                     DetBox(
                         bbox=list(bbox),
@@ -177,14 +188,16 @@ class DetectionDatasetAdapter(ABC):
                 boxes=boxes,
                 source=s.name,
                 license=s.license,
-                # 逐样本署名（ADR-0006 D4）：raw 有则带上，缺省回退 spec 级 source/license。
-                author=raw.author,
+                # 逐样本署名（ADR-0006 D4）：raw 有则带上，缺省回退数据集级 default_author。
+                author=raw.author or s.default_author,
                 original_url=raw.original_url,
                 source_media_id=raw.source_media_id,
                 asset_sha256=raw.asset_sha256,
             )
             if boxes:
                 pos.append(rec)
+            elif had_mapped:
+                continue  # 原有框但全被 tiny 滤空 → 丢弃（非负样本，防假负污染 §5.1）
             elif raw.is_negative or s.exhaustive:
                 neg.append(rec)
             # else: 非穷尽源的纯未映射图 → 丢（可能漏标真目标，§5.1 防污染负样本）

@@ -66,7 +66,8 @@ def gate(
     *,
     split: str | None = "train",
     min_boxes: dict[str, int] | None = None,
-    max_imbalance: float = 8.0,  # 允许命门 bird 有意主导；抓的是"病态失衡"（如 round1 bird 被压）
+    max_imbalance: float = 8.0,  # 命门 bird 豁免；这里抓的是**次要类之间**的病态失衡
+    primary_classes: frozenset[str] = frozenset({"bird"}),  # 命门，允许有意主导，不计入均衡比
     bounds_tol: float = 1.02,
 ) -> DataGateReport:
     """数据门：量 + 均衡 + 框合理 + 许可 + 署名 + 信任分层。返回 DataGateReport。"""
@@ -84,13 +85,18 @@ def gate(
         )
     )
 
-    # 2. 均衡：max/min（只看有目标的类 + 有框的类）
-    present = [counts.get(k, 0) for k in min_boxes] or [1]
-    lo = min(x for x in present if x > 0) if any(present) else 0
-    hi = max(present)
+    # 2. 均衡：只看**次要类**(排除命门 bird——它按设计主导，量由源 cap 控)。命门被压才是病态
+    #    （round1 教训），由「量」项兜底；这里抓 person/squirrel/cat 互相失衡。
+    sec = [counts.get(k, 0) for k in min_boxes if k not in primary_classes] or [1]
+    lo = min(x for x in sec if x > 0) if any(sec) else 0
+    hi = max(sec)
     ratio = (hi / lo) if lo else float("inf")
     checks.append(
-        (f"类均衡(max/min≤{max_imbalance:.0f})", ratio <= max_imbalance, f"比={ratio:.1f}")
+        (
+            f"次要类均衡(max/min≤{max_imbalance:.0f}，命门豁免)",
+            ratio <= max_imbalance,
+            f"比={ratio:.1f}（bird 命门不计）",
+        )
     )
 
     # 3. 框坐标合理（抓 CCT 式坐标错位：框超界/零负面积）

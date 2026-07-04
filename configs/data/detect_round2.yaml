@@ -13,19 +13,23 @@ datasets:
     negative_quota: 0
     split_ratios: [0.7, 0.15, 0.15] # 固定 test（scaling 同一 held-out）
   caltech_ct:
-    negative_quota: 6000
+    negative_quota: 10000 # 空帧负样本主力（提负样本比例，round2 训练前分析偏低 10%）
     max_per_class: { other_animal: 5000 } # 压 other_animal（round1 过载）
     split_ratios: [0.7, 0.15, 0.15]
+    # 相机陷阱**不**加 min_box_area_frac：squirrel/cat 稀缺且相机陷阱本就小尺度，滤会伤量
 
-  # ── 新源 ──
-  open_images_v7: {} # bird 6k(网图) + person 3k（下载脚本 caps 覆写，避网图域主导）
-  # ── feeder 域 bird（观鸟器场景主力，按域优先）──
-  roboflow_feeder: {} # feeder-cam（bird-recognition，3135，5 种→bird）
-  roboflow_meproject: {} # ★ 真 feeder-cam 定拍（时间戳），观鸟器域金标准（813）
+  # ── 通用源：适配观鸟器 = 选出中等尺度（tiny-box 滤远景）+ cap 避网图域主导 ──
+  open_images_v7: # bird 选中等尺度后 cap 2500 图（网图不宜主导）+ person 滤远景
+    min_box_area_frac: 0.005 # 滤 <0.5% 面积的远景鸟/人（非"鸟落镜头前"尺度）
+    max_per_class: { bird: 2500 }
+  # ── feeder 域 bird（观鸟器场景主力，按域优先，不滤——本就 feeder 尺度）──
+  roboflow_feeder: {} # feeder-cam（bird-recognition，3578，5 种→bird）
+  roboflow_meproject: {} # ★ 真 feeder-cam 定拍（时间戳），观鸟器域金标准（819）
   roboflow_birdv2: # 清晰鸟类摄影 36 种→bird（3762 源/8658 增强），cap 避增强冗余主导
     max_per_class: { bird: 4000 }
-  # ── iNat 教师伪标注（降级：域错配，只收 auto 清晰子集作多样性补充；不做 LS 人审）──
-  inat_md: {} # auto（md_pseudo，1209 清晰鸟），读 inat_md_coco.json
+  # ── iNat（降级：域错配，只收 auto 清晰子集 + 选中等尺度；不做 LS 人审）──
+  inat_md: # auto（md_pseudo，1209 清晰鸟），读 inat_md_coco.json
+    min_box_area_frac: 0.005 # 同样选中等尺度（去 iNat 残留远景）
 
   # ── eval_only（防许可传染）──
   coco2017: {}

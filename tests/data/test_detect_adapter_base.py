@@ -64,6 +64,37 @@ def test_build_records_maps_and_drops_unmapped() -> None:
     assert recs[0].source == "fake" and recs[0].license == "CDLA"
 
 
+def test_min_box_area_frac_drops_tiny_boxes() -> None:
+    """min_box_area_frac：远景小框滤掉，中等框留（贴合观鸟器"不大不小"）。"""
+    # 图 100x100=10000；大框 30x30=900=9%（留），小框 5x5=25=0.25%（滤，阈 0.5%）
+    a = _FakeAdapter(
+        _spec(min_box_area_frac=0.005),
+        [RawSample("a.jpg", 100, 100, [("Bird", [0, 0, 30, 30]), ("Bird", [0, 0, 5, 5])])],
+    )
+    recs = a.build_records()
+    assert len(recs) == 1 and len(recs[0].boxes) == 1  # 只留大框
+    assert recs[0].boxes[0].bbox == [0, 0, 30, 30]
+
+
+def test_tiny_filter_empties_positive_dropped_not_negative() -> None:
+    """正样本图若全被 tiny 滤空 → 丢弃该图（**非负样本**，防假负污染）。"""
+    a = _FakeAdapter(
+        _spec(min_box_area_frac=0.01, exhaustive=True, negative_quota=None),
+        [RawSample("a.jpg", 100, 100, [("Bird", [0, 0, 5, 5])])],  # 唯一框 0.25% < 1% → 滤空
+    )
+    recs = a.build_records()
+    assert recs == []  # 不留为负样本（它本有鸟，只是太小）
+
+
+def test_default_author_fallback_for_attribution() -> None:
+    """逐图 author 缺 → 回退数据集级 default_author（CC-BY 兑现 §4）。"""
+    a = _FakeAdapter(
+        _spec(default_author="Roboflow: ws/proj (CC-BY-4.0)"),
+        [RawSample("a.jpg", 100, 100, [("Bird", [0, 0, 30, 30])])],  # 无逐图 author
+    )
+    assert a.build_records()[0].author == "Roboflow: ws/proj (CC-BY-4.0)"
+
+
 def test_exhaustive_keeps_negative_but_nonexhaustive_drops() -> None:
     # negative_quota=None 隔离"留/丢"判定，不掺限额（限额另测）
     only_unmapped = [RawSample("n.jpg", 10, 10, [("Cow", [0, 0, 1, 1])])]

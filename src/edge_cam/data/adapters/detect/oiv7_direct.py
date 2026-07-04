@@ -179,6 +179,8 @@ class Oiv7DirectAdapter(CocoJsonAdapter):
             name="open_images_v7",
             raw_format="oiv7_direct_coco",
             label_map=OIV7_LABEL_MAP,
+            # 逐图 Flickr 作者在 OIV image-ids CSV（发行前串入）；此处数据集级兜底兑现 CC-BY §4
+            default_author="Open Images V7 / Flickr contributors (CC-BY-4.0)",
             license="CC-BY-4.0",
             commercial_safe=True,
             role="train",
