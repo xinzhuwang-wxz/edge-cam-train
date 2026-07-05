@@ -12,8 +12,9 @@
 **检测 round1 收官（2026-07-04）**：决策① MD 教师 PASS、决策② **留 NanoDet-Plus-m 416**（命门 bird AP50
 0.774 ≫ RTMDet 0.483）、CCT 坐标 bug 修复、**decode 喷框根因定位 → [[ADR-0007]]**（ONNX 出 logits、
 sigmoid 留 CPU）。报告 `results/detect/round1/`。
-**下一步（round2）** = ① 落地 ADR-0007（导出剥 Sigmoid + logits 契约门，修 cascade `OnnxDetector` 喷框隐患）；
-② 用 MD 教师给 iNat/feeder 新源伪标注 → NanoDet-416 round2 微调（补域覆盖）；③ 检测量化包络/gate 收口。
+**检测 round2 收官（2026-07-05）**：scaling 扫定案 **1.0x@416 双甜点**（test bird **85.0**/大目标 90.1）、416-vs-320 消融（320 -1.9pt 仍守基线）、
+**FP32 ONNX 剥 sigmoid 落地 ADR-0007**、**移动端 NCNN 交接包**（`mobile_handoff/`，C++≡Python 验证过，可直发同事）、观鸟器工作场景独立评测集（bird 94.9 乐观上界）。见下 Changelog + `results/detect/round2/`。
+**下一步** = ① 检测**量化包络（ORT-QDQ 掉点预估）+ gate + registry(ModelCard)** 收口（部署链最后一环）；② 分类段同样收口；③ 上板 spike（待 V85x）。
 
 ## 可行性包络（「能否达标」的判定链）
 
@@ -76,6 +77,23 @@ sigmoid 留 CPU）。报告 `results/detect/round1/`。
 > 注：检测器**已不在「不做」之列**——数据/config/评测/搭建脚本备齐（issue #2 已闭），且 320/416 两档**已首训**（见下 Changelog）。
 
 ## 变更记录（Changelog）
+
+**2026-07-05 · 检测 round2：scaling 扫收官 + FP32 ONNX + 移动端 NCNN 交接包**（产物 `results/detect/round2/`）
+- **7 点宽度扫 + 416/320 消融（固定 test 定案）**：数据量 12.5→100%=78.6→80.3→84.5→**85.0**（50%已近饱和）；
+  参数 0.5x/1.0x/1.5x=79.4/**85.0**/84.5~85.1 → **1.0x 是数据+参数双甜点**（1.5x 不涨、0.5x 掉 5.6pt，对 0.5T 板是好消息）。
+  插跑 A(full-COCO 1.5x) vs B(随机 neck) 仅 +0.6pt → **neck warm-start 无关紧要、决策 B 无损**。
+  **部署点 = main（NanoDet-Plus-m-416, 1.0x, 100%数据）**，test bird **85.0 / 大目标(工作点) 90.1**。
+  **416 vs 320**：320 bird 83.1（-1.9pt，仍守基线 77.4），换 ~1.7× 省算力 → 320 部署默认可行。
+- **诚实 caveat**：非鸟类 val→test 落差大（squirrel/cat 90+→~50）；bird 数据最富最稳。small 目标(<32²)不做（设计）。
+- **观鸟器工作场景独立评测集**（`worksite_eval/`，跨 split 全量取图、不管泄漏、固定机位/feeder 源×中大×全类+空帧负样本，870图）：
+  bird AP50 **94.9**/大目标 98.5、全类 79~95；**空帧误报 conf0.4 时 7.5%** → 部署阈值≥0.4+时序滤波。**乐观上界**（含记忆样本），泛化真值以 test 为准。
+- **FP32 ONNX 导出（[[ADR-0007]] 达成）**：写 export 包装运行时替换 head `_forward_onnx` 跳 sigmoid（不改框架源码 §4.3），
+  验证图内无 Sigmoid 节点 + onnxruntime≡torch logits(max|Δ|1e-5)。`exports/main_416_fp32_logits.onnx`（decode/NMS 留 A7 CPU）。
+- **移动端 NCNN 交接包**（`mobile_handoff/`，自洽可直发）：ONNX(保 sigmoid+归一化焊入)→pnnx→ncnn(2.3MB)；
+  C++ 核心 `feeder_detector.{h,cpp}`（decode+NMS，iOS/Android 共用）+ Python 参考 + AGENTS.md/README + 8 demo。
+  **验证**：C++≡Python 检测集合 100% 一致（含空图/多目标/低阈值）；decode pred-vs-GT IoU 0.89~0.99。
+  契约：喂 BGR 0-255 原图→出原图坐标框数组；BGR/拉伸resize/不重复归一化/NMS 在 app 等禁忌写入 AGENTS.md。
+- **踩坑**：pip 装 pnnx/ncnn 把 numpy 升 2.x→torch1.13 的 `from_numpy` 崩，降 numpy<2 修复（round1 同款坑复现）。
 
 **2026-07-04 · 检测 round1：零样本谱 + bake-off 决策② + decode 根因**（[[ADR-0007]]；报告 `results/detect/round1/`）
 - **决策① MD 能当教师 = PASS**：带框 test_sub(ENA24+CCT) 上 MD any-animal 召回 **0.83**、bird 0.851、

@@ -1,0 +1,981 @@
+Error while loading conda entry point: conda-libmamba-solver (module 'libmambapy' has no attribute 'QueryFormat')
+Error while loading conda entry point: conda-libmamba-solver (module 'libmambapy' has no attribute 'QueryFormat')
+Error while loading conda entry point: conda-libmamba-solver (module 'libmambapy' has no attribute 'QueryFormat')
+Error while loading conda entry point: conda-libmamba-solver (module 'libmambapy' has no attribute 'QueryFormat')
+/root/miniconda3/envs/nanodet/lib/python3.10/site-packages/lightning_fabric/__init__.py:29: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  __import__("pkg_resources").declare_namespace(__name__)
+[NanoDet][07-05 06:41:13]INFO:Setting up data...
+[NanoDet][07-05 06:41:13]INFO:Creating model...
+[NanoDet][07-05 06:41:15]INFO:Skip loading parameter head.gfl_cls.0.weight, required shapetorch.Size([37, 96, 1, 1]), loaded shapetorch.Size([112, 96, 1, 1]).
+[NanoDet][07-05 06:41:15]INFO:Skip loading parameter head.gfl_cls.0.bias, required shapetorch.Size([37]), loaded shapetorch.Size([112]).
+[NanoDet][07-05 06:41:15]INFO:Skip loading parameter head.gfl_cls.1.weight, required shapetorch.Size([37, 96, 1, 1]), loaded shapetorch.Size([112, 96, 1, 1]).
+[NanoDet][07-05 06:41:15]INFO:Skip loading parameter head.gfl_cls.1.bias, required shapetorch.Size([37]), loaded shapetorch.Size([112]).
+[NanoDet][07-05 06:41:15]INFO:Skip loading parameter head.gfl_cls.2.weight, required shapetorch.Size([37, 96, 1, 1]), loaded shapetorch.Size([112, 96, 1, 1]).
+[NanoDet][07-05 06:41:15]INFO:Skip loading parameter head.gfl_cls.2.bias, required shapetorch.Size([37]), loaded shapetorch.Size([112]).
+[NanoDet][07-05 06:41:15]INFO:Skip loading parameter head.gfl_cls.3.weight, required shapetorch.Size([37, 96, 1, 1]), loaded shapetorch.Size([112, 96, 1, 1]).
+[NanoDet][07-05 06:41:15]INFO:Skip loading parameter head.gfl_cls.3.bias, required shapetorch.Size([37]), loaded shapetorch.Size([112]).
+[NanoDet][07-05 06:41:15]INFO:Skip loading parameter aux_head.gfl_cls.weight, required shapetorch.Size([5, 192, 3, 3]), loaded shapetorch.Size([80, 192, 3, 3]).
+[NanoDet][07-05 06:41:15]INFO:Skip loading parameter aux_head.gfl_cls.bias, required shapetorch.Size([5]), loaded shapetorch.Size([80]).
+[NanoDet][07-05 06:41:15]INFO:Loaded model weight from /root/autodl-tmp/ect/weights/nanodet/nanodet-plus-m_416_checkpoint.ckpt
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+IPU available: False, using: 0 IPUs
+HPU available: False, using: 0 HPUs
+You are using a CUDA device ('NVIDIA GeForce RTX 4090 D') that has Tensor Cores. To properly utilize them, you should set `torch.set_float32_matmul_precision('medium' | 'high')` which will trade-off precision for performance. For more details, read https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html#torch.set_float32_matmul_precision
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+
+  | Name      | Type        | Params
+------------------------------------------
+0 | model     | NanoDetPlus | 4.2 M 
+1 | avg_model | NanoDetPlus | 4.2 M 
+------------------------------------------
+8.3 M     Trainable params
+0         Non-trainable params
+8.3 M     Total params
+33.377    Total estimated model params size (MB)
+[NanoDet][07-05 06:41:15]INFO:Weight Averaging is enabled
+loading annotations into memory...
+Done (t=0.28s)
+creating index...
+index created!
+loading annotations into memory...
+Done (t=0.02s)
+creating index...
+index created!
+model size is  1.0x
+init weights...
+=> loading pretrained model https://download.pytorch.org/models/shufflenetv2_x1-5666bf0f80.pth
+Finish initialize NanoDet-Plus Head.
+/root/miniconda3/envs/nanodet/lib/python3.10/site-packages/torch/functional.py:504: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3190.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+[NanoDet][07-05 06:41:24]INFO:Train|Epoch1/24|Iter0(1/343)| mem:17.5G| lr:1.00e-07| loss_qfl:1.0459| loss_bbox:1.4635| loss_dfl:0.5206| aux_loss_qfl:1.0419| aux_loss_bbox:0.8110| aux_loss_dfl:0.3211| 
+[NanoDet][07-05 06:41:57]INFO:Train|Epoch1/24|Iter50(51/343)| mem:18.7G| lr:1.00e-04| loss_qfl:1.6893| loss_bbox:1.2923| loss_dfl:0.4962| aux_loss_qfl:0.8837| aux_loss_bbox:0.4873| aux_loss_dfl:0.2329| 
+[NanoDet][07-05 06:42:28]INFO:Train|Epoch1/24|Iter100(101/343)| mem:18.7G| lr:2.00e-04| loss_qfl:0.7715| loss_bbox:0.8567| loss_dfl:0.4350| aux_loss_qfl:0.4899| aux_loss_bbox:0.3206| aux_loss_dfl:0.2052| 
+[NanoDet][07-05 06:43:00]INFO:Train|Epoch1/24|Iter150(151/343)| mem:18.7G| lr:3.00e-04| loss_qfl:0.6131| loss_bbox:0.6221| loss_dfl:0.3826| aux_loss_qfl:0.4938| aux_loss_bbox:0.3686| aux_loss_dfl:0.2078| 
+[NanoDet][07-05 06:43:31]INFO:Train|Epoch1/24|Iter200(201/343)| mem:18.7G| lr:4.00e-04| loss_qfl:0.5258| loss_bbox:0.5108| loss_dfl:0.3309| aux_loss_qfl:0.4383| aux_loss_bbox:0.3420| aux_loss_dfl:0.2073| 
+[NanoDet][07-05 06:44:03]INFO:Train|Epoch1/24|Iter250(251/343)| mem:18.7G| lr:5.00e-04| loss_qfl:0.4351| loss_bbox:0.4679| loss_dfl:0.2766| aux_loss_qfl:0.3961| aux_loss_bbox:0.3389| aux_loss_dfl:0.2009| 
+[NanoDet][07-05 06:44:35]INFO:Train|Epoch1/24|Iter300(301/343)| mem:18.7G| lr:6.00e-04| loss_qfl:0.4381| loss_bbox:0.4060| loss_dfl:0.2505| aux_loss_qfl:0.3815| aux_loss_bbox:0.3118| aux_loss_dfl:0.1973| 
+[NanoDet][07-05 06:45:08]INFO:Val|Epoch1/24|Iter343(1/40)| mem:18.7G| lr:6.81e-04| loss_qfl:0.5613| loss_bbox:0.4618| loss_dfl:0.2585| aux_loss_qfl:0.5042| aux_loss_bbox:0.3799| aux_loss_dfl:0.2161| 
+[NanoDet][07-05 06:45:49]INFO:
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.303
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.528
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.303
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.065
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.119
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.322
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.434
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.551
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.580
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.150
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.407
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.598
+
+[NanoDet][07-05 06:45:49]INFO:
+| class        | AP50   | mAP   | class    | AP50   | mAP   |
+|:-------------|:-------|:------|:---------|:-------|:------|
+| bird         | 80.8   | 50.2  | squirrel | 37.3   | 18.1  |
+| cat          | 32.2   | 20.2  | person   | 41.5   | 18.8  |
+| other_animal | 72.3   | 44.5  |          |        |       |
+[NanoDet][07-05 06:45:50]INFO:Saving model to /root/autodl-tmp/nanodet_round2/main/model_best/nanodet_model_best.pth
+[NanoDet][07-05 06:45:50]INFO:Val_metrics: {'mAP': 0.30342574734636935, 'AP_50': 0.5283421688168015, 'AP_75': 0.30332122297225866, 'AP_small': 0.06485779460298971, 'AP_m': 0.11874597327265488, 'AP_l': 0.32191733562165387}
+Loading and preparing results...
+DONE (t=1.76s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=9.00s).
+Accumulating evaluation results...
+DONE (t=3.19s).
+[NanoDet][07-05 06:46:00]INFO:Train|Epoch2/24|Iter350(8/343)| mem:18.7G| lr:7.00e-04| loss_qfl:0.4432| loss_bbox:0.4148| loss_dfl:0.2525| aux_loss_qfl:0.3988| aux_loss_bbox:0.3359| aux_loss_dfl:0.2128| 
+[NanoDet][07-05 06:46:32]INFO:Train|Epoch2/24|Iter400(58/343)| mem:18.7G| lr:8.00e-04| loss_qfl:0.3600| loss_bbox:0.3822| loss_dfl:0.2292| aux_loss_qfl:0.3538| aux_loss_bbox:0.2911| aux_loss_dfl:0.1866| 
+[NanoDet][07-05 06:47:03]INFO:Train|Epoch2/24|Iter450(108/343)| mem:18.7G| lr:9.00e-04| loss_qfl:0.4606| loss_bbox:0.3536| loss_dfl:0.2199| aux_loss_qfl:0.3904| aux_loss_bbox:0.3024| aux_loss_dfl:0.1939| 
+[NanoDet][07-05 06:47:34]INFO:Train|Epoch2/24|Iter500(158/343)| mem:18.7G| lr:1.00e-03| loss_qfl:0.4620| loss_bbox:0.4359| loss_dfl:0.2279| aux_loss_qfl:0.4337| aux_loss_bbox:0.3405| aux_loss_dfl:0.1947| 
+[NanoDet][07-05 06:48:06]INFO:Train|Epoch2/24|Iter550(208/343)| mem:18.7G| lr:1.00e-03| loss_qfl:0.4211| loss_bbox:0.3986| loss_dfl:0.2278| aux_loss_qfl:0.3676| aux_loss_bbox:0.3298| aux_loss_dfl:0.2009| 
+[NanoDet][07-05 06:48:37]INFO:Train|Epoch2/24|Iter600(258/343)| mem:18.7G| lr:1.00e-03| loss_qfl:0.3935| loss_bbox:0.3678| loss_dfl:0.2048| aux_loss_qfl:0.3364| aux_loss_bbox:0.3114| aux_loss_dfl:0.1850| 
+[NanoDet][07-05 06:49:09]INFO:Train|Epoch2/24|Iter650(308/343)| mem:18.7G| lr:1.00e-03| loss_qfl:0.4290| loss_bbox:0.3779| loss_dfl:0.2257| aux_loss_qfl:0.3842| aux_loss_bbox:0.3310| aux_loss_dfl:0.2072| 
+[NanoDet][07-05 06:49:36]INFO:Val|Epoch2/24|Iter686(1/40)| mem:18.7G| lr:9.88e-04| loss_qfl:0.5679| loss_bbox:0.4362| loss_dfl:0.2442| aux_loss_qfl:0.5337| aux_loss_bbox:0.3850| aux_loss_dfl:0.2271| 
+[NanoDet][07-05 06:50:12]INFO:
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.334
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.567
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.354
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.107
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.125
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.352
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.429
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.565
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.599
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.193
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.483
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.619
+
+[NanoDet][07-05 06:50:12]INFO:
+| class        | AP50   | mAP   | class    | AP50   | mAP   |
+|:-------------|:-------|:------|:---------|:-------|:------|
+| bird         | 81.8   | 54.2  | squirrel | 45.4   | 22.1  |
+| cat          | 38.2   | 21.0  | person   | 41.9   | 19.3  |
+| other_animal | 76.4   | 50.6  |          |        |       |
+[NanoDet][07-05 06:50:12]INFO:Saving model to /root/autodl-tmp/nanodet_round2/main/model_best/nanodet_model_best.pth
+[NanoDet][07-05 06:50:12]INFO:Val_metrics: {'mAP': 0.3343899881781114, 'AP_50': 0.5673363326762709, 'AP_75': 0.35383926751354794, 'AP_small': 0.10712878891575793, 'AP_m': 0.12495729778333425, 'AP_l': 0.3522898218731765}
+Loading and preparing results...
+DONE (t=1.10s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=8.36s).
+Accumulating evaluation results...
+DONE (t=2.44s).
+[NanoDet][07-05 06:50:27]INFO:Train|Epoch3/24|Iter700(15/343)| mem:18.7G| lr:9.88e-04| loss_qfl:0.3923| loss_bbox:0.3552| loss_dfl:0.2118| aux_loss_qfl:0.3716| aux_loss_bbox:0.3012| aux_loss_dfl:0.1917| 
+[NanoDet][07-05 06:51:00]INFO:Train|Epoch3/24|Iter750(65/343)| mem:18.7G| lr:9.88e-04| loss_qfl:0.3627| loss_bbox:0.3759| loss_dfl:0.2186| aux_loss_qfl:0.3345| aux_loss_bbox:0.3096| aux_loss_dfl:0.1924| 
+[NanoDet][07-05 06:51:33]INFO:Train|Epoch3/24|Iter800(115/343)| mem:18.7G| lr:9.88e-04| loss_qfl:0.4020| loss_bbox:0.3522| loss_dfl:0.2041| aux_loss_qfl:0.3559| aux_loss_bbox:0.3311| aux_loss_dfl:0.1946| 
+[NanoDet][07-05 06:52:06]INFO:Train|Epoch3/24|Iter850(165/343)| mem:18.7G| lr:9.88e-04| loss_qfl:0.3813| loss_bbox:0.3428| loss_dfl:0.2182| aux_loss_qfl:0.3387| aux_loss_bbox:0.3056| aux_loss_dfl:0.2035| 
+[NanoDet][07-05 06:52:40]INFO:Train|Epoch3/24|Iter900(215/343)| mem:18.7G| lr:9.88e-04| loss_qfl:0.3889| loss_bbox:0.3739| loss_dfl:0.2228| aux_loss_qfl:0.3486| aux_loss_bbox:0.3290| aux_loss_dfl:0.2047| 
+[NanoDet][07-05 06:53:13]INFO:Train|Epoch3/24|Iter950(265/343)| mem:18.7G| lr:9.88e-04| loss_qfl:0.3486| loss_bbox:0.3564| loss_dfl:0.2170| aux_loss_qfl:0.3105| aux_loss_bbox:0.3065| aux_loss_dfl:0.1972| 
+[NanoDet][07-05 06:53:47]INFO:Train|Epoch3/24|Iter1000(315/343)| mem:18.7G| lr:9.88e-04| loss_qfl:0.3474| loss_bbox:0.3365| loss_dfl:0.2001| aux_loss_qfl:0.3069| aux_loss_bbox:0.2978| aux_loss_dfl:0.1820| 
+[NanoDet][07-05 06:54:11]INFO:Val|Epoch3/24|Iter1029(1/40)| mem:18.7G| lr:9.68e-04| loss_qfl:0.5525| loss_bbox:0.4363| loss_dfl:0.2430| aux_loss_qfl:0.4870| aux_loss_bbox:0.3845| aux_loss_dfl:0.2208| 
+[NanoDet][07-05 06:54:50]INFO:
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.369
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.618
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.388
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.109
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.137
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.385
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.441
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.568
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.604
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.293
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.445
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.621
+
+[NanoDet][07-05 06:54:50]INFO:
+| class        | AP50   | mAP   | class    | AP50   | mAP   |
+|:-------------|:-------|:------|:---------|:-------|:------|
+| bird         | 80.5   | 52.3  | squirrel | 60.9   | 30.9  |
+| cat          | 52.6   | 31.7  | person   | 33.4   | 14.9  |
+| other_animal | 81.8   | 54.8  |          |        |       |
+[NanoDet][07-05 06:54:51]INFO:Saving model to /root/autodl-tmp/nanodet_round2/main/model_best/nanodet_model_best.pth
+[NanoDet][07-05 06:54:51]INFO:Val_metrics: {'mAP': 0.36916354279317404, 'AP_50': 0.6184884398393937, 'AP_75': 0.38753696770013824, 'AP_small': 0.10945102796165145, 'AP_m': 0.1369646226686109, 'AP_l': 0.3850496475013416}
+Loading and preparing results...
+DONE (t=1.86s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=8.15s).
+Accumulating evaluation results...
+DONE (t=2.55s).
+[NanoDet][07-05 06:55:10]INFO:Train|Epoch4/24|Iter1050(22/343)| mem:18.7G| lr:9.68e-04| loss_qfl:0.3382| loss_bbox:0.3385| loss_dfl:0.2122| aux_loss_qfl:0.3236| aux_loss_bbox:0.2943| aux_loss_dfl:0.2008| 
+[NanoDet][07-05 06:55:42]INFO:Train|Epoch4/24|Iter1100(72/343)| mem:18.7G| lr:9.68e-04| loss_qfl:0.3420| loss_bbox:0.3332| loss_dfl:0.2040| aux_loss_qfl:0.3084| aux_loss_bbox:0.2856| aux_loss_dfl:0.1868| 
+[NanoDet][07-05 06:56:14]INFO:Train|Epoch4/24|Iter1150(122/343)| mem:18.7G| lr:9.68e-04| loss_qfl:0.3795| loss_bbox:0.3425| loss_dfl:0.2083| aux_loss_qfl:0.3517| aux_loss_bbox:0.3040| aux_loss_dfl:0.1930| 
+[NanoDet][07-05 06:56:45]INFO:Train|Epoch4/24|Iter1200(172/343)| mem:18.7G| lr:9.68e-04| loss_qfl:0.3346| loss_bbox:0.3512| loss_dfl:0.2137| aux_loss_qfl:0.2989| aux_loss_bbox:0.3037| aux_loss_dfl:0.1981| 
+[NanoDet][07-05 06:57:17]INFO:Train|Epoch4/24|Iter1250(222/343)| mem:18.7G| lr:9.68e-04| loss_qfl:0.3429| loss_bbox:0.3657| loss_dfl:0.2212| aux_loss_qfl:0.2924| aux_loss_bbox:0.3264| aux_loss_dfl:0.2074| 
+[NanoDet][07-05 06:57:48]INFO:Train|Epoch4/24|Iter1300(272/343)| mem:18.7G| lr:9.68e-04| loss_qfl:0.3600| loss_bbox:0.3745| loss_dfl:0.2142| aux_loss_qfl:0.3035| aux_loss_bbox:0.3239| aux_loss_dfl:0.1913| 
+[NanoDet][07-05 06:58:20]INFO:Train|Epoch4/24|Iter1350(322/343)| mem:18.7G| lr:9.68e-04| loss_qfl:0.3707| loss_bbox:0.3912| loss_dfl:0.2152| aux_loss_qfl:0.3385| aux_loss_bbox:0.3491| aux_loss_dfl:0.1974| 
+[NanoDet][07-05 06:58:39]INFO:Val|Epoch4/24|Iter1372(1/40)| mem:18.7G| lr:9.40e-04| loss_qfl:0.5627| loss_bbox:0.4326| loss_dfl:0.2498| aux_loss_qfl:0.4727| aux_loss_bbox:0.3849| aux_loss_dfl:0.2293| 
+[NanoDet][07-05 06:59:15]INFO:
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.387
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.641
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.399
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.077
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.243
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.405
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.444
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.567
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.603
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.186
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.522
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.623
+
+[NanoDet][07-05 06:59:15]INFO:
+| class        | AP50   | mAP   | class    | AP50   | mAP   |
+|:-------------|:-------|:------|:---------|:-------|:------|
+| bird         | 80.5   | 54.1  | squirrel | 64.4   | 35.2  |
+| cat          | 55.3   | 32.3  | person   | 42.0   | 19.5  |
+| other_animal | 78.2   | 52.4  |          |        |       |
+[NanoDet][07-05 06:59:16]INFO:Saving model to /root/autodl-tmp/nanodet_round2/main/model_best/nanodet_model_best.pth
+[NanoDet][07-05 06:59:16]INFO:Val_metrics: {'mAP': 0.3869025738046023, 'AP_50': 0.6407021616154265, 'AP_75': 0.3994076470739713, 'AP_small': 0.07706658782470177, 'AP_m': 0.24325410001739525, 'AP_l': 0.40509945870953323}
+Loading and preparing results...
+DONE (t=1.09s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=8.26s).
+Accumulating evaluation results...
+DONE (t=2.18s).
+[NanoDet][07-05 06:59:40]INFO:Train|Epoch5/24|Iter1400(29/343)| mem:18.7G| lr:9.40e-04| loss_qfl:0.3311| loss_bbox:0.3360| loss_dfl:0.2106| aux_loss_qfl:0.3011| aux_loss_bbox:0.2733| aux_loss_dfl:0.1912| 
+[NanoDet][07-05 07:00:12]INFO:Train|Epoch5/24|Iter1450(79/343)| mem:18.7G| lr:9.40e-04| loss_qfl:0.3496| loss_bbox:0.2889| loss_dfl:0.1844| aux_loss_qfl:0.2850| aux_loss_bbox:0.2730| aux_loss_dfl:0.1781| 
+[NanoDet][07-05 07:00:43]INFO:Train|Epoch5/24|Iter1500(129/343)| mem:18.7G| lr:9.40e-04| loss_qfl:0.3762| loss_bbox:0.3261| loss_dfl:0.2098| aux_loss_qfl:0.3516| aux_loss_bbox:0.2978| aux_loss_dfl:0.1978| 
+[NanoDet][07-05 07:01:15]INFO:Train|Epoch5/24|Iter1550(179/343)| mem:18.7G| lr:9.40e-04| loss_qfl:0.2898| loss_bbox:0.3662| loss_dfl:0.2263| aux_loss_qfl:0.2394| aux_loss_bbox:0.3152| aux_loss_dfl:0.2064| 
+[NanoDet][07-05 07:01:47]INFO:Train|Epoch5/24|Iter1600(229/343)| mem:18.7G| lr:9.40e-04| loss_qfl:0.3210| loss_bbox:0.3434| loss_dfl:0.1973| aux_loss_qfl:0.2880| aux_loss_bbox:0.2965| aux_loss_dfl:0.1814| 
+[NanoDet][07-05 07:02:20]INFO:Train|Epoch5/24|Iter1650(279/343)| mem:18.7G| lr:9.40e-04| loss_qfl:0.3892| loss_bbox:0.3876| loss_dfl:0.2207| aux_loss_qfl:0.3226| aux_loss_bbox:0.3391| aux_loss_dfl:0.2017| 
+[NanoDet][07-05 07:02:51]INFO:Train|Epoch5/24|Iter1700(329/343)| mem:18.7G| lr:9.40e-04| loss_qfl:0.3012| loss_bbox:0.3789| loss_dfl:0.2163| aux_loss_qfl:0.2612| aux_loss_bbox:0.3301| aux_loss_dfl:0.1992| 
+[NanoDet][07-05 07:03:06]INFO:Val|Epoch5/24|Iter1715(1/40)| mem:18.7G| lr:9.06e-04| loss_qfl:0.5522| loss_bbox:0.4304| loss_dfl:0.2378| aux_loss_qfl:0.4960| aux_loss_bbox:0.3788| aux_loss_dfl:0.2213| 
+[NanoDet][07-05 07:03:42]INFO:
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.427
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.709
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.451
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.115
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.209
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.446
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.470
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.592
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.624
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.157
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.481
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.643
+
+[NanoDet][07-05 07:03:42]INFO:
+| class        | AP50   | mAP   | class    | AP50   | mAP   |
+|:-------------|:-------|:------|:---------|:-------|:------|
+| bird         | 83.8   | 56.3  | squirrel | 66.5   | 35.4  |
+| cat          | 72.9   | 42.9  | person   | 45.4   | 20.7  |
+| other_animal | 85.8   | 58.5  |          |        |       |
+[NanoDet][07-05 07:03:43]INFO:Saving model to /root/autodl-tmp/nanodet_round2/main/model_best/nanodet_model_best.pth
+[NanoDet][07-05 07:03:43]INFO:Val_metrics: {'mAP': 0.42742191285876074, 'AP_50': 0.708729860872196, 'AP_75': 0.4511366588871369, 'AP_small': 0.11461047420531525, 'AP_m': 0.20927145931545335, 'AP_l': 0.44601654087568426}
+Loading and preparing results...
+DONE (t=1.30s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=8.32s).
+Accumulating evaluation results...
+DONE (t=2.32s).
+[NanoDet][07-05 07:04:12]INFO:Train|Epoch6/24|Iter1750(36/343)| mem:18.7G| lr:9.06e-04| loss_qfl:0.2942| loss_bbox:0.3576| loss_dfl:0.2014| aux_loss_qfl:0.2704| aux_loss_bbox:0.3172| aux_loss_dfl:0.1847| 
+[NanoDet][07-05 07:04:44]INFO:Train|Epoch6/24|Iter1800(86/343)| mem:18.7G| lr:9.06e-04| loss_qfl:0.3530| loss_bbox:0.3471| loss_dfl:0.2084| aux_loss_qfl:0.3079| aux_loss_bbox:0.3034| aux_loss_dfl:0.1969| 
+[NanoDet][07-05 07:05:15]INFO:Train|Epoch6/24|Iter1850(136/343)| mem:18.7G| lr:9.06e-04| loss_qfl:0.3636| loss_bbox:0.3770| loss_dfl:0.2216| aux_loss_qfl:0.3260| aux_loss_bbox:0.3340| aux_loss_dfl:0.2018| 
+[NanoDet][07-05 07:05:47]INFO:Train|Epoch6/24|Iter1900(186/343)| mem:18.7G| lr:9.06e-04| loss_qfl:0.3221| loss_bbox:0.3837| loss_dfl:0.2264| aux_loss_qfl:0.2884| aux_loss_bbox:0.3496| aux_loss_dfl:0.2142| 
+[NanoDet][07-05 07:06:18]INFO:Train|Epoch6/24|Iter1950(236/343)| mem:18.7G| lr:9.06e-04| loss_qfl:0.3045| loss_bbox:0.3419| loss_dfl:0.2123| aux_loss_qfl:0.2530| aux_loss_bbox:0.2953| aux_loss_dfl:0.1937| 
+[NanoDet][07-05 07:06:50]INFO:Train|Epoch6/24|Iter2000(286/343)| mem:18.7G| lr:9.06e-04| loss_qfl:0.2974| loss_bbox:0.3554| loss_dfl:0.2081| aux_loss_qfl:0.2694| aux_loss_bbox:0.3185| aux_loss_dfl:0.1941| 
+[NanoDet][07-05 07:07:22]INFO:Train|Epoch6/24|Iter2050(336/343)| mem:18.7G| lr:9.06e-04| loss_qfl:0.3122| loss_bbox:0.3387| loss_dfl:0.2012| aux_loss_qfl:0.2709| aux_loss_bbox:0.3021| aux_loss_dfl:0.1901| 
+[NanoDet][07-05 07:07:32]INFO:Val|Epoch6/24|Iter2058(1/40)| mem:18.7G| lr:8.64e-04| loss_qfl:0.5068| loss_bbox:0.3836| loss_dfl:0.2277| aux_loss_qfl:0.3978| aux_loss_bbox:0.3435| aux_loss_dfl:0.2171| 
+[NanoDet][07-05 07:08:07]INFO:
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.414
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.671
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.446
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.113
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.223
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.431
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.470
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.599
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.628
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.193
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.528
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.646
+
+[NanoDet][07-05 07:08:07]INFO:
+| class        | AP50   | mAP   | class    | AP50   | mAP   |
+|:-------------|:-------|:------|:---------|:-------|:------|
+| bird         | 80.3   | 54.7  | squirrel | 69.6   | 37.2  |
+| cat          | 61.9   | 39.7  | person   | 39.5   | 17.7  |
+| other_animal | 84.4   | 57.6  |          |        |       |
+/root/autodl-tmp/ect/third_party/nanodet/nanodet/trainer/task.py:183: UserWarning: Warning! Save_key is not in eval results! Only save model last!
+  warnings.warn(
+[NanoDet][07-05 07:08:07]INFO:Val_metrics: {'mAP': 0.41388379536509434, 'AP_50': 0.671240168397624, 'AP_75': 0.44598195728469864, 'AP_small': 0.11346882056626716, 'AP_m': 0.22267481965591113, 'AP_l': 0.43094921093209776}
+Loading and preparing results...
+DONE (t=1.08s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=7.34s).
+Accumulating evaluation results...
+DONE (t=2.21s).
+[NanoDet][07-05 07:08:40]INFO:Train|Epoch7/24|Iter2100(43/343)| mem:18.7G| lr:8.64e-04| loss_qfl:0.3316| loss_bbox:0.3645| loss_dfl:0.2162| aux_loss_qfl:0.3029| aux_loss_bbox:0.3355| aux_loss_dfl:0.2067| 
+[NanoDet][07-05 07:09:12]INFO:Train|Epoch7/24|Iter2150(93/343)| mem:18.7G| lr:8.64e-04| loss_qfl:0.3421| loss_bbox:0.3574| loss_dfl:0.2135| aux_loss_qfl:0.2844| aux_loss_bbox:0.3140| aux_loss_dfl:0.1967| 
+[NanoDet][07-05 07:09:43]INFO:Train|Epoch7/24|Iter2200(143/343)| mem:18.7G| lr:8.64e-04| loss_qfl:0.3497| loss_bbox:0.3578| loss_dfl:0.2164| aux_loss_qfl:0.3121| aux_loss_bbox:0.3296| aux_loss_dfl:0.2017| 
+[NanoDet][07-05 07:10:15]INFO:Train|Epoch7/24|Iter2250(193/343)| mem:18.7G| lr:8.64e-04| loss_qfl:0.2767| loss_bbox:0.3362| loss_dfl:0.2077| aux_loss_qfl:0.2322| aux_loss_bbox:0.2986| aux_loss_dfl:0.1916| 
+[NanoDet][07-05 07:10:47]INFO:Train|Epoch7/24|Iter2300(243/343)| mem:18.7G| lr:8.64e-04| loss_qfl:0.2920| loss_bbox:0.3065| loss_dfl:0.1914| aux_loss_qfl:0.2450| aux_loss_bbox:0.2699| aux_loss_dfl:0.1830| 
+[NanoDet][07-05 07:11:19]INFO:Train|Epoch7/24|Iter2350(293/343)| mem:18.7G| lr:8.64e-04| loss_qfl:0.2984| loss_bbox:0.3442| loss_dfl:0.2005| aux_loss_qfl:0.2841| aux_loss_bbox:0.2980| aux_loss_dfl:0.1845| 
+[NanoDet][07-05 07:11:51]INFO:Train|Epoch7/24|Iter2400(343/343)| mem:18.7G| lr:8.64e-04| loss_qfl:0.2877| loss_bbox:0.3428| loss_dfl:0.2061| aux_loss_qfl:0.2421| aux_loss_bbox:0.2900| aux_loss_dfl:0.1919| 
+[NanoDet][07-05 07:11:57]INFO:Val|Epoch7/24|Iter2401(1/40)| mem:18.7G| lr:8.17e-04| loss_qfl:0.3787| loss_bbox:0.3816| loss_dfl:0.2273| aux_loss_qfl:0.3603| aux_loss_bbox:0.3470| aux_loss_dfl:0.2150| 
+[NanoDet][07-05 07:12:30]INFO:
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.441
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.705
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.481
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.133
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.329
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.458
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.488
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.605
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.637
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.236
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.455
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.656
+
+[NanoDet][07-05 07:12:30]INFO:
+| class        | AP50   | mAP   | class    | AP50   | mAP   |
+|:-------------|:-------|:------|:---------|:-------|:------|
+| bird         | 86.4   | 59.4  | squirrel | 75.6   | 43.0  |
+| cat          | 61.9   | 38.4  | person   | 42.5   | 20.6  |
+| other_animal | 86.2   | 58.9  |          |        |       |
+[NanoDet][07-05 07:12:31]INFO:Saving model to /root/autodl-tmp/nanodet_round2/main/model_best/nanodet_model_best.pth
+[NanoDet][07-05 07:12:31]INFO:Val_metrics: {'mAP': 0.4406524598326389, 'AP_50': 0.7050845354631897, 'AP_75': 0.4813363935709908, 'AP_small': 0.13272947475593672, 'AP_m': 0.3288714345320205, 'AP_l': 0.4579867507611419}
+Loading and preparing results...
+DONE (t=1.00s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=7.42s).
+Accumulating evaluation results...
+DONE (t=2.01s).
+[NanoDet][07-05 07:13:09]INFO:Train|Epoch8/24|Iter2450(50/343)| mem:18.7G| lr:8.17e-04| loss_qfl:0.3642| loss_bbox:0.3200| loss_dfl:0.1903| aux_loss_qfl:0.2900| aux_loss_bbox:0.3005| aux_loss_dfl:0.1823| 
+[NanoDet][07-05 07:13:40]INFO:Train|Epoch8/24|Iter2500(100/343)| mem:18.7G| lr:8.17e-04| loss_qfl:0.3231| loss_bbox:0.3082| loss_dfl:0.1911| aux_loss_qfl:0.2557| aux_loss_bbox:0.2722| aux_loss_dfl:0.1780| 
+[NanoDet][07-05 07:14:12]INFO:Train|Epoch8/24|Iter2550(150/343)| mem:18.7G| lr:8.17e-04| loss_qfl:0.2976| loss_bbox:0.3114| loss_dfl:0.1967| aux_loss_qfl:0.2618| aux_loss_bbox:0.2737| aux_loss_dfl:0.1831| 
+[NanoDet][07-05 07:14:43]INFO:Train|Epoch8/24|Iter2600(200/343)| mem:18.7G| lr:8.17e-04| loss_qfl:0.2985| loss_bbox:0.3243| loss_dfl:0.1924| aux_loss_qfl:0.2458| aux_loss_bbox:0.2943| aux_loss_dfl:0.1822| 
+[NanoDet][07-05 07:15:14]INFO:Train|Epoch8/24|Iter2650(250/343)| mem:18.7G| lr:8.17e-04| loss_qfl:0.3320| loss_bbox:0.3234| loss_dfl:0.1964| aux_loss_qfl:0.2886| aux_loss_bbox:0.2897| aux_loss_dfl:0.1828| 
+[NanoDet][07-05 07:15:46]INFO:Train|Epoch8/24|Iter2700(300/343)| mem:18.7G| lr:8.17e-04| loss_qfl:0.3264| loss_bbox:0.3031| loss_dfl:0.1828| aux_loss_qfl:0.2741| aux_loss_bbox:0.2709| aux_loss_dfl:0.1712| 
+[NanoDet][07-05 07:16:20]INFO:Val|Epoch8/24|Iter2744(1/40)| mem:18.7G| lr:7.66e-04| loss_qfl:0.4409| loss_bbox:0.3765| loss_dfl:0.2314| aux_loss_qfl:0.3608| aux_loss_bbox:0.3347| aux_loss_dfl:0.2133| 
+[NanoDet][07-05 07:16:57]INFO:
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.479
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.746
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.534
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.138
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.163
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.499
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.505
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.624
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.657
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.279
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.556
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.673
+
+[NanoDet][07-05 07:16:57]INFO:
+| class        | AP50   | mAP   | class    | AP50   | mAP   |
+|:-------------|:-------|:------|:---------|:-------|:------|
+| bird         | 86.5   | 60.7  | squirrel | 71.3   | 40.5  |
+| cat          | 79.1   | 52.5  | person   | 47.3   | 22.6  |
+| other_animal | 88.7   | 63.0  |          |        |       |
+[NanoDet][07-05 07:16:58]INFO:Saving model to /root/autodl-tmp/nanodet_round2/main/model_best/nanodet_model_best.pth
+[NanoDet][07-05 07:16:58]INFO:Val_metrics: {'mAP': 0.4786823824074397, 'AP_50': 0.7456266657494551, 'AP_75': 0.5336003206567782, 'AP_small': 0.13767284857995396, 'AP_m': 0.1629262766415157, 'AP_l': 0.49909118160697524}
+Loading and preparing results...
+DONE (t=1.49s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=8.72s).
+Accumulating evaluation results...
+DONE (t=2.20s).
+[NanoDet][07-05 07:17:08]INFO:Train|Epoch9/24|Iter2750(7/343)| mem:18.7G| lr:7.66e-04| loss_qfl:0.2969| loss_bbox:0.3151| loss_dfl:0.1970| aux_loss_qfl:0.2502| aux_loss_bbox:0.2781| aux_loss_dfl:0.1819| 
+[NanoDet][07-05 07:17:40]INFO:Train|Epoch9/24|Iter2800(57/343)| mem:18.7G| lr:7.66e-04| loss_qfl:0.2701| loss_bbox:0.3585| loss_dfl:0.2084| aux_loss_qfl:0.2248| aux_loss_bbox:0.3092| aux_loss_dfl:0.1946| 
+[NanoDet][07-05 07:18:11]INFO:Train|Epoch9/24|Iter2850(107/343)| mem:18.7G| lr:7.66e-04| loss_qfl:0.3069| loss_bbox:0.3561| loss_dfl:0.2293| aux_loss_qfl:0.2845| aux_loss_bbox:0.3182| aux_loss_dfl:0.2140| 
+[NanoDet][07-05 07:18:43]INFO:Train|Epoch9/24|Iter2900(157/343)| mem:18.7G| lr:7.66e-04| loss_qfl:0.3334| loss_bbox:0.3041| loss_dfl:0.1970| aux_loss_qfl:0.2935| aux_loss_bbox:0.2853| aux_loss_dfl:0.1856| 
+[NanoDet][07-05 07:19:14]INFO:Train|Epoch9/24|Iter2950(207/343)| mem:18.7G| lr:7.66e-04| loss_qfl:0.2866| loss_bbox:0.3501| loss_dfl:0.2105| aux_loss_qfl:0.2529| aux_loss_bbox:0.3261| aux_loss_dfl:0.2010| 
+[NanoDet][07-05 07:19:46]INFO:Train|Epoch9/24|Iter3000(257/343)| mem:18.7G| lr:7.66e-04| loss_qfl:0.2851| loss_bbox:0.3371| loss_dfl:0.2068| aux_loss_qfl:0.2478| aux_loss_bbox:0.3008| aux_loss_dfl:0.1964| 
+[NanoDet][07-05 07:20:17]INFO:Train|Epoch9/24|Iter3050(307/343)| mem:18.7G| lr:7.66e-04| loss_qfl:0.2618| loss_bbox:0.3240| loss_dfl:0.1967| aux_loss_qfl:0.2304| aux_loss_bbox:0.2740| aux_loss_dfl:0.1817| 
+[NanoDet][07-05 07:20:46]INFO:Val|Epoch9/24|Iter3087(1/40)| mem:18.7G| lr:7.10e-04| loss_qfl:0.4081| loss_bbox:0.3709| loss_dfl:0.2299| aux_loss_qfl:0.3500| aux_loss_bbox:0.3554| aux_loss_dfl:0.2225| 
+[NanoDet][07-05 07:21:21]INFO:
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.474
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.748
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.515
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.104
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.263
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.492
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.501
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.613
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.646
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.171
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.528
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.665
+
+[NanoDet][07-05 07:21:21]INFO:
+| class        | AP50   | mAP   | class    | AP50   | mAP   |
+|:-------------|:-------|:------|:---------|:-------|:------|
+| bird         | 87.2   | 60.7  | squirrel | 76.3   | 44.7  |
+| cat          | 80.0   | 50.9  | person   | 41.0   | 18.5  |
+| other_animal | 89.3   | 62.2  |          |        |       |
+[NanoDet][07-05 07:21:21]INFO:Val_metrics: {'mAP': 0.4740082950273423, 'AP_50': 0.747512461919621, 'AP_75': 0.5154515624051391, 'AP_small': 0.10356372175679106, 'AP_m': 0.26311003633864144, 'AP_l': 0.4917092112560567}
+Loading and preparing results...
+DONE (t=1.09s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=8.36s).
+Accumulating evaluation results...
+DONE (t=2.20s).
+[NanoDet][07-05 07:21:36]INFO:Train|Epoch10/24|Iter3100(14/343)| mem:18.7G| lr:7.10e-04| loss_qfl:0.3396| loss_bbox:0.3215| loss_dfl:0.1890| aux_loss_qfl:0.3135| aux_loss_bbox:0.2962| aux_loss_dfl:0.1803| 
+[NanoDet][07-05 07:22:07]INFO:Train|Epoch10/24|Iter3150(64/343)| mem:18.7G| lr:7.10e-04| loss_qfl:0.2916| loss_bbox:0.2855| loss_dfl:0.1836| aux_loss_qfl:0.2628| aux_loss_bbox:0.2502| aux_loss_dfl:0.1708| 
+[NanoDet][07-05 07:22:39]INFO:Train|Epoch10/24|Iter3200(114/343)| mem:18.7G| lr:7.10e-04| loss_qfl:0.3373| loss_bbox:0.3775| loss_dfl:0.2161| aux_loss_qfl:0.2911| aux_loss_bbox:0.3322| aux_loss_dfl:0.2012| 
+[NanoDet][07-05 07:23:11]INFO:Train|Epoch10/24|Iter3250(164/343)| mem:18.7G| lr:7.10e-04| loss_qfl:0.3060| loss_bbox:0.3046| loss_dfl:0.1863| aux_loss_qfl:0.2630| aux_loss_bbox:0.2701| aux_loss_dfl:0.1742| 
+[NanoDet][07-05 07:23:42]INFO:Train|Epoch10/24|Iter3300(214/343)| mem:18.7G| lr:7.10e-04| loss_qfl:0.2962| loss_bbox:0.3234| loss_dfl:0.2083| aux_loss_qfl:0.2495| aux_loss_bbox:0.2968| aux_loss_dfl:0.1950| 
+[NanoDet][07-05 07:24:13]INFO:Train|Epoch10/24|Iter3350(264/343)| mem:18.7G| lr:7.10e-04| loss_qfl:0.2479| loss_bbox:0.3378| loss_dfl:0.2171| aux_loss_qfl:0.2183| aux_loss_bbox:0.3027| aux_loss_dfl:0.2042| 
+[NanoDet][07-05 07:24:45]INFO:Train|Epoch10/24|Iter3400(314/343)| mem:18.7G| lr:7.10e-04| loss_qfl:0.3299| loss_bbox:0.3200| loss_dfl:0.1980| aux_loss_qfl:0.2606| aux_loss_bbox:0.2925| aux_loss_dfl:0.1914| 
+[NanoDet][07-05 07:25:09]INFO:Val|Epoch10/24|Iter3430(1/40)| mem:18.7G| lr:6.51e-04| loss_qfl:0.3980| loss_bbox:0.3657| loss_dfl:0.2131| aux_loss_qfl:0.3328| aux_loss_bbox:0.3349| aux_loss_dfl:0.2031| 
+[NanoDet][07-05 07:25:42]INFO:
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.503
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.769
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.557
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.090
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.297
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.522
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.522
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.631
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.662
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.171
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.543
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.680
+
+[NanoDet][07-05 07:25:42]INFO:
+| class        | AP50   | mAP   | class    | AP50   | mAP   |
+|:-------------|:-------|:------|:---------|:-------|:------|
+| bird         | 88.1   | 62.3  | squirrel | 79.8   | 47.4  |
+| cat          | 81.0   | 55.1  | person   | 46.2   | 22.8  |
+| other_animal | 89.7   | 64.0  |          |        |       |
+[NanoDet][07-05 07:25:43]INFO:Saving model to /root/autodl-tmp/nanodet_round2/main/model_best/nanodet_model_best.pth
+[NanoDet][07-05 07:25:43]INFO:Val_metrics: {'mAP': 0.5030617178862669, 'AP_50': 0.7694827471206628, 'AP_75': 0.5566313321176399, 'AP_small': 0.09034653465346533, 'AP_m': 0.2968760117615306, 'AP_l': 0.5222097486169661}
+Loading and preparing results...
+DONE (t=0.97s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=7.28s).
+Accumulating evaluation results...
+DONE (t=2.44s).
+[NanoDet][07-05 07:26:02]INFO:Train|Epoch11/24|Iter3450(21/343)| mem:18.7G| lr:6.51e-04| loss_qfl:0.2609| loss_bbox:0.3610| loss_dfl:0.2183| aux_loss_qfl:0.2113| aux_loss_bbox:0.3292| aux_loss_dfl:0.2046| 
+[NanoDet][07-05 07:26:33]INFO:Train|Epoch11/24|Iter3500(71/343)| mem:18.7G| lr:6.51e-04| loss_qfl:0.2663| loss_bbox:0.3140| loss_dfl:0.1962| aux_loss_qfl:0.2499| aux_loss_bbox:0.2876| aux_loss_dfl:0.1882| 
+[NanoDet][07-05 07:27:04]INFO:Train|Epoch11/24|Iter3550(121/343)| mem:18.7G| lr:6.51e-04| loss_qfl:0.2552| loss_bbox:0.3435| loss_dfl:0.2152| aux_loss_qfl:0.2240| aux_loss_bbox:0.3074| aux_loss_dfl:0.2009| 
+[NanoDet][07-05 07:27:36]INFO:Train|Epoch11/24|Iter3600(171/343)| mem:18.7G| lr:6.51e-04| loss_qfl:0.2870| loss_bbox:0.3265| loss_dfl:0.1905| aux_loss_qfl:0.2497| aux_loss_bbox:0.2986| aux_loss_dfl:0.1808| 
+[NanoDet][07-05 07:28:07]INFO:Train|Epoch11/24|Iter3650(221/343)| mem:18.7G| lr:6.51e-04| loss_qfl:0.2625| loss_bbox:0.3020| loss_dfl:0.1955| aux_loss_qfl:0.2120| aux_loss_bbox:0.2778| aux_loss_dfl:0.1852| 
+[NanoDet][07-05 07:28:38]INFO:Train|Epoch11/24|Iter3700(271/343)| mem:18.7G| lr:6.51e-04| loss_qfl:0.2593| loss_bbox:0.2777| loss_dfl:0.1856| aux_loss_qfl:0.2380| aux_loss_bbox:0.2676| aux_loss_dfl:0.1792| 
+[NanoDet][07-05 07:29:09]INFO:Train|Epoch11/24|Iter3750(321/343)| mem:18.7G| lr:6.51e-04| loss_qfl:0.2702| loss_bbox:0.3202| loss_dfl:0.2033| aux_loss_qfl:0.2327| aux_loss_bbox:0.2916| aux_loss_dfl:0.1936| 
+[NanoDet][07-05 07:29:29]INFO:Val|Epoch11/24|Iter3773(1/40)| mem:18.7G| lr:5.89e-04| loss_qfl:0.3472| loss_bbox:0.3479| loss_dfl:0.2193| aux_loss_qfl:0.2877| aux_loss_bbox:0.3261| aux_loss_dfl:0.2119| 
+[NanoDet][07-05 07:30:00]INFO:
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.554
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.821
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.622
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.069
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.357
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.572
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.541
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.654
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.682
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.257
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.529
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.699
+
+[NanoDet][07-05 07:30:00]INFO:
+| class        | AP50   | mAP   | class    | AP50   | mAP   |
+|:-------------|:-------|:------|:---------|:-------|:------|
+| bird         | 89.5   | 64.7  | squirrel | 84.9   | 54.9  |
+| cat          | 91.1   | 63.9  | person   | 51.8   | 26.3  |
+| other_animal | 93.4   | 67.0  |          |        |       |
+[NanoDet][07-05 07:30:01]INFO:Saving model to /root/autodl-tmp/nanodet_round2/main/model_best/nanodet_model_best.pth
+[NanoDet][07-05 07:30:01]INFO:Val_metrics: {'mAP': 0.5536223958127805, 'AP_50': 0.8213209508403675, 'AP_75': 0.6221292901484244, 'AP_small': 0.06856393195338294, 'AP_m': 0.3572027535078896, 'AP_l': 0.5722911219895659}
+Loading and preparing results...
+DONE (t=0.97s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=6.88s).
+Accumulating evaluation results...
+DONE (t=1.67s).
+[NanoDet][07-05 07:30:24]INFO:Train|Epoch12/24|Iter3800(28/343)| mem:18.7G| lr:5.89e-04| loss_qfl:0.2316| loss_bbox:0.2988| loss_dfl:0.1948| aux_loss_qfl:0.1990| aux_loss_bbox:0.2744| aux_loss_dfl:0.1855| 
+[NanoDet][07-05 07:30:55]INFO:Train|Epoch12/24|Iter3850(78/343)| mem:18.7G| lr:5.89e-04| loss_qfl:0.2768| loss_bbox:0.3266| loss_dfl:0.2014| aux_loss_qfl:0.2531| aux_loss_bbox:0.2895| aux_loss_dfl:0.1893| 
+[NanoDet][07-05 07:31:27]INFO:Train|Epoch12/24|Iter3900(128/343)| mem:18.7G| lr:5.89e-04| loss_qfl:0.2357| loss_bbox:0.2961| loss_dfl:0.1900| aux_loss_qfl:0.1995| aux_loss_bbox:0.2672| aux_loss_dfl:0.1791| 
+[NanoDet][07-05 07:31:59]INFO:Train|Epoch12/24|Iter3950(178/343)| mem:18.7G| lr:5.89e-04| loss_qfl:0.2696| loss_bbox:0.3179| loss_dfl:0.1973| aux_loss_qfl:0.2235| aux_loss_bbox:0.2957| aux_loss_dfl:0.1860| 
+[NanoDet][07-05 07:32:30]INFO:Train|Epoch12/24|Iter4000(228/343)| mem:18.7G| lr:5.89e-04| loss_qfl:0.2321| loss_bbox:0.3090| loss_dfl:0.2013| aux_loss_qfl:0.2123| aux_loss_bbox:0.2709| aux_loss_dfl:0.1887| 
+[NanoDet][07-05 07:33:02]INFO:Train|Epoch12/24|Iter4050(278/343)| mem:18.7G| lr:5.89e-04| loss_qfl:0.3162| loss_bbox:0.2933| loss_dfl:0.1932| aux_loss_qfl:0.2820| aux_loss_bbox:0.2687| aux_loss_dfl:0.1834| 
+[NanoDet][07-05 07:33:33]INFO:Train|Epoch12/24|Iter4100(328/343)| mem:18.7G| lr:5.89e-04| loss_qfl:0.2469| loss_bbox:0.3638| loss_dfl:0.2084| aux_loss_qfl:0.2230| aux_loss_bbox:0.3105| aux_loss_dfl:0.1939| 
+[NanoDet][07-05 07:33:48]INFO:Val|Epoch12/24|Iter4116(1/40)| mem:18.7G| lr:5.27e-04| loss_qfl:0.3503| loss_bbox:0.3463| loss_dfl:0.2138| aux_loss_qfl:0.2932| aux_loss_bbox:0.3158| aux_loss_dfl:0.2028| 
+[NanoDet][07-05 07:34:21]INFO:
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.557
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.819
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.627
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.067
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.304
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.577
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.544
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.655
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.683
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.193
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.526
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.701
+
+[NanoDet][07-05 07:34:21]INFO:
+| class        | AP50   | mAP   | class    | AP50   | mAP   |
+|:-------------|:-------|:------|:---------|:-------|:------|
+| bird         | 89.3   | 64.9  | squirrel | 86.3   | 56.0  |
+| cat          | 89.8   | 64.1  | person   | 51.4   | 26.1  |
+| other_animal | 92.7   | 67.2  |          |        |       |
+[NanoDet][07-05 07:34:21]INFO:Saving model to /root/autodl-tmp/nanodet_round2/main/model_best/nanodet_model_best.pth
+[NanoDet][07-05 07:34:21]INFO:Val_metrics: {'mAP': 0.5565734895480756, 'AP_50': 0.8191449434582979, 'AP_75': 0.6273518775302772, 'AP_small': 0.06666269758472729, 'AP_m': 0.30352064829523595, 'AP_l': 0.5773423653046423}
+Loading and preparing results...
+DONE (t=0.95s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=7.19s).
+Accumulating evaluation results...
+DONE (t=1.76s).
+[NanoDet][07-05 07:34:49]INFO:Train|Epoch13/24|Iter4150(35/343)| mem:18.7G| lr:5.27e-04| loss_qfl:0.2237| loss_bbox:0.3044| loss_dfl:0.2037| aux_loss_qfl:0.2030| aux_loss_bbox:0.2815| aux_loss_dfl:0.1955| 
+[NanoDet][07-05 07:35:21]INFO:Train|Epoch13/24|Iter4200(85/343)| mem:18.7G| lr:5.27e-04| loss_qfl:0.2599| loss_bbox:0.3017| loss_dfl:0.1887| aux_loss_qfl:0.2299| aux_loss_bbox:0.2817| aux_loss_dfl:0.1823| 
+[NanoDet][07-05 07:35:52]INFO:Train|Epoch13/24|Iter4250(135/343)| mem:18.7G| lr:5.27e-04| loss_qfl:0.2469| loss_bbox:0.3309| loss_dfl:0.1981| aux_loss_qfl:0.2115| aux_loss_bbox:0.3029| aux_loss_dfl:0.1887| 
+[NanoDet][07-05 07:36:24]INFO:Train|Epoch13/24|Iter4300(185/343)| mem:18.7G| lr:5.27e-04| loss_qfl:0.2602| loss_bbox:0.3088| loss_dfl:0.1923| aux_loss_qfl:0.2496| aux_loss_bbox:0.2766| aux_loss_dfl:0.1823| 
+[NanoDet][07-05 07:36:56]INFO:Train|Epoch13/24|Iter4350(235/343)| mem:18.7G| lr:5.27e-04| loss_qfl:0.2367| loss_bbox:0.2811| loss_dfl:0.1887| aux_loss_qfl:0.2081| aux_loss_bbox:0.2641| aux_loss_dfl:0.1827| 
+[NanoDet][07-05 07:37:29]INFO:Train|Epoch13/24|Iter4400(285/343)| mem:18.7G| lr:5.27e-04| loss_qfl:0.2635| loss_bbox:0.3362| loss_dfl:0.2111| aux_loss_qfl:0.2354| aux_loss_bbox:0.2996| aux_loss_dfl:0.1952| 
+[NanoDet][07-05 07:38:01]INFO:Train|Epoch13/24|Iter4450(335/343)| mem:18.7G| lr:5.27e-04| loss_qfl:0.2186| loss_bbox:0.3023| loss_dfl:0.1934| aux_loss_qfl:0.1874| aux_loss_bbox:0.2778| aux_loss_dfl:0.1872| 
+[NanoDet][07-05 07:38:13]INFO:Val|Epoch13/24|Iter4459(1/40)| mem:18.7G| lr:4.65e-04| loss_qfl:0.3352| loss_bbox:0.3630| loss_dfl:0.2231| aux_loss_qfl:0.2726| aux_loss_bbox:0.3300| aux_loss_dfl:0.2088| 
+[NanoDet][07-05 07:38:44]INFO:
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.541
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.806
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.604
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.151
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.373
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.561
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.536
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.651
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.678
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.293
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.588
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.695
+
+[NanoDet][07-05 07:38:44]INFO:
+| class        | AP50   | mAP   | class    | AP50   | mAP   |
+|:-------------|:-------|:------|:---------|:-------|:------|
+| bird         | 89.4   | 64.8  | squirrel | 84.1   | 52.4  |
+| cat          | 85.4   | 60.3  | person   | 51.4   | 26.3  |
+| other_animal | 92.7   | 66.6  |          |        |       |
+[NanoDet][07-05 07:38:44]INFO:Val_metrics: {'mAP': 0.5409579419569667, 'AP_50': 0.8061970398502885, 'AP_75': 0.6044399080095191, 'AP_small': 0.15077110569801375, 'AP_m': 0.3728468515687884, 'AP_l': 0.5606125541021869}
+Loading and preparing results...
+DONE (t=1.02s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=6.78s).
+Accumulating evaluation results...
+DONE (t=1.53s).
+[NanoDet][07-05 07:39:17]INFO:Train|Epoch14/24|Iter4500(42/343)| mem:18.7G| lr:4.65e-04| loss_qfl:0.2248| loss_bbox:0.2718| loss_dfl:0.1854| aux_loss_qfl:0.1943| aux_loss_bbox:0.2487| aux_loss_dfl:0.1766| 
+[NanoDet][07-05 07:39:49]INFO:Train|Epoch14/24|Iter4550(92/343)| mem:18.7G| lr:4.65e-04| loss_qfl:0.2405| loss_bbox:0.2770| loss_dfl:0.1778| aux_loss_qfl:0.1933| aux_loss_bbox:0.2553| aux_loss_dfl:0.1719| 
+[NanoDet][07-05 07:40:21]INFO:Train|Epoch14/24|Iter4600(142/343)| mem:18.7G| lr:4.65e-04| loss_qfl:0.2379| loss_bbox:0.2710| loss_dfl:0.1841| aux_loss_qfl:0.2176| aux_loss_bbox:0.2473| aux_loss_dfl:0.1740| 
+[NanoDet][07-05 07:40:54]INFO:Train|Epoch14/24|Iter4650(192/343)| mem:18.7G| lr:4.65e-04| loss_qfl:0.2624| loss_bbox:0.3082| loss_dfl:0.1880| aux_loss_qfl:0.2147| aux_loss_bbox:0.2781| aux_loss_dfl:0.1790| 
+[NanoDet][07-05 07:41:27]INFO:Train|Epoch14/24|Iter4700(242/343)| mem:18.7G| lr:4.65e-04| loss_qfl:0.2642| loss_bbox:0.2834| loss_dfl:0.1860| aux_loss_qfl:0.2143| aux_loss_bbox:0.2595| aux_loss_dfl:0.1778| 
+[NanoDet][07-05 07:41:59]INFO:Train|Epoch14/24|Iter4750(292/343)| mem:18.7G| lr:4.65e-04| loss_qfl:0.2626| loss_bbox:0.3291| loss_dfl:0.2047| aux_loss_qfl:0.2211| aux_loss_bbox:0.3055| aux_loss_dfl:0.1984| 
+[NanoDet][07-05 07:42:31]INFO:Train|Epoch14/24|Iter4800(342/343)| mem:18.7G| lr:4.65e-04| loss_qfl:0.2915| loss_bbox:0.3080| loss_dfl:0.1916| aux_loss_qfl:0.2516| aux_loss_bbox:0.2729| aux_loss_dfl:0.1797| 
+[NanoDet][07-05 07:42:38]INFO:Val|Epoch14/24|Iter4802(1/40)| mem:18.7G| lr:4.04e-04| loss_qfl:0.2892| loss_bbox:0.3576| loss_dfl:0.2210| aux_loss_qfl:0.2455| aux_loss_bbox:0.3311| aux_loss_dfl:0.2108| 
+[NanoDet][07-05 07:43:10]INFO:
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.554
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.824
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.625
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.092
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.345
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.573
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.544
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.656
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.685
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.200
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.564
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.701
+
+[NanoDet][07-05 07:43:10]INFO:
+| class        | AP50   | mAP   | class    | AP50   | mAP   |
+|:-------------|:-------|:------|:---------|:-------|:------|
+| bird         | 90.0   | 65.6  | squirrel | 87.3   | 55.7  |
+| cat          | 89.6   | 61.1  | person   | 52.3   | 26.8  |
+| other_animal | 92.9   | 67.6  |          |        |       |
+[NanoDet][07-05 07:43:10]INFO:Val_metrics: {'mAP': 0.553647852225289, 'AP_50': 0.8241271334619672, 'AP_75': 0.6254703783632942, 'AP_small': 0.09168311322716635, 'AP_m': 0.34515018332823705, 'AP_l': 0.5725092785875371}
+Loading and preparing results...
+DONE (t=0.89s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=6.74s).
+Accumulating evaluation results...
+DONE (t=1.60s).
+[NanoDet][07-05 07:43:48]INFO:Train|Epoch15/24|Iter4850(49/343)| mem:18.7G| lr:4.04e-04| loss_qfl:0.2141| loss_bbox:0.3001| loss_dfl:0.1926| aux_loss_qfl:0.1703| aux_loss_bbox:0.2626| aux_loss_dfl:0.1803| 
+[NanoDet][07-05 07:44:21]INFO:Train|Epoch15/24|Iter4900(99/343)| mem:18.7G| lr:4.04e-04| loss_qfl:0.2678| loss_bbox:0.2896| loss_dfl:0.1871| aux_loss_qfl:0.2325| aux_loss_bbox:0.2602| aux_loss_dfl:0.1775| 
+[NanoDet][07-05 07:44:53]INFO:Train|Epoch15/24|Iter4950(149/343)| mem:18.7G| lr:4.04e-04| loss_qfl:0.2599| loss_bbox:0.2869| loss_dfl:0.1935| aux_loss_qfl:0.2374| aux_loss_bbox:0.2610| aux_loss_dfl:0.1851| 
+[NanoDet][07-05 07:45:25]INFO:Train|Epoch15/24|Iter5000(199/343)| mem:18.7G| lr:4.04e-04| loss_qfl:0.2507| loss_bbox:0.3025| loss_dfl:0.1913| aux_loss_qfl:0.2175| aux_loss_bbox:0.2753| aux_loss_dfl:0.1816| 
+[NanoDet][07-05 07:45:58]INFO:Train|Epoch15/24|Iter5050(249/343)| mem:18.7G| lr:4.04e-04| loss_qfl:0.2438| loss_bbox:0.2948| loss_dfl:0.1910| aux_loss_qfl:0.2061| aux_loss_bbox:0.2660| aux_loss_dfl:0.1791| 
+[NanoDet][07-05 07:46:31]INFO:Train|Epoch15/24|Iter5100(299/343)| mem:18.7G| lr:4.04e-04| loss_qfl:0.2364| loss_bbox:0.3044| loss_dfl:0.1945| aux_loss_qfl:0.2165| aux_loss_bbox:0.2711| aux_loss_dfl:0.1837| 
+[NanoDet][07-05 07:47:05]INFO:Val|Epoch15/24|Iter5145(1/40)| mem:18.7G| lr:3.44e-04| loss_qfl:0.2998| loss_bbox:0.3462| loss_dfl:0.2139| aux_loss_qfl:0.2561| aux_loss_bbox:0.3306| aux_loss_dfl:0.2056| 
+[NanoDet][07-05 07:47:36]INFO:
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.575
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.837
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.647
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.135
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.358
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.596
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.556
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.667
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.696
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.257
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.556
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.713
+
+[NanoDet][07-05 07:47:36]INFO:
+| class        | AP50   | mAP   | class    | AP50   | mAP   |
+|:-------------|:-------|:------|:---------|:-------|:------|
+| bird         | 90.6   | 66.3  | squirrel | 86.0   | 55.5  |
+| cat          | 93.8   | 68.2  | person   | 53.2   | 27.9  |
+| other_animal | 94.9   | 69.7  |          |        |       |
+[NanoDet][07-05 07:47:37]INFO:Saving model to /root/autodl-tmp/nanodet_round2/main/model_best/nanodet_model_best.pth
+[NanoDet][07-05 07:47:37]INFO:Val_metrics: {'mAP': 0.5751057205766854, 'AP_50': 0.837186627024648, 'AP_75': 0.6472385184728117, 'AP_small': 0.13521513853704062, 'AP_m': 0.35827900663980444, 'AP_l': 0.595554288024733}
+Loading and preparing results...
+DONE (t=0.86s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=6.67s).
+Accumulating evaluation results...
+DONE (t=1.49s).
+[NanoDet][07-05 07:47:46]INFO:Train|Epoch16/24|Iter5150(6/343)| mem:18.7G| lr:3.44e-04| loss_qfl:0.2541| loss_bbox:0.3465| loss_dfl:0.2049| aux_loss_qfl:0.2196| aux_loss_bbox:0.3098| aux_loss_dfl:0.1932| 
+[NanoDet][07-05 07:48:19]INFO:Train|Epoch16/24|Iter5200(56/343)| mem:18.7G| lr:3.44e-04| loss_qfl:0.2362| loss_bbox:0.2993| loss_dfl:0.1839| aux_loss_qfl:0.2007| aux_loss_bbox:0.2612| aux_loss_dfl:0.1728| 
+[NanoDet][07-05 07:48:51]INFO:Train|Epoch16/24|Iter5250(106/343)| mem:18.7G| lr:3.44e-04| loss_qfl:0.2189| loss_bbox:0.3096| loss_dfl:0.1954| aux_loss_qfl:0.1855| aux_loss_bbox:0.2884| aux_loss_dfl:0.1892| 
+[NanoDet][07-05 07:49:24]INFO:Train|Epoch16/24|Iter5300(156/343)| mem:18.7G| lr:3.44e-04| loss_qfl:0.2229| loss_bbox:0.2744| loss_dfl:0.1846| aux_loss_qfl:0.1888| aux_loss_bbox:0.2416| aux_loss_dfl:0.1730| 
+[NanoDet][07-05 07:49:56]INFO:Train|Epoch16/24|Iter5350(206/343)| mem:18.7G| lr:3.44e-04| loss_qfl:0.2592| loss_bbox:0.3026| loss_dfl:0.1899| aux_loss_qfl:0.2338| aux_loss_bbox:0.2774| aux_loss_dfl:0.1804| 
+[NanoDet][07-05 07:50:29]INFO:Train|Epoch16/24|Iter5400(256/343)| mem:18.7G| lr:3.44e-04| loss_qfl:0.2251| loss_bbox:0.3011| loss_dfl:0.1846| aux_loss_qfl:0.1876| aux_loss_bbox:0.2806| aux_loss_dfl:0.1786| 
+[NanoDet][07-05 07:51:02]INFO:Train|Epoch16/24|Iter5450(306/343)| mem:18.7G| lr:3.44e-04| loss_qfl:0.2225| loss_bbox:0.2672| loss_dfl:0.1740| aux_loss_qfl:0.1970| aux_loss_bbox:0.2601| aux_loss_dfl:0.1679| 
+[NanoDet][07-05 07:51:31]INFO:Val|Epoch16/24|Iter5488(1/40)| mem:18.7G| lr:2.89e-04| loss_qfl:0.2920| loss_bbox:0.3496| loss_dfl:0.2152| aux_loss_qfl:0.2437| aux_loss_bbox:0.3251| aux_loss_dfl:0.2039| 
+[NanoDet][07-05 07:52:02]INFO:
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.581
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.841
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.655
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.109
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.435
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.602
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.557
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.668
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.695
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.293
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.566
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.712
+
+[NanoDet][07-05 07:52:02]INFO:
+| class        | AP50   | mAP   | class    | AP50   | mAP   |
+|:-------------|:-------|:------|:---------|:-------|:------|
+| bird         | 90.5   | 66.6  | squirrel | 87.9   | 57.8  |
+| cat          | 94.4   | 67.7  | person   | 52.6   | 27.9  |
+| other_animal | 95.0   | 70.4  |          |        |       |
+[NanoDet][07-05 07:52:03]INFO:Saving model to /root/autodl-tmp/nanodet_round2/main/model_best/nanodet_model_best.pth
+[NanoDet][07-05 07:52:03]INFO:Val_metrics: {'mAP': 0.580642058180695, 'AP_50': 0.8407650369089983, 'AP_75': 0.6552151291671847, 'AP_small': 0.10931129183423403, 'AP_m': 0.4349015335628673, 'AP_l': 0.6022586841381402}
+Loading and preparing results...
+DONE (t=0.83s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=6.28s).
+Accumulating evaluation results...
+DONE (t=1.49s).
+[NanoDet][07-05 07:52:17]INFO:Train|Epoch17/24|Iter5500(13/343)| mem:18.7G| lr:2.89e-04| loss_qfl:0.2255| loss_bbox:0.2930| loss_dfl:0.1955| aux_loss_qfl:0.1863| aux_loss_bbox:0.2756| aux_loss_dfl:0.1881| 
+[NanoDet][07-05 07:52:50]INFO:Train|Epoch17/24|Iter5550(63/343)| mem:18.7G| lr:2.89e-04| loss_qfl:0.2398| loss_bbox:0.2611| loss_dfl:0.1781| aux_loss_qfl:0.2067| aux_loss_bbox:0.2383| aux_loss_dfl:0.1707| 
+[NanoDet][07-05 07:53:22]INFO:Train|Epoch17/24|Iter5600(113/343)| mem:18.7G| lr:2.89e-04| loss_qfl:0.2060| loss_bbox:0.2847| loss_dfl:0.1894| aux_loss_qfl:0.1619| aux_loss_bbox:0.2583| aux_loss_dfl:0.1803| 
+[NanoDet][07-05 07:53:54]INFO:Train|Epoch17/24|Iter5650(163/343)| mem:18.7G| lr:2.89e-04| loss_qfl:0.2233| loss_bbox:0.2811| loss_dfl:0.1859| aux_loss_qfl:0.1974| aux_loss_bbox:0.2586| aux_loss_dfl:0.1759| 
+[NanoDet][07-05 07:54:27]INFO:Train|Epoch17/24|Iter5700(213/343)| mem:18.7G| lr:2.89e-04| loss_qfl:0.2509| loss_bbox:0.3287| loss_dfl:0.1985| aux_loss_qfl:0.2211| aux_loss_bbox:0.3051| aux_loss_dfl:0.1904| 
+[NanoDet][07-05 07:54:59]INFO:Train|Epoch17/24|Iter5750(263/343)| mem:18.7G| lr:2.89e-04| loss_qfl:0.2274| loss_bbox:0.2951| loss_dfl:0.1877| aux_loss_qfl:0.1768| aux_loss_bbox:0.2718| aux_loss_dfl:0.1778| 
+[NanoDet][07-05 07:55:32]INFO:Train|Epoch17/24|Iter5800(313/343)| mem:18.7G| lr:2.89e-04| loss_qfl:0.2236| loss_bbox:0.2950| loss_dfl:0.1870| aux_loss_qfl:0.1837| aux_loss_bbox:0.2784| aux_loss_dfl:0.1798| 
+[NanoDet][07-05 07:55:57]INFO:Val|Epoch17/24|Iter5831(1/40)| mem:18.7G| lr:2.37e-04| loss_qfl:0.3028| loss_bbox:0.3359| loss_dfl:0.2107| aux_loss_qfl:0.2560| aux_loss_bbox:0.3212| aux_loss_dfl:0.2036| 
+[NanoDet][07-05 07:56:28]INFO:
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.586
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.847
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.660
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.110
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.448
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.607
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.564
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.674
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.701
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.171
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.549
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.719
+
+[NanoDet][07-05 07:56:28]INFO:
+| class        | AP50   | mAP   | class    | AP50   | mAP   |
+|:-------------|:-------|:------|:---------|:-------|:------|
+| bird         | 91.1   | 67.3  | squirrel | 89.4   | 58.4  |
+| cat          | 93.8   | 68.7  | person   | 54.3   | 28.4  |
+| other_animal | 95.0   | 70.3  |          |        |       |
+[NanoDet][07-05 07:56:28]INFO:Saving model to /root/autodl-tmp/nanodet_round2/main/model_best/nanodet_model_best.pth
+[NanoDet][07-05 07:56:28]INFO:Val_metrics: {'mAP': 0.5861653088941167, 'AP_50': 0.8472798531939882, 'AP_75': 0.6603628196366644, 'AP_small': 0.11047827049911468, 'AP_m': 0.4477480649519694, 'AP_l': 0.6065261856881299}
+Loading and preparing results...
+DONE (t=0.86s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=6.03s).
+Accumulating evaluation results...
+DONE (t=1.35s).
+[NanoDet][07-05 07:56:47]INFO:Train|Epoch18/24|Iter5850(20/343)| mem:18.7G| lr:2.37e-04| loss_qfl:0.2245| loss_bbox:0.2805| loss_dfl:0.1865| aux_loss_qfl:0.1939| aux_loss_bbox:0.2604| aux_loss_dfl:0.1784| 
+[NanoDet][07-05 07:57:20]INFO:Train|Epoch18/24|Iter5900(70/343)| mem:18.7G| lr:2.37e-04| loss_qfl:0.2223| loss_bbox:0.2993| loss_dfl:0.1949| aux_loss_qfl:0.1904| aux_loss_bbox:0.2723| aux_loss_dfl:0.1860| 
+[NanoDet][07-05 07:57:52]INFO:Train|Epoch18/24|Iter5950(120/343)| mem:18.7G| lr:2.37e-04| loss_qfl:0.2208| loss_bbox:0.2642| loss_dfl:0.1810| aux_loss_qfl:0.1979| aux_loss_bbox:0.2410| aux_loss_dfl:0.1749| 
+[NanoDet][07-05 07:58:25]INFO:Train|Epoch18/24|Iter6000(170/343)| mem:18.7G| lr:2.37e-04| loss_qfl:0.1815| loss_bbox:0.2773| loss_dfl:0.1842| aux_loss_qfl:0.1499| aux_loss_bbox:0.2562| aux_loss_dfl:0.1737| 
+[NanoDet][07-05 07:58:57]INFO:Train|Epoch18/24|Iter6050(220/343)| mem:18.7G| lr:2.37e-04| loss_qfl:0.2223| loss_bbox:0.2729| loss_dfl:0.1836| aux_loss_qfl:0.1841| aux_loss_bbox:0.2502| aux_loss_dfl:0.1762| 
+[NanoDet][07-05 07:59:30]INFO:Train|Epoch18/24|Iter6100(270/343)| mem:18.7G| lr:2.37e-04| loss_qfl:0.2102| loss_bbox:0.2875| loss_dfl:0.1881| aux_loss_qfl:0.1783| aux_loss_bbox:0.2667| aux_loss_dfl:0.1832| 
+[NanoDet][07-05 08:00:02]INFO:Train|Epoch18/24|Iter6150(320/343)| mem:18.7G| lr:2.37e-04| loss_qfl:0.2044| loss_bbox:0.3026| loss_dfl:0.1929| aux_loss_qfl:0.1649| aux_loss_bbox:0.2769| aux_loss_dfl:0.1831| 
+[NanoDet][07-05 08:00:23]INFO:Val|Epoch18/24|Iter6174(1/40)| mem:18.7G| lr:1.90e-04| loss_qfl:0.2680| loss_bbox:0.3386| loss_dfl:0.2143| aux_loss_qfl:0.2274| aux_loss_bbox:0.3182| aux_loss_dfl:0.2045| 
+[NanoDet][07-05 08:00:53]INFO:
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.592
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.847
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.663
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.146
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.379
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.614
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.568
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.675
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.701
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.243
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.569
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.719
+
+[NanoDet][07-05 08:00:53]INFO:
+| class        | AP50   | mAP   | class    | AP50   | mAP   |
+|:-------------|:-------|:------|:---------|:-------|:------|
+| bird         | 91.3   | 67.7  | squirrel | 88.4   | 59.4  |
+| cat          | 93.8   | 68.8  | person   | 54.8   | 29.2  |
+| other_animal | 95.2   | 71.1  |          |        |       |
+[NanoDet][07-05 08:00:53]INFO:Saving model to /root/autodl-tmp/nanodet_round2/main/model_best/nanodet_model_best.pth
+[NanoDet][07-05 08:00:53]INFO:Val_metrics: {'mAP': 0.5923058633822842, 'AP_50': 0.8469018717880001, 'AP_75': 0.6628714018224657, 'AP_small': 0.14610002295776134, 'AP_m': 0.3787244037223383, 'AP_l': 0.6138315344731536}
+Loading and preparing results...
+DONE (t=0.78s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=6.39s).
+Accumulating evaluation results...
+DONE (t=1.35s).
+[NanoDet][07-05 08:01:16]INFO:Train|Epoch19/24|Iter6200(27/343)| mem:18.7G| lr:1.90e-04| loss_qfl:0.2246| loss_bbox:0.3162| loss_dfl:0.1873| aux_loss_qfl:0.1876| aux_loss_bbox:0.2892| aux_loss_dfl:0.1804| 
+[NanoDet][07-05 08:01:49]INFO:Train|Epoch19/24|Iter6250(77/343)| mem:18.7G| lr:1.90e-04| loss_qfl:0.2365| loss_bbox:0.2946| loss_dfl:0.1896| aux_loss_qfl:0.2117| aux_loss_bbox:0.2562| aux_loss_dfl:0.1786| 
+[NanoDet][07-05 08:02:21]INFO:Train|Epoch19/24|Iter6300(127/343)| mem:18.7G| lr:1.90e-04| loss_qfl:0.1806| loss_bbox:0.2948| loss_dfl:0.1901| aux_loss_qfl:0.1557| aux_loss_bbox:0.2662| aux_loss_dfl:0.1784| 
+[NanoDet][07-05 08:02:53]INFO:Train|Epoch19/24|Iter6350(177/343)| mem:18.7G| lr:1.90e-04| loss_qfl:0.2171| loss_bbox:0.2960| loss_dfl:0.1887| aux_loss_qfl:0.1993| aux_loss_bbox:0.2790| aux_loss_dfl:0.1826| 
+[NanoDet][07-05 08:03:26]INFO:Train|Epoch19/24|Iter6400(227/343)| mem:18.7G| lr:1.90e-04| loss_qfl:0.2466| loss_bbox:0.2864| loss_dfl:0.1837| aux_loss_qfl:0.2099| aux_loss_bbox:0.2638| aux_loss_dfl:0.1744| 
+[NanoDet][07-05 08:03:59]INFO:Train|Epoch19/24|Iter6450(277/343)| mem:18.7G| lr:1.90e-04| loss_qfl:0.1953| loss_bbox:0.2705| loss_dfl:0.1877| aux_loss_qfl:0.1551| aux_loss_bbox:0.2535| aux_loss_dfl:0.1829| 
+[NanoDet][07-05 08:04:31]INFO:Train|Epoch19/24|Iter6500(327/343)| mem:18.7G| lr:1.90e-04| loss_qfl:0.1974| loss_bbox:0.2921| loss_dfl:0.1950| aux_loss_qfl:0.1551| aux_loss_bbox:0.2654| aux_loss_dfl:0.1833| 
+[NanoDet][07-05 08:04:47]INFO:Val|Epoch19/24|Iter6517(1/40)| mem:18.7G| lr:1.49e-04| loss_qfl:0.2707| loss_bbox:0.3318| loss_dfl:0.2094| aux_loss_qfl:0.2324| aux_loss_bbox:0.3146| aux_loss_dfl:0.2013| 
+[NanoDet][07-05 08:05:17]INFO:
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.599
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.852
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.670
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.122
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.391
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.619
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.572
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.677
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.705
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.221
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.570
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.724
+
+[NanoDet][07-05 08:05:17]INFO:
+| class        | AP50   | mAP   | class    | AP50   | mAP   |
+|:-------------|:-------|:------|:---------|:-------|:------|
+| bird         | 91.7   | 68.1  | squirrel | 89.6   | 61.0  |
+| cat          | 94.5   | 70.0  | person   | 54.7   | 29.2  |
+| other_animal | 95.7   | 70.9  |          |        |       |
+[NanoDet][07-05 08:05:18]INFO:Saving model to /root/autodl-tmp/nanodet_round2/main/model_best/nanodet_model_best.pth
+[NanoDet][07-05 08:05:18]INFO:Val_metrics: {'mAP': 0.5985566550610857, 'AP_50': 0.8522744066364847, 'AP_75': 0.6697945588909795, 'AP_small': 0.12212268379862898, 'AP_m': 0.3912447849199212, 'AP_l': 0.6194046357301879}
+Loading and preparing results...
+DONE (t=0.74s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=6.00s).
+Accumulating evaluation results...
+DONE (t=1.32s).
+[NanoDet][07-05 08:05:46]INFO:Train|Epoch20/24|Iter6550(34/343)| mem:18.7G| lr:1.49e-04| loss_qfl:0.1993| loss_bbox:0.3019| loss_dfl:0.2017| aux_loss_qfl:0.1731| aux_loss_bbox:0.2767| aux_loss_dfl:0.1936| 
+[NanoDet][07-05 08:06:19]INFO:Train|Epoch20/24|Iter6600(84/343)| mem:18.7G| lr:1.49e-04| loss_qfl:0.2217| loss_bbox:0.2636| loss_dfl:0.1819| aux_loss_qfl:0.1919| aux_loss_bbox:0.2366| aux_loss_dfl:0.1697| 
+[NanoDet][07-05 08:06:51]INFO:Train|Epoch20/24|Iter6650(134/343)| mem:18.7G| lr:1.49e-04| loss_qfl:0.2085| loss_bbox:0.2930| loss_dfl:0.1880| aux_loss_qfl:0.1749| aux_loss_bbox:0.2605| aux_loss_dfl:0.1757| 
+[NanoDet][07-05 08:07:24]INFO:Train|Epoch20/24|Iter6700(184/343)| mem:18.7G| lr:1.49e-04| loss_qfl:0.1902| loss_bbox:0.2763| loss_dfl:0.1833| aux_loss_qfl:0.1417| aux_loss_bbox:0.2541| aux_loss_dfl:0.1754| 
+[NanoDet][07-05 08:07:56]INFO:Train|Epoch20/24|Iter6750(234/343)| mem:18.7G| lr:1.49e-04| loss_qfl:0.2687| loss_bbox:0.3193| loss_dfl:0.1909| aux_loss_qfl:0.2281| aux_loss_bbox:0.2876| aux_loss_dfl:0.1805| 
+[NanoDet][07-05 08:08:29]INFO:Train|Epoch20/24|Iter6800(284/343)| mem:18.7G| lr:1.49e-04| loss_qfl:0.2408| loss_bbox:0.2569| loss_dfl:0.1717| aux_loss_qfl:0.2009| aux_loss_bbox:0.2325| aux_loss_dfl:0.1630| 
+[NanoDet][07-05 08:09:01]INFO:Train|Epoch20/24|Iter6850(334/343)| mem:18.7G| lr:1.49e-04| loss_qfl:0.2332| loss_bbox:0.3093| loss_dfl:0.1906| aux_loss_qfl:0.1921| aux_loss_bbox:0.2813| aux_loss_dfl:0.1799| 
+[NanoDet][07-05 08:09:13]INFO:Val|Epoch20/24|Iter6860(1/40)| mem:18.7G| lr:1.14e-04| loss_qfl:0.2616| loss_bbox:0.3392| loss_dfl:0.2135| aux_loss_qfl:0.2170| aux_loss_bbox:0.3137| aux_loss_dfl:0.2029| 
+[NanoDet][07-05 08:09:43]INFO:
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.603
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.856
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.676
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.090
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.465
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.622
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.579
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.683
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.710
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.200
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.567
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.728
+
+[NanoDet][07-05 08:09:43]INFO:
+| class        | AP50   | mAP   | class    | AP50   | mAP   |
+|:-------------|:-------|:------|:---------|:-------|:------|
+| bird         | 91.5   | 68.1  | squirrel | 90.4   | 60.7  |
+| cat          | 94.8   | 71.0  | person   | 55.5   | 29.9  |
+| other_animal | 96.0   | 71.6  |          |        |       |
+[NanoDet][07-05 08:09:43]INFO:Saving model to /root/autodl-tmp/nanodet_round2/main/model_best/nanodet_model_best.pth
+[NanoDet][07-05 08:09:43]INFO:Val_metrics: {'mAP': 0.6025733522838752, 'AP_50': 0.8563620312630852, 'AP_75': 0.6764142163445388, 'AP_small': 0.08955681282413955, 'AP_m': 0.4645880229750032, 'AP_l': 0.6223045718355769}
+Loading and preparing results...
+DONE (t=0.74s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=6.25s).
+Accumulating evaluation results...
+DONE (t=1.22s).
+[NanoDet][07-05 08:10:16]INFO:Train|Epoch21/24|Iter6900(41/343)| mem:18.7G| lr:1.14e-04| loss_qfl:0.2065| loss_bbox:0.3020| loss_dfl:0.1837| aux_loss_qfl:0.1732| aux_loss_bbox:0.2889| aux_loss_dfl:0.1779| 
+[NanoDet][07-05 08:10:48]INFO:Train|Epoch21/24|Iter6950(91/343)| mem:18.7G| lr:1.14e-04| loss_qfl:0.1850| loss_bbox:0.2525| loss_dfl:0.1814| aux_loss_qfl:0.1462| aux_loss_bbox:0.2315| aux_loss_dfl:0.1732| 
+[NanoDet][07-05 08:11:21]INFO:Train|Epoch21/24|Iter7000(141/343)| mem:18.7G| lr:1.14e-04| loss_qfl:0.1876| loss_bbox:0.2568| loss_dfl:0.1792| aux_loss_qfl:0.1429| aux_loss_bbox:0.2338| aux_loss_dfl:0.1702| 
+[NanoDet][07-05 08:11:54]INFO:Train|Epoch21/24|Iter7050(191/343)| mem:18.7G| lr:1.14e-04| loss_qfl:0.2025| loss_bbox:0.3093| loss_dfl:0.1925| aux_loss_qfl:0.1786| aux_loss_bbox:0.2763| aux_loss_dfl:0.1817| 
+[NanoDet][07-05 08:12:27]INFO:Train|Epoch21/24|Iter7100(241/343)| mem:18.7G| lr:1.14e-04| loss_qfl:0.1942| loss_bbox:0.3155| loss_dfl:0.1911| aux_loss_qfl:0.1642| aux_loss_bbox:0.2923| aux_loss_dfl:0.1809| 
+[NanoDet][07-05 08:12:59]INFO:Train|Epoch21/24|Iter7150(291/343)| mem:18.7G| lr:1.14e-04| loss_qfl:0.1543| loss_bbox:0.2711| loss_dfl:0.1822| aux_loss_qfl:0.1287| aux_loss_bbox:0.2501| aux_loss_dfl:0.1735| 
+[NanoDet][07-05 08:13:31]INFO:Train|Epoch21/24|Iter7200(341/343)| mem:18.7G| lr:1.14e-04| loss_qfl:0.2142| loss_bbox:0.2668| loss_dfl:0.1790| aux_loss_qfl:0.1904| aux_loss_bbox:0.2411| aux_loss_dfl:0.1699| 
+[NanoDet][07-05 08:13:38]INFO:Val|Epoch21/24|Iter7203(1/40)| mem:18.7G| lr:8.63e-05| loss_qfl:0.2555| loss_bbox:0.3350| loss_dfl:0.2118| aux_loss_qfl:0.2086| aux_loss_bbox:0.3181| aux_loss_dfl:0.2038| 
+[NanoDet][07-05 08:14:08]INFO:
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.608
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.857
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.692
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.067
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.389
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.628
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.581
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.683
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.712
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.171
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.564
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.730
+
+[NanoDet][07-05 08:14:08]INFO:
+| class        | AP50   | mAP   | class    | AP50   | mAP   |
+|:-------------|:-------|:------|:---------|:-------|:------|
+| bird         | 91.6   | 68.3  | squirrel | 91.0   | 62.5  |
+| cat          | 94.6   | 72.0  | person   | 55.5   | 29.5  |
+| other_animal | 95.9   | 71.5  |          |        |       |
+[NanoDet][07-05 08:14:09]INFO:Saving model to /root/autodl-tmp/nanodet_round2/main/model_best/nanodet_model_best.pth
+[NanoDet][07-05 08:14:09]INFO:Val_metrics: {'mAP': 0.6076867070617787, 'AP_50': 0.8572000477897509, 'AP_75': 0.6919612109635954, 'AP_small': 0.06712635549269214, 'AP_m': 0.3886207139200948, 'AP_l': 0.6284779401801525}
+Loading and preparing results...
+DONE (t=0.77s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=6.05s).
+Accumulating evaluation results...
+DONE (t=1.22s).
+[NanoDet][07-05 08:14:46]INFO:Train|Epoch22/24|Iter7250(48/343)| mem:18.7G| lr:8.63e-05| loss_qfl:0.1884| loss_bbox:0.2862| loss_dfl:0.1829| aux_loss_qfl:0.1606| aux_loss_bbox:0.2586| aux_loss_dfl:0.1733| 
+[NanoDet][07-05 08:15:18]INFO:Train|Epoch22/24|Iter7300(98/343)| mem:18.7G| lr:8.63e-05| loss_qfl:0.1688| loss_bbox:0.2874| loss_dfl:0.1888| aux_loss_qfl:0.1402| aux_loss_bbox:0.2691| aux_loss_dfl:0.1834| 
+[NanoDet][07-05 08:15:51]INFO:Train|Epoch22/24|Iter7350(148/343)| mem:18.7G| lr:8.63e-05| loss_qfl:0.1573| loss_bbox:0.2724| loss_dfl:0.1896| aux_loss_qfl:0.1261| aux_loss_bbox:0.2510| aux_loss_dfl:0.1856| 
+[NanoDet][07-05 08:16:23]INFO:Train|Epoch22/24|Iter7400(198/343)| mem:18.7G| lr:8.63e-05| loss_qfl:0.2244| loss_bbox:0.2743| loss_dfl:0.1824| aux_loss_qfl:0.1979| aux_loss_bbox:0.2588| aux_loss_dfl:0.1770| 
+[NanoDet][07-05 08:16:56]INFO:Train|Epoch22/24|Iter7450(248/343)| mem:18.7G| lr:8.63e-05| loss_qfl:0.1908| loss_bbox:0.2803| loss_dfl:0.1782| aux_loss_qfl:0.1672| aux_loss_bbox:0.2532| aux_loss_dfl:0.1705| 
+[NanoDet][07-05 08:17:28]INFO:Train|Epoch22/24|Iter7500(298/343)| mem:18.7G| lr:8.63e-05| loss_qfl:0.1439| loss_bbox:0.2339| loss_dfl:0.1733| aux_loss_qfl:0.1177| aux_loss_bbox:0.2171| aux_loss_dfl:0.1671| 
+[NanoDet][07-05 08:18:02]INFO:Val|Epoch22/24|Iter7546(1/40)| mem:18.7G| lr:6.63e-05| loss_qfl:0.2500| loss_bbox:0.3227| loss_dfl:0.2070| aux_loss_qfl:0.2069| aux_loss_bbox:0.3140| aux_loss_dfl:0.2007| 
+[NanoDet][07-05 08:18:31]INFO:
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.606
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.856
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.682
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.111
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.393
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.627
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.580
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.683
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.710
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.200
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.556
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.728
+
+[NanoDet][07-05 08:18:31]INFO:
+| class        | AP50   | mAP   | class    | AP50   | mAP   |
+|:-------------|:-------|:------|:---------|:-------|:------|
+| bird         | 91.5   | 68.3  | squirrel | 90.4   | 61.4  |
+| cat          | 94.7   | 72.1  | person   | 55.2   | 29.4  |
+| other_animal | 96.1   | 72.0  |          |        |       |
+[NanoDet][07-05 08:18:31]INFO:Val_metrics: {'mAP': 0.6064564159937771, 'AP_50': 0.8557254432044982, 'AP_75': 0.6822142525465213, 'AP_small': 0.11089858985898589, 'AP_m': 0.392739526147564, 'AP_l': 0.6273524827056136}
+Loading and preparing results...
+DONE (t=0.70s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=5.53s).
+Accumulating evaluation results...
+DONE (t=1.19s).
+[NanoDet][07-05 08:18:40]INFO:Train|Epoch23/24|Iter7550(5/343)| mem:18.7G| lr:6.63e-05| loss_qfl:0.1956| loss_bbox:0.2742| loss_dfl:0.1812| aux_loss_qfl:0.1580| aux_loss_bbox:0.2465| aux_loss_dfl:0.1720| 
+[NanoDet][07-05 08:19:13]INFO:Train|Epoch23/24|Iter7600(55/343)| mem:18.7G| lr:6.63e-05| loss_qfl:0.1532| loss_bbox:0.2201| loss_dfl:0.1646| aux_loss_qfl:0.1255| aux_loss_bbox:0.2081| aux_loss_dfl:0.1606| 
+[NanoDet][07-05 08:19:45]INFO:Train|Epoch23/24|Iter7650(105/343)| mem:18.7G| lr:6.63e-05| loss_qfl:0.2124| loss_bbox:0.3219| loss_dfl:0.1984| aux_loss_qfl:0.1726| aux_loss_bbox:0.2948| aux_loss_dfl:0.1912| 
+[NanoDet][07-05 08:20:18]INFO:Train|Epoch23/24|Iter7700(155/343)| mem:18.7G| lr:6.63e-05| loss_qfl:0.1795| loss_bbox:0.2520| loss_dfl:0.1781| aux_loss_qfl:0.1627| aux_loss_bbox:0.2415| aux_loss_dfl:0.1701| 
+[NanoDet][07-05 08:20:50]INFO:Train|Epoch23/24|Iter7750(205/343)| mem:18.7G| lr:6.63e-05| loss_qfl:0.1415| loss_bbox:0.2417| loss_dfl:0.1715| aux_loss_qfl:0.1125| aux_loss_bbox:0.2227| aux_loss_dfl:0.1642| 
+[NanoDet][07-05 08:21:23]INFO:Train|Epoch23/24|Iter7800(255/343)| mem:18.7G| lr:6.63e-05| loss_qfl:0.1725| loss_bbox:0.2702| loss_dfl:0.1851| aux_loss_qfl:0.1319| aux_loss_bbox:0.2461| aux_loss_dfl:0.1780| 
+[NanoDet][07-05 08:21:55]INFO:Train|Epoch23/24|Iter7850(305/343)| mem:18.7G| lr:6.63e-05| loss_qfl:0.2268| loss_bbox:0.3069| loss_dfl:0.1935| aux_loss_qfl:0.2168| aux_loss_bbox:0.2749| aux_loss_dfl:0.1841| 
+[NanoDet][07-05 08:22:26]INFO:Val|Epoch23/24|Iter7889(1/40)| mem:18.7G| lr:5.41e-05| loss_qfl:0.2519| loss_bbox:0.3301| loss_dfl:0.2094| aux_loss_qfl:0.2028| aux_loss_bbox:0.3200| aux_loss_dfl:0.2034| 
+[NanoDet][07-05 08:22:54]INFO:
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.607
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.858
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.689
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.122
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.389
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.628
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.580
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.682
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.708
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.207
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.556
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.727
+
+[NanoDet][07-05 08:22:54]INFO:
+| class        | AP50   | mAP   | class    | AP50   | mAP   |
+|:-------------|:-------|:------|:---------|:-------|:------|
+| bird         | 91.8   | 68.5  | squirrel | 90.6   | 61.4  |
+| cat          | 95.5   | 72.3  | person   | 54.9   | 29.3  |
+| other_animal | 96.1   | 72.2  |          |        |       |
+[NanoDet][07-05 08:22:54]INFO:Val_metrics: {'mAP': 0.6072289181441399, 'AP_50': 0.8578365348660903, 'AP_75': 0.6894007314308841, 'AP_small': 0.1223047304730473, 'AP_m': 0.38916704917127615, 'AP_l': 0.627656346378852}
+Loading and preparing results...
+DONE (t=0.68s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=5.46s).
+Accumulating evaluation results...
+DONE (t=1.13s).
+[NanoDet][07-05 08:23:08]INFO:Train|Epoch24/24|Iter7900(12/343)| mem:18.7G| lr:5.41e-05| loss_qfl:0.1772| loss_bbox:0.2992| loss_dfl:0.1892| aux_loss_qfl:0.1416| aux_loss_bbox:0.2809| aux_loss_dfl:0.1839| 
+[NanoDet][07-05 08:23:41]INFO:Train|Epoch24/24|Iter7950(62/343)| mem:18.7G| lr:5.41e-05| loss_qfl:0.2301| loss_bbox:0.2753| loss_dfl:0.1801| aux_loss_qfl:0.1877| aux_loss_bbox:0.2441| aux_loss_dfl:0.1683| 
+[NanoDet][07-05 08:24:13]INFO:Train|Epoch24/24|Iter8000(112/343)| mem:18.7G| lr:5.41e-05| loss_qfl:0.1618| loss_bbox:0.2649| loss_dfl:0.1737| aux_loss_qfl:0.1302| aux_loss_bbox:0.2332| aux_loss_dfl:0.1629| 
+[NanoDet][07-05 08:24:46]INFO:Train|Epoch24/24|Iter8050(162/343)| mem:18.7G| lr:5.41e-05| loss_qfl:0.1507| loss_bbox:0.2649| loss_dfl:0.1847| aux_loss_qfl:0.1218| aux_loss_bbox:0.2432| aux_loss_dfl:0.1760| 
+[NanoDet][07-05 08:25:18]INFO:Train|Epoch24/24|Iter8100(212/343)| mem:18.7G| lr:5.41e-05| loss_qfl:0.1781| loss_bbox:0.2527| loss_dfl:0.1796| aux_loss_qfl:0.1489| aux_loss_bbox:0.2352| aux_loss_dfl:0.1715| 
+[NanoDet][07-05 08:25:50]INFO:Train|Epoch24/24|Iter8150(262/343)| mem:18.7G| lr:5.41e-05| loss_qfl:0.2186| loss_bbox:0.2807| loss_dfl:0.1810| aux_loss_qfl:0.1849| aux_loss_bbox:0.2563| aux_loss_dfl:0.1716| 
+[NanoDet][07-05 08:26:23]INFO:Train|Epoch24/24|Iter8200(312/343)| mem:18.7G| lr:5.41e-05| loss_qfl:0.1908| loss_bbox:0.2780| loss_dfl:0.1790| aux_loss_qfl:0.1597| aux_loss_bbox:0.2548| aux_loss_dfl:0.1752| 
+[NanoDet][07-05 08:26:49]INFO:Val|Epoch24/24|Iter8232(1/40)| mem:18.7G| lr:5.00e-05| loss_qfl:0.2539| loss_bbox:0.3291| loss_dfl:0.2074| aux_loss_qfl:0.2052| aux_loss_bbox:0.3208| aux_loss_dfl:0.2018| 
+[NanoDet][07-05 08:27:17]INFO:
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.611
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.858
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.692
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.112
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.378
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.632
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.580
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.683
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.710
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.200
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.549
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.728
+
+[NanoDet][07-05 08:27:17]INFO:
+| class        | AP50   | mAP   | class    | AP50   | mAP   |
+|:-------------|:-------|:------|:---------|:-------|:------|
+| bird         | 91.8   | 68.9  | squirrel | 90.7   | 62.4  |
+| cat          | 95.2   | 72.6  | person   | 55.1   | 29.6  |
+| other_animal | 96.0   | 72.3  |          |        |       |
+[NanoDet][07-05 08:27:18]INFO:Saving model to /root/autodl-tmp/nanodet_round2/main/model_best/nanodet_model_best.pth
+[NanoDet][07-05 08:27:18]INFO:Val_metrics: {'mAP': 0.6114322436619917, 'AP_50': 0.8576880260327194, 'AP_75': 0.6923118710518394, 'AP_small': 0.11238492270279658, 'AP_m': 0.3781004897596921, 'AP_l': 0.6324032197380446}
+`Trainer.fit` stopped: `max_epochs=24` reached.
+Loading and preparing results...
+DONE (t=0.69s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=5.38s).
+Accumulating evaluation results...
+DONE (t=1.13s).
+TRAIN_EXIT=0
