@@ -71,10 +71,17 @@
 
 ---
 
-## 五、下一 session 起始 prompt（可直接粘贴）
+## 五、落地节奏（重要：别"先造完再用"，共同螺旋上升）
 
-> 背景：检测 round1/round2 已收官，方法论沉淀在 `docs/方法论-检测复盘.md`。现在开始【分类】段。
+先造完美技能再用 = 纸上完美计划，违背螺旋精神。正确节奏是**用螺旋 harness 的方法造螺旋 harness**，分类既是被开发的项目、也是 harness 的第一个试验+反馈场：
+1. **搭 v0 骨架**（`write-a-skill` 建结构）——最小可跑：基座循环（autoresearch/ralph）+ 一个活 roadmap 文件 + 一个审查闸门。别一次大而全。
+2. **在分类里 dogfood**——分类真实反馈（数据审查、消融、区域评估…）既推进分类、也暴露 harness 问题；每圈审"这 harness 真帮到了吗/审查闸门审得对吗"→ 反过来改 harness。
+3. **固化+精修**（`skillify` 固化跑通的工作流 / `learner` 从会话提炼）——每圈把 harness 打磨更好，结合进 autoresearch。
+
+## 六、下一 session 起始 prompt（可直接粘贴）
+
+> 背景：检测 round1/round2 已收官，方法论在 `docs/方法论-检测复盘.md`。现在开始【分类】段，并用一个自研的「螺旋 harness」驱动开发（概念+外部实践调研+架构建议在 `docs/classify/00-螺旋harness起始.md`）。
 >
-> 【第一步·审计已有分类】读 docs/classify/、ADR-0002/0005、results/classify/、src 分类代码，提炼：做到哪、可借鉴 know-how、坑、已发布 registry 模型、还差什么。
+> 【第一步·审计已有分类】读 docs/classify/、ADR-0002/0005、results/classify/、src 分类代码，提炼：做到哪、可借鉴 know-how、坑、已发布 registry 模型（fp32/int8_sim/field）、还差什么。
 >
-> 【第二步·螺旋 harness 驱动分类】按 `docs/classify/00-螺旋harness起始.md`：loop-harness（goal+约束+改验留弃）之上，加 ①可变 roadmap ②一个【普适、贯穿全程】的现实审查闸门——在任何"知道了新东西"的时刻（调研发现 / 采·生成·派生的数据 / 训练·评测结果 / 导出物 / 一个决策，无一例外），都问"这东西真服务目标吗、意味着下一步要不要变"，③据此回改路线，全程在 harness 内、不靠人驱动。先和我把"审查闸门审什么、怎么触发改路线"定义清楚，再驱动分类开发。
+> 【第二步·搭螺旋 harness v0 并在分类里 dogfood】按 00-螺旋harness起始.md §二⑤架构 + §五节奏：**先搭最小 v0**（基座 autoresearch/ralph + 活 roadmap 文件 + 一个"贯穿全程现实审查→回改路线"的闸门），**别先造完再用**；拿 v0 跑分类，用真实反馈同时推进分类+精修 harness（三步共演化）。核心=审查判据从「did it work」升级为「does it serve the goal」，对项目负责、螺旋上升。先和我把"审查闸门审什么/怎么触发改路线"定义清楚再开跑。
