@@ -25,11 +25,31 @@
 
 ---
 
-## 二、现有技能盘点
+## 二、外部实践调研（2026）—— 螺旋 harness 不是无先例，是有据的综合
 
-- 最接近：`autoresearch`（目标迭代 改-验-留/弃）、`ralph`（loop 到完成 + verify reviewer）、`ralplan`（规划闸）、`autoresearch:probe`（对假设/需求的对抗审问）。
-- **缺的正是核心**：**可变 roadmap + 对照现实审查【每一样产物】并回改路线的自主闸门**。这层需新做——组合现有技能 + 新的"审查-回改"闸门，或落成新 skill/workflow。
-- 待定义清楚：审查闸门**审什么**（每类产物的"服务目标"判据）、**怎么触发**改路线（阈值/信号）、**改什么**（roadmap 的哪部分可变）。
+**① 名字有 30 年血统：Boehm 螺旋模型。** 软件工程的**螺旋模型**（Boehm，风险驱动迭代）每圈 4 活动 = 定目标 → 析风险 → 工程 → **评估产出 + 对照成功指标/反馈 再进下一圈**。螺旋 harness ≈ **把螺旋模型套到自主 agent 开发**——"评估产出对照现实"正是每圈的评估闸，"螺旋上升"正是它的原意。这validates了直觉。
+
+**② 领域有专名：harness engineering。** Anthropic/OpenAI 称 **"harness engineering"**，Geoffrey Huntley 称 **"back pressure engineering"**：框架越好、agent 越可靠。参考枢纽 `github.com/ai-boost/awesome-harness-engineering`。
+
+**③ 三个新增各有成熟对应（可直接借鉴/下载）：**
+
+| 螺旋 harness 组件 | 外部对应（可抄）|
+|---|---|
+| **可变 roadmap** | **Task-Decoupled Planning**（Supervisor 建依赖图 + **Self-Revision 执行后更新图**，局部重规划不级联）；**AdaPlanner**（闭环自适应改计划，环境反馈双向）；**LATS**（MCTS + 失败回溯）；**Plan-and-Execute**（需要时才重规划）|
+| **贯穿现实审查闸门** | **Reflexion**（自省存记忆→精修计划）；**Self-Refine**（内部自检反馈）；**PARC**（自省式长程编码 agent）；**SkillOpt**（validation-gated 更新）+ 螺旋模型每圈评估 |
+| **长程 + 对项目负责** | **Anthropic《Effective Harnesses for Long-Running Agents》**（feature list + git commit + test gate 当跨 session 状态）；**goal persistence**（目标存活、计划可弃→触发重规划）；**ralph loop**（fresh context + 文件系统当记忆，spec↔code 比对出任务，每圈一任务；避"Dumb Zone" 100–150k token 后掉质）；**statewright**（状态机护栏，按 phase 限工具）；Meta **REA**（hibernate-wake 断点续 6h 任务）|
+
+**④ 真正的空白（值得自己抽成技能）：** 单一现成品都不完全是你要的，但**每块都有强先例**。你的独特打包 = **审查是"贯穿全程/一切信息（含调研发现、决策）"的一等反射 + 直接改活 roadmap + goal 持久 + 螺旋上升**——这个特定组合没现成 skill，值得抽（结合 autoresearch）。
+
+**⑤ 若抽成"结合 autoresearch 的新技能"，建议架构：**
+- **基座循环**：`autoresearch`（goal-metric-verify）或 `ralph`（PRD 持久 + fresh context）。
+- **活 roadmap**：一个 harness 每圈读+改的路线文件（学 Anthropic feature-list / TDP 依赖图）。
+- **现实审查反射闸门（核心新增）**：任何产物/调研/决策后，一个 audit subagent 问"服务目标吗 / 合现实吗 / 下一步要不要变"→ 写发现 + roadmap 增量（Reflexion 式，落盘）。
+- **goal 持久**：goal 存活不变，roadmap 可弃可改。
+- **循环骨架 = Boehm 螺旋圈**：{定目标 → 做 → **审现实+目标** → 改活 roadmap → 下一圈}，token 到阈值就 fresh context 续（ralph 式）。
+- **待定义**：审查闸门**审什么**（每类信息的"服务目标"判据）、**怎么触发**改路线（信号/阈值）、**改什么**（roadmap 哪部分可变、哪部分冻结）。
+
+**关键参考链接**：awesome-harness-engineering（GitHub 枢纽）· ralph（snarktank/ralph）· Anthropic long-running-agent harness · AdaPlanner / Reflexion / PARC（论文）· RoadmapBench（长程 agentic 开发评测）。
 
 ---
 
