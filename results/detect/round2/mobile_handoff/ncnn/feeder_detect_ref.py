@@ -4,7 +4,7 @@ decode 规格(源自 nanodet 源码)：
   center = (x*stride, y*stride)  # 无 +0.5
   dist[l,t,r,b] = Σ softmax(每边8bin)·[0..7] · stride
   box = [cx-l, cy-t, cx+r, cy+b]  (416 输入空间) → 缩放回原图
-用法: python feeder_detect_ref.py <image> [conf=0.4] [nms=0.5] [out.jpg]
+用法: python ncnn/feeder_detect_ref.py <image> [conf=0.4] [nms=0.5] [out.jpg]（从包根跑）
 """
 import os, sys, json
 import numpy as np, cv2, ncnn
@@ -13,7 +13,7 @@ LABELS = ["bird", "squirrel", "cat", "person", "other_animal"]
 STRIDES = [8, 16, 32, 64]
 REG_MAX = 7
 INPUT = 416
-EXPORTS = os.environ.get("FEEDER_MODEL_DIR", ".")   # 模型目录（默认当前目录）
+EXPORTS = os.environ.get("FEEDER_MODEL_DIR", os.path.dirname(os.path.abspath(__file__)))  # 默认脚本同目录
 PARAM = f"{EXPORTS}/nanodet_feeder5_mobile_416.param"
 BIN = f"{EXPORTS}/nanodet_feeder5_mobile_416.bin"
 

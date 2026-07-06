@@ -7,6 +7,7 @@
 - 任务：粗检测 5 类 `["bird","squirrel","cat","person","other_animal"]`（下标=类别 id）。
 - 命门=bird（观鸟器）。其余类仅供"检到即抑制告警"，精度不作强依赖。
 - 运行时：NCNN（BSD-3，商用 OK）。模型 2.3MB。
+- **三格式接口一致**：本包另有 `onnx/`、`tflite/`（同一模型、同 I/O、同 decode）。本规格是 **ncnn 视角**（C++），下列文件均在 `ncnn/` 目录；tflite 集成见 `README.md`。
 
 ## 文件契约
 | 文件 | 角色 | 不可变 |
@@ -54,7 +55,7 @@ std::vector<Detection> r = det.detect(bgr, W, H, 0.40f, 0.50f);  // 每帧
 ## 集成步骤
 - **依赖**：ncnn 官方预编译库 <https://github.com/Tencent/ncnn/releases>（iOS: `*-ios`；Android: `*-android-vulkan`）。
 - **iOS**：`feeder_detector.cpp/.h` 设为 Objective-C++（或 `.mm` 桥接）；Swift 侧封装暴露 `detect(UIImage)->[Detection]`；模型放 bundle。
-- **Android**：`cpp/` 放入源码，CMake 链 ncnn；写 JNI `detect(byte[] bgr,int w,int h)`；Kotlin 侧 Bitmap→BGR 字节。
+- **Android**：`ncnn/` 源码放入工程，CMake 链 ncnn；写 JNI `detect(byte[] bgr,int w,int h)`；Kotlin 侧 Bitmap→BGR 字节。
 - 参考官方 `demo_android_ncnn`（把其 nanodet.cpp 换成本 feeder_detector.cpp）。
 
 ## 不变量 / 禁忌（Agent 必读）
@@ -68,7 +69,7 @@ std::vector<Detection> r = det.detect(bgr, W, H, 0.40f, 0.50f);  // 每帧
 ## 验证状态（已通过）
 - C++ ≡ Python 参考：多张密集多目标图 × 多阈值，检测集合 **100% 一致**（含空图边界）。
 - decode 正确性：固定 test 上 pred-vs-GT IoU 满框 0.995 / 局部 0.951 / 中目标 0.89~0.92。
-- ONNX→ncnn 转换：与 onnxruntime 输出 max|Δ|≈0.03（SIMD 数值噪声，检测无感）。
+- 三格式对齐（9 张图、同 decode、都喂 0-255）：tflite-fp32 ≡ onnx（raw max|Δ|≈1e-5，检测框 100% 一致）；ncnn ≡ onnx/tflite（检测框一致，±1px 舍入）。
 
 ## 性能参考（供预期，非承诺）
 - 固定 held-out test（泛化真值）：bird AP50 **85.0**、大目标 **90.1**；整体 AP50 0.655。
