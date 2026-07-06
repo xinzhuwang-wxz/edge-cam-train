@@ -41,6 +41,7 @@
 
 **已发生的闸门实践（示范）**：本轮调研已触发多次——芯片包络收敛"性能优先能上大模型"预期（①）、BioCLIP/eBird S&T 许可判红（③）、发现姊妹 taxonomy registry 改写 seam 债与检索库图景（④）、embedding FP32 出口是时间敏感 seam（④）。
 - **2026-07-06 用户反馈"数据是大问题，检测那里花了很久，数据需要打磨"** → lens ①④ 触发 → **数据打磨从 R1.2 一个步骤，升级为贯穿 Round1/Round2 的主线**（见 D）。判据：分类数据比检测更难（细粒度标错毒性大 / 长尾结构性 / crop 质量耦合检测器 / 许可逐图+iNat NC 未决 / 域 gap 对细节更敏感 / 360→数千种规模），data-centric ROI 已被调研证 > 换 backbone（05 §六）。
+- **2026-07-06 数据源选型 dogfood（harness 第一圈真实 dogfood）**：用审查闸门三 lens 评估所有可商用鸟类图源（见 [08-数据源审查](08-数据源审查.md)）→ 审出 iNat ToS 契约挡商用（连 CC0）、"好图 vs 现场"域 gap 本质、北美商用干净图缺口 → **回改路线：定 v1 首发欧洲、北美 fast-follow+gate、新增 Macaulay CC-BY 量化 / FeederWatch 北美先验 / 自采 feeder 三动作**。示范"审查判据从 did-it-work 升级为 does-it-serve-the-goal + 直接改活 roadmap"。
 
 ---
 
@@ -57,6 +58,7 @@
 
 ### 🅳 数据打磨（贯穿主线 · 分类段最大难题，用户 07-06 定调）
 分类数据比检测更难，且 data-centric ROI > 换 backbone（05 §六）。贯穿始终、非一次性步骤：
+- **数据源 + 首发地域（[08-数据源审查](08-数据源审查.md) 已定，2026-07-06）**：**v1 首发欧洲**（naturgucker/挪/arter CC-BY ~1.4M 支撑充分）；北美 **fast-follow + gate**（Macaulay CC-BY 量化 / 自采北美 feeder / iNat 澄清，三选一达标才上）。可商用图源 = 欧洲三源 + Macaulay CC-BY 子集 + Flickr/Wikimedia CC-BY + 自采 feeder；**iNat 仅 R&D**（ToS 连 CC0 都禁商用）。先验 = GBIF occurrence（含 eBird EOD CC-BY）+ **FeederWatch（北美喂食器专属）**。
 - **现状诊断（R1 早期起）**：类分布/长尾曲线、Cleanlab 标签噪声率、**crop 质量审计**（检测器裁框好坏直接毒害分类输入）、许可覆盖（CC0/CC-BY 逐图 + iNat NC 未决）、**域 gap**（网络好图 vs 观鸟器现场：遮挡/背身/夜视/糊）。
 - **持续打磨**：洗标（Cleanlab）→ 长尾策略（LA loss/解耦重训）→ 干净打标扩稀有种（Noisy-Student+QC）→ 真实 feeder 域补齐。
 - **数据质量指标进命门配套**（数据是因、命门是果）。
@@ -94,3 +96,25 @@
 - **本文件 = 活 roadmap 本体**：每圈结束更新 D 表状态 + 把审查发现写进 B 的"已发生闸门实践"。
 - **基座循环**：{定圈目标 → 做 → 四 lens 审现实+命门 → 改本表 → 下一圈}。
 - **何时 skillify**：R1 跑通 2–3 圈、闸门/触发口径稳定后，用 skillify 把循环固化为 skill、结合进 autoresearch（§五节奏，别先造完再用）。
+
+---
+
+## 七、新 session 起点（专注做分类 · 可直接接手）
+
+> 分类段的调研 + 定靶已收官，进入执行。新 session 读本节即可上手，不必翻长对话。
+
+**一句话现状**：命门 = 层级可用率；**v1 首发欧洲**；backbone bake-off = Lite4@256 / MNV4-Conv-M@320 / RepViT-M1.5@224；数据源已审（08）；用螺旋 harness（审查闸门 + 活 roadmap）驱动，每步过三 lens。
+
+**先读（文档地图）**：本文（06 harness+命门+roadmap）→ [08 数据源审查](08-数据源审查.md) → [04 芯片+选型](04-V861选型调研.md) → [05 系统架构](05-系统架构最佳实践.md) → [07 竞品](07-竞品与端侧差异化.md) → ADR-0008（模型）/ ADR-0005（数据许可）/ ADR-0002（taxonomy）。审计基线见 01/02/03。
+
+**已定**：命门指标（§A）· backbone 选型（04/ADR-0008）· 系统架构（05：端云 / teacher=DINOv2-Apache / geo 先验 / 层级回退 / ArcFace 一套两用）· 数据许可+源+**首发欧洲**（ADR-0005/08）· taxonomy 接 bird-tagger registry（ADR-0002）· 命门 metric `eval/hierarchical.py`（TDD 绿）。
+
+**未定（open items）**：iNat 商用许可（红线，未解）· v1 精确类集（欧洲种清单，待 taxonomy+首发地域定）· 自采 feeder（未启动，域真实性唯一来源）· Macaulay CC-BY 子集量化（北美 fast-follow gate）。
+
+**下一步（Round1，按 §D/§E）**：
+1. **接 taxonomy registry**（bird-tagger `species.jsonl`+`rollup`）填 EbirdTaxonomy 占位 + 让命门尺子在真数据上跑（层级可用率需真实属/科树）。
+2. **数据现状诊断**（现有 360 类：类分布 / 长尾曲线 / Cleanlab 标签噪声 / crop 质量 / 许可覆盖 / **域 gap** —— 给 ②合现实 lens 补量化指标）。
+3. **backbone bake-off**（三候选各训 + INT8 消融 + 算子回退 + 内存，四维加权定档）。
+
+**起始 prompt（可直接粘贴到新 session）**：
+> 继续【分类】段执行。读 `docs/classify/06`（harness+命门+roadmap）+ `08`（数据源）+ `04/05/07` + ADR-0005/0008/0002 接手现状——命门 = 层级可用率（`eval/hierarchical.py`），v1 首发欧洲，用螺旋 harness 驱动（每步过审查闸门：①服务命门 ②合现实/域 ③守红线）。下一步 Round1：接 bird-tagger/taxonomy registry 填 EbirdTaxonomy + 现有 360 类数据诊断（脏度/许可/域 gap）+ backbone bake-off（Lite4@256 / MNV4-Conv-M@320 / RepViT-M1.5@224）。先做哪个你定，别先造完再用、每圈审"这真服务命门吗"、审出偏离就改活 roadmap（06）。
