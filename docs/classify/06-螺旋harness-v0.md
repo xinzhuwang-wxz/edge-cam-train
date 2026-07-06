@@ -63,6 +63,11 @@
   - **三层解耦（cap 决策）**：清单=可得性（cap 1000/种）· 下载=训练预算（GPU 时 `--per-species-cap` 调）· 训练=采样治不均衡。避免提前扔 URL、以后加数据不重爬（"一次成功"）。
   - **接通 train**：`GbifBirdsAdapter` 加 `label_field=ebird_code`（index 规范码直当 taxon_key，免 crosswalk，与 registry 层级树同键）+ `configs/data/classify_europe.yaml`。GPU 一条龙：下载→build→train。TDD 绿。
   - **状态**：URL 清单后台爬取中（cap=1000）；跑完 = 本地数据集备妥，**下一步需 GPU 下字节 + 训练（R1.3 bake-off）→ 到该叫用户租卡的边界**。
+- **2026-07-07 裁框步 + 多鸟处理 + backbone 性能优先重排（用户三问）** → lens ②④：
+  - **检测裁框进管线**（`scripts/crop_manifest_images.py`）：下载→**裁框**→build→train；复用上一版 recipe（round2 检测器→最高分 bird 框→`expand_to_square`+pad→resize）——上一版最大杠杆（整图→裁框 +15pt，train==inference）。`--pad` 15/20 可 ablate。
+  - **多框多鸟**：一图=一物种标签属**主体鸟**→取最高分框；`n_bird_boxes` 入 crops index 供 Cleanlab/QC；`--drop-ambiguous`（多框且首框不占优=疑似混种）可丢；**绝不每框各出一 crop 打同标签**（混种批量毒标）。部署侧多鸟=级联逐框各跑分类器。
+  - **② lens 冒烟抓 bug**：detector 须用**裸 logits 导出**（`main_416_fp32_logits.onnx`）；op13/已 bake 后处理导出喂 decode → 双重 sigmoid → 框数爆炸（1145 vs 正常 1–6）。加退化守卫。**上板前抓到**。
+  - **backbone 性能优先重排**（ADR-0008 决策2 更新）：命门精度第一、四维降 tie-breaker；bake-off 扩 **MNV4-Conv-L@256（~83.4）/ RepViT-M2.3（~83.7）** + 分辨率扫（256→320→384）；硬红线不动（纯CNN/INT8/避transformer），内存墙放松非取消（~15→~30MB，MNV4-L 32MB 须上板实测）。分辨率+data 与换 backbone 并列消融。
 
 ---
 
@@ -89,7 +94,7 @@
 |---|---|---|---|
 | **R1.1** | **接 taxonomy registry**（bird-tagger species.jsonl+rollup）填 ADR-0002 seam 债 + **建命门尺子**（层级可用率/校准/区域内/AURC）| 建"层级可用率"必需 taxonomy 树 | ✅ registry vendored + **registry→Hierarchy 桥 TDD 绿**（`data/ebird_registry.py`）+ **欧洲类集 universe 1,211 种落仓**（`data/region/europe/`）；命门 metric 已跑真实层级树。**待**：校准(ECE/Platt)/AURC 尺子 + occurrence 频次分层 |
 | **R1.2** | **数据现状诊断**（🅳 现状诊断全项）——摸清**欧洲 1,211 种**数据脏在哪（类分布/长尾/许可/**crop 域 gap**）| 数据质量=命门的因 | ▶ **图覆盖审计已落**（826 种≥100图够种级叶子 / 174 折叠 / 扣 iNat）；**待**：occurrence 常规过滤（最后）+ 长尾类分布 + crop 域 gap |
-| R1.3 | **backbone bake-off**（Lite4@256 / MNV4-Conv-M@320 / RepViT-M1.5@224，各训+INT8消融+算子回退+内存实测）按四维加权定档 | 命门天花板 | 待（尺子+数据就绪后）|
+| R1.3 | **backbone bake-off（性能优先）**：效率参照(Lite4@256/MNV4-M@320/RepViT-M1.5@224) + **性能档(MNV4-Conv-L@256/RepViT-M2.3)** + 分辨率扫(256→320→384)；命门 top-1 主导、四维 tie-breaker | 命门天花板 | 待 GPU（数据+裁框就绪，**租卡即起**）|
 | R1.4 | **定 ONNX 双出口 seam**（softmax + penultimate FP32 embedding）——时间敏感，事后补贵 | 检索路线前置 | 待 |
 
 ### Round2 · 富训收口（甜点定了再富训 + scaling + 出货）

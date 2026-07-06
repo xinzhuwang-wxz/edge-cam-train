@@ -5,19 +5,24 @@
 #      python scripts/download_manifest_images.py \
 #        --manifest data/region/europe/europe_download_manifest.csv \
 #        --out /root/autodl-tmp/classify_raw/europe --per-species-cap 500 --jobs 24
-#   2) 组装 manifest：
+#   2) 检测裁框（上一版最大杠杆 +15pt；train==inference）→ classify_crops/europe：
+#      python scripts/crop_manifest_images.py \
+#        --det results/detect/round2/exports/main_416_fp32_logits.onnx \
+#        --in-root /root/autodl-tmp/classify_raw/europe \
+#        --out-root /root/autodl-tmp/classify_crops/europe --pad 0.15 --size 256
+#   3) 组装 manifest（读 crops 根）：
 #      python -m edge_cam.data.adapters.classify.build --config configs/data/classify_europe.yaml
-#   3) 训练：python -m edge_cam.train.classify.train data.manifest=<out_dir>/manifest.json ...
+#   4) 训练：python -m edge_cam.train.classify.train data.manifest=<out_dir>/manifest.json ...
 #
 # label_field=ebird_code：index 已带规范 eBird 码 → taxon_key 直接是它，免 sci_name→code
 # crosswalk，且与 vendored registry 层级树（roll-up / genus-family aux loss）同键对齐。
 name: europe_classify
 version: v1
-raw_root: /root/autodl-tmp/classify_raw          # 换机用 --config 覆盖或改此行
-out_dir: /root/autodl-tmp/classify_raw/processed_europe
+raw_root: /root/autodl-tmp/classify_crops        # 裁框后根（换机用 --config 覆盖或改此行）
+out_dir: /root/autodl-tmp/classify_crops/processed_europe
 sources:
   - adapter: gbif_birds
-    root: europe            # download_manifest_images.py --out .../europe（index.csv + <code>/<hash>.jpg）
+    root: europe            # crop_manifest_images.py --out-root .../europe（crops index.csv + n_bird_boxes）
     source: europe_gbif_ccby
     overrides:
       label_field: ebird_code   # 规范键直用（annotation-first 欧洲流）
