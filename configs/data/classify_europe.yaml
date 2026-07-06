@@ -1,0 +1,25 @@
+# v1 首发欧洲分类训练数据组装（annotation-first；ADR-0008 路线 A / docs/classify/06）。
+#
+# GPU 阶段一条龙（本地已备好 URL 清单 data/region/europe/europe_download_manifest.csv）：
+#   1) 下字节 → index.csv（按训练预算 cap）：
+#      python scripts/download_manifest_images.py \
+#        --manifest data/region/europe/europe_download_manifest.csv \
+#        --out /root/autodl-tmp/classify_raw/europe --per-species-cap 500 --jobs 24
+#   2) 组装 manifest：
+#      python -m edge_cam.data.adapters.classify.build --config configs/data/classify_europe.yaml
+#   3) 训练：python -m edge_cam.train.classify.train data.manifest=<out_dir>/manifest.json ...
+#
+# label_field=ebird_code：index 已带规范 eBird 码 → taxon_key 直接是它，免 sci_name→code
+# crosswalk，且与 vendored registry 层级树（roll-up / genus-family aux loss）同键对齐。
+name: europe_classify
+version: v1
+raw_root: /root/autodl-tmp/classify_raw          # 换机用 --config 覆盖或改此行
+out_dir: /root/autodl-tmp/classify_raw/processed_europe
+sources:
+  - adapter: gbif_birds
+    root: europe            # download_manifest_images.py --out .../europe（index.csv + <code>/<hash>.jpg）
+    source: europe_gbif_ccby
+    overrides:
+      label_field: ebird_code   # 规范键直用（annotation-first 欧洲流）
+      # max_per_class 不设：训练预算已在 download 的 --per-species-cap 控（清单=可得性、下载=预算）
+      # 长尾不均衡交训练侧 balanced_sampler / class_weighted（configs/train/classify）

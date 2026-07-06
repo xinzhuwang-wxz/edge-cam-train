@@ -58,6 +58,11 @@
   - **图覆盖审计**（`scripts/audit_europe_image_coverage.py` → `data/region/europe/europe_image_coverage.jsonl`）：GBIF 全局 CC0/CC-BY StillImage **扣 iNat**（iNat 占 ~55–76%、ToS 禁商用，扣除是③红线实影响）。1,211 种 0 错 0 未匹配。
   - **粒度线画出**：≥500 图 468 / 100–499 358 / 30–99 211 / 1–29 155 / 0 图 19 → **826 种（≥100 图）够种级叶子**；174 尾部（<30 图）折叠，其中 105 种的属有「富兄弟」（折叠有意义）、69 种属也贫（→科/cloud）。
   - **caveat**：GBIF crosswalk 1190 EXACT / 17 HIGHERRANK / 4 FUZZY（21 非精确，多为近期 split，待清）；图级 license 下载时逐条再核（03 坑）；图量是"可得"非"已下"，实际训练量再打折。
+- **2026-07-07 分类数据管线补齐 + annotation-first 欧洲准备（用户"本地备好、GPU 再下"）** → lens ②④：
+  - **管线诊断**：分类管线原是半成品——**datasetKey 驱动**（非物种清单驱动）+ **fetch/download 耦合**（不能只建索引）。补两件：`scripts/build_europe_download_manifest.py`（物种清单驱动、扣 iNat、**只写 URL 索引不下字节**、续跑限速）+ `scripts/download_manifest_images.py`（GPU 时读清单下字节→index.csv，带 `--per-species-cap`）。
+  - **三层解耦（cap 决策）**：清单=可得性（cap 1000/种）· 下载=训练预算（GPU 时 `--per-species-cap` 调）· 训练=采样治不均衡。避免提前扔 URL、以后加数据不重爬（"一次成功"）。
+  - **接通 train**：`GbifBirdsAdapter` 加 `label_field=ebird_code`（index 规范码直当 taxon_key，免 crosswalk，与 registry 层级树同键）+ `configs/data/classify_europe.yaml`。GPU 一条龙：下载→build→train。TDD 绿。
+  - **状态**：URL 清单后台爬取中（cap=1000）；跑完 = 本地数据集备妥，**下一步需 GPU 下字节 + 训练（R1.3 bake-off）→ 到该叫用户租卡的边界**。
 
 ---
 

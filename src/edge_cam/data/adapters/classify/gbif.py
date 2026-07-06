@@ -33,12 +33,16 @@ class GbifBirdsAdapter(ClassifyDatasetAdapter):
         index: str = "index.csv",
         source: str = "gbif",
         taxonomy_csv: str | None = None,
+        label_field: str = "scientific_name",
         max_per_class: int | None = None,
         split_ratios: tuple[float, float, float] = (0.8, 0.1, 0.1),
         path_prefix: str = "",
         **spec_overrides,
     ) -> None:
+        # label_field=ebird_code：index 已带规范 eBird 码 → 直接当 taxon_key（免 sci_name→code
+        # crosswalk 及其不匹配；annotation-first 欧洲流用它）。默认学名（旧流兼容）。
         tax = EbirdTaxonomy.from_csv(taxonomy_csv) if taxonomy_csv else IdentityTaxonomy()
+        self.label_field = label_field
         spec = ClassifySpec(
             name=source,
             source=source,
@@ -61,7 +65,7 @@ class GbifBirdsAdapter(ClassifyDatasetAdapter):
                 rel = row["path"]
                 yield ClassifyRawSample(
                     path=f"{self.path_prefix}/{rel}" if self.path_prefix else rel,
-                    raw_label=row["scientific_name"],
+                    raw_label=row[self.label_field],
                     license=row["license"],
                     group_key=row.get("group_key") or None,
                     lat=float(row["lat"]) if row.get("lat") else None,

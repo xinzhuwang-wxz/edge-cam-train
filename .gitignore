@@ -52,3 +52,6 @@ results/**/*.pth
 # round2：模型权重(541MB, DVC 领域不进 git)；exports 为冗余中间件(ncnn 正本在 mobile_handoff/)
 results/detect/round2/checkpoints/
 results/detect/round2/exports/
+
+# annotation-first 欧洲下载清单（大, 可由 build_europe_download_manifest.py 重建）→ 不进 git
+/data/region/europe/europe_download_manifest.csv

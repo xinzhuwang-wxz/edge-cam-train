@@ -77,5 +77,50 @@ def test_gbif_adapter_max_per_class_and_split(tmp_path) -> None:
     assert build_adapter("gbif_birds", str(tmp_path)).spec.split_unit == "observer"
 
 
+def test_label_field_ebird_code_direct_taxon_key(tmp_path) -> None:
+    """label_field=ebird_code：index 已带规范码 → taxon_key 直接是它（免 crosswalk）。"""
+    p = tmp_path / "index.csv"
+    cols = [
+        "path",
+        "ebird_code",
+        "scientific_name",
+        "license",
+        "group_key",
+        "lat",
+        "lon",
+        "observed_at",
+    ]
+    with p.open("w", newline="", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=cols)
+        w.writeheader()
+        w.writerows(
+            [
+                {
+                    "path": "houspa/a.jpg",
+                    "ebird_code": "houspa",
+                    "scientific_name": "Passer domesticus",
+                    "license": "CC_BY_4_0",
+                    "group_key": "o1",
+                    "lat": "",
+                    "lon": "",
+                    "observed_at": "",
+                },
+                {
+                    "path": "gretit1/b.jpg",
+                    "ebird_code": "gretit1",
+                    "scientific_name": "Parus major",
+                    "license": "CC0_1_0",
+                    "group_key": "o2",
+                    "lat": "",
+                    "lon": "",
+                    "observed_at": "",
+                },
+            ]
+        )
+    recs = build_adapter("gbif_birds", str(tmp_path), label_field="ebird_code").build_records()
+    # taxon_key = eBird 码本身（非学名），可直接接 registry 层级树
+    assert {r.label for r in recs} == {"houspa", "gretit1"}
+
+
 def test_registered() -> None:
     assert "gbif_birds" in available_adapters()
