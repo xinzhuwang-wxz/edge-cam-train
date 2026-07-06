@@ -1,0 +1,15 @@
+{
+ "role": "逐种商用干净图覆盖（粒度主信号；常规/迷鸟划分放最后）",
+ "signal": "GBIF StillImage · CC0/CC_BY · 全局 · 扣 iNat",
+ "n_species": 1211,
+ "n_no_gbif_match": 0,
+ "n_error": 0,
+ "clean_bucket_dist": {
+  "a_rich_>=500": 468,
+  "b_ok_100-499": 358,
+  "c_thin_30-99": 211,
+  "d_sparse_1-29": 155,
+  "e_none_0": 19
+ },
+ "note": "clean=总CC-BY−iNat；图级 license 下载时再逐条核（03 坑）"
+}

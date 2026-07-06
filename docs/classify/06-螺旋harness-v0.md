@@ -52,7 +52,12 @@
   - **lens ② 发现**：bird-tagger registry **只有身份、无区域** → 区域必须另接 occurrence 源（eBird checklist / GBIF）；印证 05 §模式1"geo 独立一层"。
   - **registry vendored + 桥落地**：vendor registry 进 `data/taxonomy/ebird_clements_2025`（版本 pin eBird/Clements 2025.0）；建 `data/ebird_registry.py` + `Hierarchy.from_registry`（TDD 绿）——**填上命门 metric 缺的 registry→Hierarchy 桥**。
   - **欧洲类集 universe 落仓**：`registry × eBird 45 国 checklist 并集` → `data/region/europe/europe_species.jsonl` = **1,211 种 / 486 属 / 109 科**（ever-recorded 上界，含迷鸟/外来如鸵鸟）；命门 metric 已能在真实欧洲层级树上 roll-up；全在端侧 ~1,500 包络内。
-  - **下一步**：GBIF occurrence 频次给 1,211 分「常规(~544 种级叶子) vs 迷鸟/外来(折叠属级)」+ 逐种商用干净图覆盖审计（数据打磨主线）。
+  - **下一步**：逐种商用干净图覆盖审计（数据打磨主线）。
+- **2026-07-07 R1.2 图像覆盖审计落地 + 用户纠序** → lens ②：
+  - **用户纠序（关键）**：粒度主信号 = **逐种商用干净图量**，不是 occurrence 频次——迷鸟在原产地可能有大把图（鸵鸟 clean=438 实证），按 occurrence 先砍会误折叠有图的种。**「常规 vs 迷鸟/外来」划分放最后**当补充过滤，不当第一刀。
+  - **图覆盖审计**（`scripts/audit_europe_image_coverage.py` → `data/region/europe/europe_image_coverage.jsonl`）：GBIF 全局 CC0/CC-BY StillImage **扣 iNat**（iNat 占 ~55–76%、ToS 禁商用，扣除是③红线实影响）。1,211 种 0 错 0 未匹配。
+  - **粒度线画出**：≥500 图 468 / 100–499 358 / 30–99 211 / 1–29 155 / 0 图 19 → **826 种（≥100 图）够种级叶子**；174 尾部（<30 图）折叠，其中 105 种的属有「富兄弟」（折叠有意义）、69 种属也贫（→科/cloud）。
+  - **caveat**：GBIF crosswalk 1190 EXACT / 17 HIGHERRANK / 4 FUZZY（21 非精确，多为近期 split，待清）；图级 license 下载时逐条再核（03 坑）；图量是"可得"非"已下"，实际训练量再打折。
 
 ---
 
@@ -78,7 +83,7 @@
 | 圈 | 做什么 | 命门相关 | 状态 |
 |---|---|---|---|
 | **R1.1** | **接 taxonomy registry**（bird-tagger species.jsonl+rollup）填 ADR-0002 seam 债 + **建命门尺子**（层级可用率/校准/区域内/AURC）| 建"层级可用率"必需 taxonomy 树 | ✅ registry vendored + **registry→Hierarchy 桥 TDD 绿**（`data/ebird_registry.py`）+ **欧洲类集 universe 1,211 种落仓**（`data/region/europe/`）；命门 metric 已跑真实层级树。**待**：校准(ECE/Platt)/AURC 尺子 + occurrence 频次分层 |
-| **R1.2** | **数据现状诊断**（🅳 现状诊断全项）——摸清**欧洲 1,211 种**数据脏在哪（类分布/长尾/许可/**crop 域 gap**）| 数据质量=命门的因 | ▶ 下一圈（类集已定，可起）|
+| **R1.2** | **数据现状诊断**（🅳 现状诊断全项）——摸清**欧洲 1,211 种**数据脏在哪（类分布/长尾/许可/**crop 域 gap**）| 数据质量=命门的因 | ▶ **图覆盖审计已落**（826 种≥100图够种级叶子 / 174 折叠 / 扣 iNat）；**待**：occurrence 常规过滤（最后）+ 长尾类分布 + crop 域 gap |
 | R1.3 | **backbone bake-off**（Lite4@256 / MNV4-Conv-M@320 / RepViT-M1.5@224，各训+INT8消融+算子回退+内存实测）按四维加权定档 | 命门天花板 | 待（尺子+数据就绪后）|
 | R1.4 | **定 ONNX 双出口 seam**（softmax + penultimate FP32 embedding）——时间敏感，事后补贵 | 检索路线前置 | 待 |
 
