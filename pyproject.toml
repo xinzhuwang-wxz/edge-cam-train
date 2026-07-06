@@ -1,10 +1,10 @@
 [project]
 name = "edge-cam-train"
 version = "0.0.0"
-description = "边侧 AI 相机训练→消融→量化→部署框架 (Allwinner V85x, Vivante VIP NPU, INT8-only)"
+description = "边侧 AI 相机（智能观鸟器）鸟类识别训练→评测→量化→部署框架 (Allwinner V861, Vivante VIP NPU 1 TOPS INT8-only)"
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "Apache-2.0" }
+license = { text = "PolyForm-Noncommercial-1.0.0" }
 
 # 核心：数据准备 + 契约（轻量，无 torch）。重型 ML 栈在 [train] extra。
 dependencies = [
