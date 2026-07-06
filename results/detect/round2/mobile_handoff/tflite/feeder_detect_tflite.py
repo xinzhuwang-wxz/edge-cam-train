@@ -2,7 +2,7 @@
 模型 feeder_416.{fp32,fp16}.tflite —— sigmoid + 归一化**已焊进图**，和 ncnn 一样：
   喂 0-255 BGR（resize 416）→ 概率 [3598,37]，decode/NMS 与 feeder_detect_ref.py 逐行相同。
 唯一区别 = runtime（tflite interpreter 换掉 ncnn），预处理/后处理/decode 全不变。
-用法: python feeder_detect_tflite.py <image> [fp32|fp16] [conf] [nms] [out.jpg]
+用法: python tflite/feeder_detect_tflite.py <image> [fp32|fp16] [conf] [nms] [out.jpg]（从包根跑）
 """
 
 import json
@@ -24,7 +24,7 @@ LABELS = ["bird", "squirrel", "cat", "person", "other_animal"]
 STRIDES = [8, 16, 32, 64]
 REG_MAX = 7
 INPUT = 416
-MODEL_DIR = os.environ.get("FEEDER_MODEL_DIR", ".")
+MODEL_DIR = os.environ.get("FEEDER_MODEL_DIR", os.path.dirname(os.path.abspath(__file__)))
 
 
 def softmax(x):
