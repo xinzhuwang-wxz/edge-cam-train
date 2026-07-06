@@ -1,0 +1,39 @@
+{
+  "authority": "eBird/Clements",
+  "ebird_authority_ver": 2025.0,
+  "ebird_taxonomy_version": "fetched-2026-07-04",
+  "fetched_at": "2026-07-04",
+  "raw_file": "ebird_taxonomy.2026-07-04.jsonl",
+  "raw_sha256": "1a9222c7193dbe3ec2461f316a7760617fede6287c468824ae5f6b6a9328f151",
+  "scope": "Aves (kingdom Animalia / phylum Chordata / class Aves are constant)",
+  "taxa_count": 17891,
+  "species_count": 11167,
+  "category_counts": {
+    "species": 11167,
+    "slash": 1035,
+    "issf": 3952,
+    "hybrid": 792,
+    "spuh": 722,
+    "form": 156,
+    "domestic": 25,
+    "intergrade": 42
+  },
+  "registry_species_count": 11167,
+  "registry_rollup_count": 4120,
+  "registry_rollup_by_category": {
+    "issf": 3952,
+    "domestic": 23,
+    "form": 103,
+    "intergrade": 42
+  },
+  "registry_family_count": 251,
+  "registry_genus_count": 2377,
+  "registry_order_count": 45,
+  "built_at": "2026-07-05",
+  "avibase_source": "Wikidata SPARQL (P3444 eBird x P2026 Avibase)",
+  "avibase_fetched_at": "2026-07-04",
+  "avibase_raw_file": "wikidata_avibase.2026-07-04.jsonl",
+  "avibase_covered": 8785,
+  "avibase_coverage_pct": 78.7,
+  "avibase_conflicts": 5
+}

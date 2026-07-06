@@ -15,8 +15,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Protocol
 
 import torch
+
+
+class _RegistryLike(Protocol):
+    """建 Hierarchy 所需的 registry 最小接口（见 data/ebird_registry.EbirdRegistry）。"""
+
+    def hierarchy_arrays(self, class_codes: list[str]) -> tuple[list[str], list[str]]: ...
 
 
 @dataclass
@@ -33,6 +40,16 @@ class Hierarchy:
     @property
     def num_classes(self) -> int:
         return len(self.genus)
+
+    @classmethod
+    def from_registry(cls, class_codes: list[str], registry: _RegistryLike) -> Hierarchy:
+        """从 eBird registry 按类集顺序建层级树（填 R1.1 的 registry→Hierarchy 桥）。
+
+        class_codes[i] = 第 i 类的 ebird_code（顺序 = 模型 logits 的类顺序）。
+        registry 提供 `hierarchy_arrays(codes)→(genus, family)`（见 data/ebird_registry.py）；
+        duck-typed，eval 不反向依赖 data。缺失码由 registry 报错，不建残缺树。"""
+        genus, family = registry.hierarchy_arrays(class_codes)
+        return cls(genus=genus, family=family)
 
 
 @dataclass

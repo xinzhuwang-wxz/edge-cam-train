@@ -42,6 +42,17 @@
 **已发生的闸门实践（示范）**：本轮调研已触发多次——芯片包络收敛"性能优先能上大模型"预期（①）、BioCLIP/eBird S&T 许可判红（③）、发现姊妹 taxonomy registry 改写 seam 债与检索库图景（④）、embedding FP32 出口是时间敏感 seam（④）。
 - **2026-07-06 用户反馈"数据是大问题，检测那里花了很久，数据需要打磨"** → lens ①④ 触发 → **数据打磨从 R1.2 一个步骤，升级为贯穿 Round1/Round2 的主线**（见 D）。判据：分类数据比检测更难（细粒度标错毒性大 / 长尾结构性 / crop 质量耦合检测器 / 许可逐图+iNat NC 未决 / 域 gap 对细节更敏感 / 360→数千种规模），data-centric ROI 已被调研证 > 换 backbone（05 §六）。
 - **2026-07-06 数据源选型 dogfood（harness 第一圈真实 dogfood）**：用审查闸门三 lens 评估所有可商用鸟类图源（见 [08-数据源审查](08-数据源审查.md)）→ 审出 iNat ToS 契约挡商用（连 CC0）、"好图 vs 现场"域 gap 本质、北美商用干净图缺口 → **回改路线：定 v1 首发欧洲、北美 fast-follow+gate、新增 Macaulay CC-BY 量化 / FeederWatch 北美先验 / 自采 feeder 三动作**。示范"审查判据从 did-it-work 升级为 does-it-serve-the-goal + 直接改活 roadmap"。
+- **2026-07-07 用户定调「用螺旋 harness 重新认真做一遍分类，之前 360 类不纠结」+ 两配方决策落定** → lens ①④：
+  - **前一版（feeder 360 / 0.748）降级为「可行性信号」**（证明 taxonomy 桥能通、0.748 可达），**不再当 bake-off 锚**（§E step3 从"基线锚"降为一次性 sanity）；新建以**发行地域（欧洲）干净数据**为地基从头做。
+  - **决策：genus/family aux loss 进训练配方**（从 baseline 起，非 R2 晚期杠杆）——零推理开销、直接抬层级可用率（逼混淆收在正确属内→roll-up 更干净）；用 registry 属/科树算 aux 项，类集里未映射类的 aux 项 mask；**留一条 no-aux 消融行量化增益**（证据非信仰）。
+  - **决策：roll-up 在端上做**（A7 CPU 后处理，阈值/策略当 OTA config）——保离线自足；确认 ADR-0008 §6 / ADR-0005 §2（后处理留 CPU）。
+  - **澄清（写给后人，防误读）**：模型输出是**粒度一致的种级分布、永不降级**；层级回退 = 后处理 roll-up（端上/产品策略）+ **校准**（模型层，命门地基）+ aux loss（可选便宜杠杆）。命门评的是**整条栈给不给得出诚实答案**，非"模型多头降级"。
+- **2026-07-07 执行落地（R1.1 桥 + 欧洲类集 universe）** → lens ②④：
+  - **路线 A 用最新实践复核确认**（不推翻 ADR-0008 决策3）：SpeciesNet（相机陷阱同域生产：MegaDetector→全球分类器 + geofence + rollup）、iNat（55k + SINR）均为"一个并集模型 + 推理 mask"，非区域包；区域包是 Merlin 的手机+旅行场景选择，不适配我们**固定 GPS 单设备**。增量：K=0.02 小先验（+9% vs 硬 mask +6.6%）、固定 GPS 可"训并集/部署裁剪"后路。
+  - **lens ② 发现**：bird-tagger registry **只有身份、无区域** → 区域必须另接 occurrence 源（eBird checklist / GBIF）；印证 05 §模式1"geo 独立一层"。
+  - **registry vendored + 桥落地**：vendor registry 进 `data/taxonomy/ebird_clements_2025`（版本 pin eBird/Clements 2025.0）；建 `data/ebird_registry.py` + `Hierarchy.from_registry`（TDD 绿）——**填上命门 metric 缺的 registry→Hierarchy 桥**。
+  - **欧洲类集 universe 落仓**：`registry × eBird 45 国 checklist 并集` → `data/region/europe/europe_species.jsonl` = **1,211 种 / 486 属 / 109 科**（ever-recorded 上界，含迷鸟/外来如鸵鸟）；命门 metric 已能在真实欧洲层级树上 roll-up；全在端侧 ~1,500 包络内。
+  - **下一步**：GBIF occurrence 频次给 1,211 分「常规(~544 种级叶子) vs 迷鸟/外来(折叠属级)」+ 逐种商用干净图覆盖审计（数据打磨主线）。
 
 ---
 
@@ -66,13 +77,13 @@
 ### Round1 · 定靶探路（建尺子 + 数据诊断 + 选型）
 | 圈 | 做什么 | 命门相关 | 状态 |
 |---|---|---|---|
-| **R1.1** | **接 taxonomy registry**（bird-tagger species.jsonl+rollup）填 ADR-0002 seam 债 + **建命门尺子**（层级可用率/校准/区域内/AURC）| 建"层级可用率"必需 taxonomy 树 | ▶ 命门 metric `eval/hierarchical.py` 已落绿；待接真实层级数据 + 补校准/AURC |
-| **R1.2** | **数据现状诊断**（🅳 现状诊断全项）——与 R1.1 并行，摸清 360 类数据脏在哪 | 数据质量=命门的因 | ▶ 提前，并行 |
+| **R1.1** | **接 taxonomy registry**（bird-tagger species.jsonl+rollup）填 ADR-0002 seam 债 + **建命门尺子**（层级可用率/校准/区域内/AURC）| 建"层级可用率"必需 taxonomy 树 | ✅ registry vendored + **registry→Hierarchy 桥 TDD 绿**（`data/ebird_registry.py`）+ **欧洲类集 universe 1,211 种落仓**（`data/region/europe/`）；命门 metric 已跑真实层级树。**待**：校准(ECE/Platt)/AURC 尺子 + occurrence 频次分层 |
+| **R1.2** | **数据现状诊断**（🅳 现状诊断全项）——摸清**欧洲 1,211 种**数据脏在哪（类分布/长尾/许可/**crop 域 gap**）| 数据质量=命门的因 | ▶ 下一圈（类集已定，可起）|
 | R1.3 | **backbone bake-off**（Lite4@256 / MNV4-Conv-M@320 / RepViT-M1.5@224，各训+INT8消融+算子回退+内存实测）按四维加权定档 | 命门天花板 | 待（尺子+数据就绪后）|
 | R1.4 | **定 ONNX 双出口 seam**（softmax + penultimate FP32 embedding）——时间敏感，事后补贵 | 检索路线前置 | 待 |
 
 ### Round2 · 富训收口（甜点定了再富训 + scaling + 出货）
-- 补数据（feeder 真实域）+ 方法杠杆按序：干净大模型打标(Noisy-Student)+QC → 层级 aux loss → 在线 DKD。
+- 补数据（feeder 真实域）+ 方法杠杆按序：干净大模型打标(Noisy-Student)+QC → 在线 DKD。（**层级 aux loss 已前置进 baseline 训练配方**，2026-07-07，见 §B；不再作 R2 晚期单列杠杆。）
 - geo_prior 自训"物种×地区×月份"时空先验（GBIF CC0/CC-BY，推理期软重排）。
 - 量化包络 + gate 阈值定数 + 真实模型进 registry + 上板 spike（ACUITY/.nb/延迟）。
 - embedding 检索兜底（云端 kNN + 与 KB embedding 表对齐，DINOv2 encoder）——按需。
@@ -83,7 +94,7 @@
 
 **目标**：没有对的尺子，后面 bake-off 没法比（同检测 round1"先建评测尺子"）。而"层级可用率"必须先有 taxonomy 树。
 
-1. **接入 taxonomy registry**：把 bird-tagger/taxonomy 的 `species.jsonl`(ebird_code→genus/family/order) + `rollup` 接进 edge_cam；填 `EbirdTaxonomy` 占位（现 IdentityTaxonomy）。现 360 类的 label → ebird_code 映射（复用 build_ebird_mapping.py，命中率 347/360 已知）。
+1. ~~**接入 taxonomy registry**~~ ✅（2026-07-07）：registry vendored 进 `data/taxonomy/ebird_clements_2025`（版本 pin）+ `data/ebird_registry.py` 的 `Hierarchy.from_registry` 桥（TDD 绿）。**类集不再是旧 360，而是 registry × eBird 欧洲 checklist 筛出的 1,211 欧洲种**（`data/region/europe/`，`scripts/build_europe_species_list.py` 可重建）。
 2. **eval 建命门尺子**（TDD，本地）：`eval/metrics` 加层级可用率（沿 rollup 上滚 + 置信门）、`eval/calibration` 加 ECE/Reliability/per-class Platt、`eval/risk` 加 AURC/Coverage@Precision；区域内 vs 全局双报。
 3. **拿现有 V2 Lite0 模型（0.748）过新尺子**：得到 baseline 的层级可用率/校准/区域内基线数——这既验证尺子、又是 bake-off 的对照锚。
 
