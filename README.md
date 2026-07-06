@@ -1,7 +1,6 @@
 # edge-cam-train
 
 > 边侧 AI 相机（智能观鸟器）鸟类识别的 **数据 → 训练 → 评测/消融 → 量化 → 部署** 全链路框架。
-> **非商用许可**（PolyForm Noncommercial，见[许可](#许可)）。
 
 ## 场景
 
@@ -65,11 +64,3 @@ python -m edge_cam.train.classify.train \
 | `docs/detect/` · `docs/classify/` | 检测 / 分类全过程（数据·训练·评测）|
 | `docs/decisions/` | ADR（不可逆决策，如 ADR-0008 分类模型架构选型）|
 | `results/{detect,classify}/` | 实验报告 + 产物 |
-
-## 许可
-
-本框架以 **[PolyForm Noncommercial License 1.0.0](LICENSE)** 发布——**允许研究、学习、非商用使用与修改，禁止任何商业用途**。
-
-> 两层许可要分清：
-> - **框架代码**（本仓库）= PolyForm Noncommercial（对外**禁止商用**）。
-> - **训练数据纪律**：只用 CC0/CC-BY + 自采、维护逐图署名清册、避 NC/GPL/AGPL（NanoDet/timm 等上游 OSS 保持各自 Apache/MIT/BSD）——这是为**模型产物**的许可清洁，与框架代码的对外非商用许可是不同的两件事。
