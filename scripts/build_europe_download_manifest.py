@@ -26,7 +26,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 EUROPE = Path(__file__).resolve().parents[1] / "data" / "region" / "europe"
@@ -157,7 +157,8 @@ def main() -> None:
     completed = 0
     with ThreadPoolExecutor(max_workers=args.workers) as ex:
         futs = {ex.submit(collect_species, s, args.cap): s for s in todo}
-        for fut, s in list(futs.items()):
+        for fut in as_completed(futs):  # 哪个种先完成先写（不被慢种 gate 住，进度可见）
+            s = futs[fut]
             try:
                 rows = fut.result()
             except Exception as e:  # noqa: BLE001 — 单种失败不带崩，续跑可补
