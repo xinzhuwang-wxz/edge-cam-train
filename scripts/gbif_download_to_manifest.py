@@ -52,6 +52,19 @@ def _norm_license(u: str) -> str:
     return u or ""
 
 
+def _media_license(s: str) -> str:
+    """媒体级 license 严格归一（③红线：occurrence license≠图片 license，须按图片级筛）。
+    返回 CC0_1_0 / CC_BY_4_0 / other（©版权保留/NC/SA/ND/空/未知 都归 other 剔除）。"""
+    s = (s or "").lower()
+    if "by-nc" in s or "by-sa" in s or "-nd" in s or "noncommercial" in s or "sharealike" in s:
+        return "other"  # NC/SA/ND 红线，先判（含 'by' 不能误放行）
+    if "publicdomain/zero" in s or "cc0" in s:
+        return "CC0_1_0"
+    if "/licenses/by/" in s or "licenses/by " in s:
+        return "CC_BY_4_0"
+    return "other"  # ©版权保留/见URL/空/未知 → 剔（不确定即不用）
+
+
 def _already_parsed() -> bool:
     """清单已是 GBIF 全量 → 幂等跳过（防 cron 反复重下 825MB）。"""
     s = EUROPE / "europe_manifest_summary.json"
@@ -161,8 +174,11 @@ def parse_to_manifest(zip_path: Path) -> None:
                 }
         print(f"occurrence 命中 1211 类集: {len(occ)} 条", flush=True)
 
-        # multimedia: gbifID → URL，join occurrence
+        # multimedia → URL，按**媒体级** license 严筛。③红线：occurrence license ≠ 图片 license
+        # （实测 occurrence 全 CC-BY 的源，图片级过半是 ©版权保留 / NC-SA）
         n = 0
+        drop = 0
+        per: dict[str, int] = {}
         seen: set[str] = set()
         with (
             z.open("multimedia.txt") as fh,
@@ -174,7 +190,7 @@ def parse_to_manifest(zip_path: Path) -> None:
             w.writeheader()
             tf = io.TextIOWrapper(fh, encoding="utf-8", errors="replace")
             col = _cols(tf.readline())
-            gi, ui = col.get("gbifID"), col.get("identifier")
+            gi, ui, mli = col.get("gbifID"), col.get("identifier"), col.get("license")
             for line in tf:
                 p = line.rstrip("\n").split("\t")
                 if gi is None or ui is None or gi >= len(p) or ui >= len(p):
@@ -182,18 +198,23 @@ def parse_to_manifest(zip_path: Path) -> None:
                 gid, url = p[gi], p[ui]
                 if not url or url in seen or gid not in occ:
                     continue
+                mlic = _media_license(p[mli] if mli is not None and mli < len(p) else "")
+                if mlic == "other":  # 媒体级非 CC0/CC-BY（©/NC/SA/未知）→ 剔（红线）
+                    drop += 1
+                    continue
                 seen.add(url)
-                w.writerow({**occ[gid], "url": url})
+                w.writerow({**occ[gid], "url": url, "license": mlic})  # 用媒体级 license
+                per[occ[gid]["ebird_code"]] = per.get(occ[gid]["ebird_code"], 0) + 1
                 n += 1
-    per = {}
-    for gid in occ:
-        per[occ[gid]["ebird_code"]] = per.get(occ[gid]["ebird_code"], 0) + 1
+    print(f"媒体级 license 严筛：留 {n}（CC0/CC-BY）/ 剔 {drop}（©版权/NC/SA/未知）", flush=True)
     summary = {
-        "role": "annotation-first 下载清单（GBIF Download API，全量）",
+        "role": "annotation-first 下载清单（GBIF Download API，媒体级 CC0/CC-BY）",
         "source": "GBIF Occurrence Download DWCA",
         "n_image_rows": n,
         "n_species": len(per),
-        "note": "Aves+StillImage+CC0/CC_BY+活体观测+欧洲各国+扣iNat；speciesKey→ebird_code",
+        "n_dropped_media_license": drop,
+        "note": "Aves+StillImage+活体观测+欧洲各国+扣iNat；**媒体级** license 严筛 CC0/CC-BY"
+        "（≠occurrence 级，防©/NC 混入）；speciesKey→ebird_code",
     }
     (EUROPE / "europe_manifest_summary.json").write_text(
         json.dumps(summary, ensure_ascii=False, indent=1), encoding="utf-8"

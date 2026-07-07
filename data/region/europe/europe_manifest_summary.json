@@ -1,7 +1,8 @@
 {
- "role": "annotation-first 下载清单（GBIF Download API，全量）",
+ "role": "annotation-first 下载清单（GBIF Download API，媒体级 CC0/CC-BY）",
  "source": "GBIF Occurrence Download DWCA",
- "n_image_rows": 3735336,
- "n_species": 761,
- "note": "Aves+StillImage+CC0/CC_BY+活体观测+欧洲各国+扣iNat；speciesKey→ebird_code"
+ "n_image_rows": 1709946,
+ "n_species": 502,
+ "n_dropped_media_license": 2119907,
+ "note": "Aves+StillImage+活体观测+欧洲各国+扣iNat；**媒体级**license 严筛 CC0/CC-BY（≠occurrence级，防©/NC混入）；speciesKey→ebird_code"
 }
