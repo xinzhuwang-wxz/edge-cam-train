@@ -32,7 +32,10 @@ from pathlib import Path
 EUROPE = Path(__file__).resolve().parents[1] / "data" / "region" / "europe"
 OCC = "https://api.gbif.org/v1/occurrence/search"
 INAT_DATASET = "50c9509d-22c7-4a22-a47d-8c48425ef4a7"  # iNaturalist RG（商用禁，扣除）
-CC_CLEAN = ["CC0_1_0", "CC_BY_4_0"]
+CC_CLEAN = ["CC0_1_0", "CC_BY_4_0"]  # 去 NC
+# 只要活体观测：博物馆标本（PRESERVED_SPECIMEN 死鸟剥制）域不符须排除（08）；
+# MACHINE_OBSERVATION=相机陷阱，反贴喂食器域。
+BASIS = ["HUMAN_OBSERVATION", "MACHINE_OBSERVATION", "OBSERVATION"]
 FIELDS = [
     "ebird_code",
     "scientific_name",
@@ -82,7 +85,12 @@ def collect_species(sp: dict, cap: int) -> list[dict]:
     key = sp["gbif_key"]
     rows: list[dict] = []
     seen_urls: set[str] = set()
-    base = {"taxonKey": key, "mediaType": "StillImage", "license": CC_CLEAN}
+    base = {
+        "taxonKey": key,
+        "mediaType": "StillImage",
+        "license": CC_CLEAN,
+        "basisOfRecord": BASIS,  # 排标本、只活体观测（08）
+    }
     offset = 0
     while len(rows) < cap:
         page = _get({**base, "limit": 300, "offset": offset})

@@ -68,6 +68,9 @@
   - **多框多鸟**：一图=一物种标签属**主体鸟**→取最高分框；`n_bird_boxes` 入 crops index 供 Cleanlab/QC；`--drop-ambiguous`（多框且首框不占优=疑似混种）可丢；**绝不每框各出一 crop 打同标签**（混种批量毒标）。部署侧多鸟=级联逐框各跑分类器。
   - **② lens 冒烟抓 bug**：detector 须用**裸 logits 导出**（`main_416_fp32_logits.onnx`）；op13/已 bake 后处理导出喂 decode → 双重 sigmoid → 框数爆炸（1145 vs 正常 1–6）。加退化守卫。**上板前抓到**。
   - **backbone 性能优先重排**（ADR-0008 决策2 更新）：命门精度第一、四维降 tie-breaker；bake-off 扩 **MNV4-Conv-L@256（~83.4）/ RepViT-M2.3（~83.7）** + 分辨率扫（256→320→384）；硬红线不动（纯CNN/INT8/避transformer），内存墙放松非取消（~15→~30MB，MNV4-L 32MB 须上板实测）。分辨率+data 与换 backbone 并列消融。
+- **2026-07-07 用户查 GBIF gallery（空）→ ② lens 抓两事**：
+  - **gallery 空 = 填错框**（非数据问题）：taxon key `9705453` 被填进"学名"框（该填 `Parus major` 不是数字）→ `scientificName='9705453'` 匹配 **0**；正确 `taxonKey=9705453` = **33,570** 张 CC-BY。下了一张 480×640 实图验证数据真实。
+  - **② 抓到标本泄漏（真数据质量债）**：采集来源 ~98% 是欧洲三源 CC-BY（Norwegian 92k / naturgucker 45k / arter 41k），但混入 **NMNH 博物馆标本 676 张（死鸟剥制，08 明令排除，域不符）**——GBIF 查询漏了 `basisOfRecord`。修：采集器加 `basisOfRecord=HUMAN/MACHINE/OBSERVATION`（排 PRESERVED_SPECIMEN；MACHINE=相机观测反贴喂食器域）+ 剔现清单 676 标本 + 续跑。**用户查 gallery 的顺手 dogfood 直接抓出隐藏债**——正是 harness ②lens 要的。
 
 ---
 
