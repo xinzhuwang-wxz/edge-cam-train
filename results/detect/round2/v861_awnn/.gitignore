@@ -1,0 +1,7 @@
+# 大/可再生产物不进 git（awnn.sh build 可重建；真校准后会变）
+# onnx 源副本（本就 *.onnx 全局忽略；此处显式标注）
+onnx/
+# _ipu.param/.bin / .table / _opt.* / profile.csv（awnntools build 产出）
+build_out/
+# int8 输入/参考输出二进制
+board_handoff/*.bin

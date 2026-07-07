@@ -1,0 +1,117 @@
+# !!!Config file disallow TABs!!!
+# "general_conf.model_type" only support "onnx"
+# "dataset_conf.mean" and "dataset_conf.norm" need to be configured according to the specific model. 
+# "dataset_conf.shape" can be modified according to your needs.
+# "dataset_conf.image_types" allowed types:"RGB, BGR, GRAY, BGRA, RGBA".
+general_conf:
+    model_type: onnx
+    model_path: /data/onnx
+    model_names:
+    -   main_416_fp32_logits.onnx
+    output:
+build_conf:
+    build_mode: auto
+    export_type: standard
+    debug_enable: true
+    enable_onnxsim: true # We suggest make it enable.
+    save_temporary_model: false
+    cutstartname: # Set the name of the starting tensors to capture the subgraph, default = None
+    cutendname: # Set the name of the ending tensors to capture the subgraph, default = None
+    quantize_conf:
+        quantized_dtype: symmetric_i8
+        calibration_algorithm: percentile
+        quantized_method: per-channel
+    calibration_engine: default
+    dataset_conf:
+    # type=DATASET_TYPE_JSON: Dataset used for configuring a multi-input model
+    # The tesnor_layout should be matched to the shape information, eg: When tensor_layout is HWC, the shape corresponds to [h w c] 
+    -   type: DATASET_TYPE_TXT
+        path: datasets/images/calibration_datasets.txt # The path is just for example, not the actual datasets path, you should configure it by yourself.
+        image_types: []
+        preprocess_conf:
+        -   name: data
+            color_space: RGB
+            mean:
+            -   0.0
+            -   0.0
+            -   0.0
+            norm:
+            -   1.0
+            -   1.0
+            -   1.0
+            tensor_layout: NCHW
+            shape:
+            -   1
+            -   3
+            -   416
+            -   416
+    opt_level: 1
+profile_conf:
+    # profile_conf.gt_model_names: Set the name of the ground truth model to compare with the optimized model, default = None
+    gt_model_names: # if "gt_model_names" is not explicitly specified, it will be inferred based on the global configuration information "general_conf".
+    quantized_model_names:
+    -   main_416_fp32_logits_ipu.param
+    -   main_416_fp32_logits_ipu.bin
+    dataset_conf:
+    -   type: DATASET_TYPE_TXT
+        path: datasets/images/calibration_datasets.txt
+        image_types: []
+        preprocess_conf:
+        -   name: data
+            color_space: RGB
+            mean:
+            -   0.0
+            -   0.0
+            -   0.0
+            norm:
+            -   1.0
+            -   1.0
+            -   1.0
+            tensor_layout: NCHW
+            shape:
+            -   1
+            -   3
+            -   416
+            -   416
+    evaluation_conf:
+        sort_flag: false
+        analysis_conf:
+        -   layer_wise
+        -   graph_wise
+        measure_method:
+        -   snr
+        -   mse
+        -   cos-similarity
+simulate_conf:
+    model_names:
+    -   main_416_fp32_logits_ipu.param
+    -   main_416_fp32_logits_ipu.bin
+    dataset_conf:
+    -   type: DATASET_TYPE_TXT
+        path: datasets/images/calibration_datasets.txt
+        image_types: []
+        preprocess_conf:
+        -   name: data
+            color_space: RGB
+            mean:
+            -   0.0
+            -   0.0
+            -   0.0
+            norm:
+            -   1.0
+            -   1.0
+            -   1.0
+            tensor_layout: NCHW
+            shape:
+            -   1
+            -   3
+            -   416
+            -   416
+    monitor_blobs:
+    -   output
+    dump_path: datasets/results
+encrypt_conf:
+    model_names:
+    -   main_416_fp32_logits_ipu.param
+    -   main_416_fp32_logits_ipu.bin
+    output:

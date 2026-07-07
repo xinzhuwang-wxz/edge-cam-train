@@ -1,0 +1,9 @@
+/data/calib/class_cat_bobcat.jpg
+/data/calib/class_other_animal_fox.jpg
+/data/calib/class_person.jpg
+/data/calib/class_squirrel.jpg
+/data/calib/demo_bird.jpg
+/data/calib/natural1_sparrow_on_rail.jpg
+/data/calib/natural2_tanager_in_foliage.jpg
+/data/calib/natural3_blackbird_on_post.jpg
+/data/calib/natural4_shorebirds_small_far.jpg
