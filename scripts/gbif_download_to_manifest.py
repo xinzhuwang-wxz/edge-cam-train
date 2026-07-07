@@ -20,6 +20,7 @@ import base64
 import csv
 import io
 import json
+import time
 import urllib.request
 import zipfile
 from pathlib import Path
@@ -55,23 +56,37 @@ def status(key: str) -> dict:
     )
 
 
-def download_zip(key: str) -> Path:
+def download_zip(key: str, expected: int = 0) -> Path:
+    """断点续传下载 DWCA 存档（HTTP Range），抗 flaky 网络的 IncompleteRead/超时。"""
     DL_DIR.mkdir(parents=True, exist_ok=True)
     dst = DL_DIR / f"{key}.zip"
-    if dst.exists() and dst.stat().st_size > 0:
-        print(f"存档已在: {dst}", flush=True)
-        return dst
     c = json.loads(CREDS.read_text())
     url = f"https://api.gbif.org/v1/occurrence/download/request/{key}.zip"
-    req = urllib.request.Request(url)
-    req.add_header(
-        "Authorization", "Basic " + base64.b64encode(f"{c['user']}:{c['pwd']}".encode()).decode()
-    )
-    print(f"下载存档 → {dst} …", flush=True)
-    with urllib.request.urlopen(req, timeout=600) as r, dst.open("wb") as f:
-        while chunk := r.read(1 << 20):
-            f.write(chunk)
-    print(f"存档 {dst.stat().st_size / 1e6:.0f} MB", flush=True)
+    auth = "Basic " + base64.b64encode(f"{c['user']}:{c['pwd']}".encode()).decode()
+    print(f"下载存档 → {dst}（期望 {expected / 1e6:.0f}MB，断点续传）…", flush=True)
+    for _ in range(60):
+        pos = dst.stat().st_size if dst.exists() else 0
+        if expected and pos >= expected:
+            break  # 完整
+        req = urllib.request.Request(url)
+        req.add_header("Authorization", auth)
+        if pos:
+            req.add_header("Range", f"bytes={pos}-")  # 从断点续
+        try:
+            with (
+                urllib.request.urlopen(req, timeout=180) as r,
+                dst.open("ab" if pos else "wb") as f,
+            ):
+                while chunk := r.read(1 << 20):
+                    f.write(chunk)
+            if not expected:
+                break  # 无期望大小则一次成功即完
+        except Exception as e:  # noqa: BLE001 — IncompleteRead/超时 → 续传重试
+            print(
+                f"  中断 @{dst.stat().st_size / 1e6:.1f}MB，续传…（{type(e).__name__}）", flush=True
+            )
+            time.sleep(3)
+    print(f"存档完成 {dst.stat().st_size / 1e6:.0f} MB", flush=True)
     return dst
 
 
@@ -175,7 +190,7 @@ def main() -> None:
     if st.get("status") != "SUCCEEDED":
         print("未就绪，稍后再试（PREPARING/RUNNING）。", flush=True)
         return
-    parse_to_manifest(download_zip(a.key))
+    parse_to_manifest(download_zip(a.key, int(st.get("size") or 0)))
 
 
 if __name__ == "__main__":
