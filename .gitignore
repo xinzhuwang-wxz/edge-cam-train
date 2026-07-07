@@ -55,3 +55,6 @@ results/detect/round2/exports/
 
 # annotation-first 欧洲下载清单（大, 可由 build_europe_download_manifest.py 重建）→ 不进 git
 /data/region/europe/europe_download_manifest.csv
+
+# GBIF Download 存档（大, 可重下）→ 不进 git
+/data/region/europe/gbif_dl/
