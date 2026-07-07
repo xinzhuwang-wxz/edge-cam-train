@@ -71,6 +71,12 @@
 - **2026-07-07 用户查 GBIF gallery（空）→ ② lens 抓两事**：
   - **gallery 空 = 填错框**（非数据问题）：taxon key `9705453` 被填进"学名"框（该填 `Parus major` 不是数字）→ `scientificName='9705453'` 匹配 **0**；正确 `taxonKey=9705453` = **33,570** 张 CC-BY。下了一张 480×640 实图验证数据真实。
   - **② 抓到标本泄漏（真数据质量债）**：采集来源 ~98% 是欧洲三源 CC-BY（Norwegian 92k / naturgucker 45k / arter 41k），但混入 **NMNH 博物馆标本 676 张（死鸟剥制，08 明令排除，域不符）**——GBIF 查询漏了 `basisOfRecord`。修：采集器加 `basisOfRecord=HUMAN/MACHINE/OBSERVATION`（排 PRESERVED_SPECIMEN；MACHINE=相机观测反贴喂食器域）+ 剔现清单 676 标本 + 续跑。**用户查 gallery 的顺手 dogfood 直接抓出隐藏债**——正是 harness ②lens 要的。
+- **2026-07-07 数据采集彻底收口（GBIF Download API 根治限流/网络）+ 多 session worktree** → lens ②④：
+  - **分页采集撞墙**：反复 GBIF IP 429 封禁 + 代理/VPN flaky 网络（请求 4s + SSL 握手超时）→ 挣扎到 349/1192 种、反复被 kill。用户拍板走 **GBIF 异步 Download API**（需免费账号）。
+  - **一个 job 拿全**：谓词（Aves+StillImage+CC0/CC-BY+活体观测+欧洲各国+扣iNat）→ GBIF 打包 **150 万条** DWCA 存档（825MB）→ 断点续传（HTTP Range 抗 flaky 网络）下载+解析 → `europe_download_manifest.csv` = **3,735,336 图行 / 761 种**（全 CC0/CC-BY）。工具 `scripts/gbif_download_to_manifest.py`（幂等+锁），凭据 `~/.config/gbif`（不进 repo）。分页采集退役。
+  - **761 < 1211**：其余 ~450 种在欧洲各国无 CC-BY 非 iNat 观测媒体 → 数据稀薄，**genus 折叠**（符合"粒度按数据"设计）；country=欧洲 = 媒体**域匹配**（抽查见 RECONYX 相机陷阱图，域完美贴喂食器）。
+  - **多 session worktree 隔离**：本项目多 session 并行、共享工作区靠切分支会互踩；classify 迁 `/Users/bamboo/Githubs/edge-cam-classify` 独立 worktree（与 deploy/round3 零冲突），采集/监控/git 全在自己目录+分支。
+  - **下一步 = GPU**：`download_manifest_images --per-species-cap 500 → crop_manifest_images → build → train`（bake-off）——到租卡边界。
 
 ---
 
