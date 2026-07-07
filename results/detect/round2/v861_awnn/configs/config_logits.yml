@@ -1,0 +1,115 @@
+# !!!Config file disallow TABs!!!  (AWNN 工具链要求：禁用 Tab，全空格缩进)
+# ============================================================================
+# 主路 L：logits ONNX（main_416_fp32_logits.onnx）
+#   - NPU 图 = 裸 backbone+head+merge → output[1,3598,37] logits（sigmoid 前）
+#   - CPU   = sigmoid(前5类) + DFL(reg_max=7) + 逐类 NMS  → src/edge_cam/cascade/adapters.py:decode_nanodet
+#   - 符合 ADR-0007（ONNX 出 logits、sigmoid 留 CPU）+ CLAUDE.md 硬规则#2
+#   - 该 logits ONNX 前端【无】normalization → 由 AWNN 预处理注入 (mean/norm 见下, BGR)
+#     · 板端可选 build_conf.use_npu_preprocess=true 把归一化折进 NPU(仅支持归一化,不做通道交换; 喂 0-255 BGR)
+#     · 常数来源：feeder_416.onnx 焊入的 norm_mean/norm_std（实测提取，BGR 序）
+# 容器内路径约定：工作区挂载到 /data
+# ============================================================================
+general_conf:
+    model_type: onnx
+    model_path: /data/onnx
+    model_names:
+    -   main_416_fp32_logits.onnx
+    output: /data/build_out/logits
+build_conf:
+    build_mode: auto
+    export_type: standard
+    debug_enable: true
+    enable_onnxsim: true
+    save_temporary_model: false
+    cutstartname:
+    cutendname:
+    quantize_conf:
+        quantized_dtype: symmetric_i8
+        calibration_algorithm: percentile   # 首选; 若激活量化掉点大可换 kl
+        quantized_method: per-channel        # depthwise 多, per-channel 必须
+    calibration_engine: default
+    dataset_conf:
+    -   type: DATASET_TYPE_TXT
+        path: /data/calib/calibration_datasets.txt
+        image_types: []
+        preprocess_conf:
+        -   name: data
+            color_space: BGR                 # 模型按 BGR 训练
+            mean:
+            -   103.53
+            -   116.28
+            -   123.675
+            norm:                            # = 1/std (BGR)
+            -   0.017429
+            -   0.017507
+            -   0.017125
+            tensor_layout: NCHW
+            shape:
+            -   1
+            -   3
+            -   416
+            -   416
+    opt_level: 1
+profile_conf:
+    gt_model_names:                          # 留空→由 general_conf 推断浮点 gt
+    quantized_model_names:
+    -   main_416_fp32_logits_ipu.param
+    -   main_416_fp32_logits_ipu.bin
+    dataset_conf:
+    -   type: DATASET_TYPE_TXT
+        path: /data/calib/calibration_datasets.txt
+        image_types: []
+        preprocess_conf:
+        -   name: data
+            color_space: BGR
+            mean:
+            -   103.53
+            -   116.28
+            -   123.675
+            norm:
+            -   0.017429
+            -   0.017507
+            -   0.017125
+            tensor_layout: NCHW
+            shape:
+            -   1
+            -   3
+            -   416
+            -   416
+    evaluation_conf:
+        sort_flag: false
+        analysis_conf:
+        -   layer_wise
+        -   graph_wise
+        measure_method:
+        -   snr
+        -   mse
+        -   cos-similarity
+simulate_conf:
+    model_names:
+    -   main_416_fp32_logits_ipu.param
+    -   main_416_fp32_logits_ipu.bin
+    dataset_conf:
+    -   type: DATASET_TYPE_TXT
+        path: /data/calib/calib_sim.txt          # P5 框复现: 4 图小集(bird/squirrel/cat/空帧)
+        image_types: []
+        preprocess_conf:
+        -   name: data
+            color_space: BGR
+            mean:
+            -   103.53
+            -   116.28
+            -   123.675
+            norm:
+            -   0.017429
+            -   0.017507
+            -   0.017125
+            tensor_layout: NCHW
+            shape:
+            -   1
+            -   3
+            -   416
+            -   416
+    monitor_blobs:
+    -   output                               # logits 输出节点; 若 build 后改名, 按日志调整
+    dump_path: /data/build_out/logits/results

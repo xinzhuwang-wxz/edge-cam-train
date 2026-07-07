@@ -1,0 +1,113 @@
+# !!!Config file disallow TABs!!!
+# ============================================================================
+# 对照路 W：feeder_416.onnx（移动端整图, norm+sigmoid 都焊入）
+#   - NPU 图 = 归一化 + backbone+head + sigmoid → output_prob[1,3598,37] 概率
+#   - CPU   = 只做 DFL + NMS（sigmoid 已在图内）
+#   - 【违反】ADR-0007/rule#2（sigmoid 进 INT8 NPU 图）→ 仅作消融对照:
+#     量化后 sigmoid 是否掉命门(bird)置信度 / Vivante 是否软回退该算子
+#   - normalization 已在图内 → AWNN 预处理走恒等 (mean=0, norm=1, 喂 0-255 BGR)
+# ============================================================================
+general_conf:
+    model_type: onnx
+    model_path: /data/onnx
+    model_names:
+    -   feeder_416.onnx
+    output: /data/build_out/whole
+build_conf:
+    build_mode: auto
+    export_type: standard
+    debug_enable: true
+    enable_onnxsim: true
+    save_temporary_model: false
+    cutstartname:
+    cutendname:
+    quantize_conf:
+        quantized_dtype: symmetric_i8
+        calibration_algorithm: percentile
+        quantized_method: per-channel
+    calibration_engine: default
+    dataset_conf:
+    -   type: DATASET_TYPE_TXT
+        path: /data/calib/calibration_datasets.txt
+        image_types: []
+        preprocess_conf:
+        -   name: data
+            color_space: BGR
+            mean:
+            -   0.0
+            -   0.0
+            -   0.0
+            norm:
+            -   1.0
+            -   1.0
+            -   1.0
+            tensor_layout: NCHW
+            shape:
+            -   1
+            -   3
+            -   416
+            -   416
+    opt_level: 1
+profile_conf:
+    gt_model_names:
+    quantized_model_names:
+    -   feeder_416_ipu.param
+    -   feeder_416_ipu.bin
+    dataset_conf:
+    -   type: DATASET_TYPE_TXT
+        path: /data/calib/calibration_datasets.txt
+        image_types: []
+        preprocess_conf:
+        -   name: data
+            color_space: BGR
+            mean:
+            -   0.0
+            -   0.0
+            -   0.0
+            norm:
+            -   1.0
+            -   1.0
+            -   1.0
+            tensor_layout: NCHW
+            shape:
+            -   1
+            -   3
+            -   416
+            -   416
+    evaluation_conf:
+        sort_flag: false
+        analysis_conf:
+        -   layer_wise
+        -   graph_wise
+        measure_method:
+        -   snr
+        -   mse
+        -   cos-similarity
+simulate_conf:
+    model_names:
+    -   feeder_416_ipu.param
+    -   feeder_416_ipu.bin
+    dataset_conf:
+    -   type: DATASET_TYPE_TXT
+        path: /data/calib/calibration_datasets.txt
+        image_types: []
+        preprocess_conf:
+        -   name: data
+            color_space: BGR
+            mean:
+            -   0.0
+            -   0.0
+            -   0.0
+            norm:
+            -   1.0
+            -   1.0
+            -   1.0
+            tensor_layout: NCHW
+            shape:
+            -   1
+            -   3
+            -   416
+            -   416
+    monitor_blobs:
+    -   output_prob
+    dump_path: /data/build_out/whole/results

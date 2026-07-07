@@ -1,6 +1,10 @@
 """ACUITY/pegasus 打包器（engineering §6 ★，**板子相关，当前为桩**）。
 
-链路（plan §7）：ONNX → onnxsim 静态 → pegasus import → pegasus quantize(PTQ) → .nb。
+⚠️ **已弃用（[[ADR-0009]]）**：目标芯片 V85x→V861，工具链实为 **AWNN**（非 ACUITY/pegasus）、
+板端格式为 `_ipu.param/.bin`（非 `.nb`）。**新代码用 `awnn_packager.AwnnPackager`（已实装可跑）**。
+本桩仅为历史保留 / 万一回到 V85x 的备用。
+
+链路（plan §7，历史）：ONNX → onnxsim 静态 → pegasus import → pegasus quantize(PTQ) → .nb。
 真跑须 V85x Tina-SDK 内配套 pegasus（Ubuntu only），且 VIPLite .so 必须与 pegasus 对齐
 （否则 VIP_ERROR_NETWORK_INCOMPATIBLE）。无板/无 SDK 时 pack() 抛 NotImplementedError，
 但接口与 PackagerBackend 一致，有板子时填 subprocess 调 pegasus 即可（不改调用方）。"""
