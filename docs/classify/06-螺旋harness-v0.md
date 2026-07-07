@@ -77,6 +77,11 @@
   - **761 < 1211**：其余 ~450 种在欧洲各国无 CC-BY 非 iNat 观测媒体 → 数据稀薄，**genus 折叠**（符合"粒度按数据"设计）；country=欧洲 = 媒体**域匹配**（抽查见 RECONYX 相机陷阱图，域完美贴喂食器）。
   - **多 session worktree 隔离**：本项目多 session 并行、共享工作区靠切分支会互踩；classify 迁 `/Users/bamboo/Githubs/edge-cam-classify` 独立 worktree（与 deploy/round3 零冲突），采集/监控/git 全在自己目录+分支。
   - **下一步 = GPU**：`download_manifest_images --per-species-cap 500 → crop_manifest_images → build → train`（bake-off）——到租卡边界。
+- **2026-07-07 数据集审计（"先把数据集搞对"，用户要求，同检测 round 纪律）** → lens ②：
+  - **分布**：3.7M URL / 761 种；**≥100 图 457 种**（种级叶子稳）/ <100 的 304 种（86 薄+218 稀，40 种仅 1 张→折叠）；99 科；全 CC0/CC-BY。水鸟偏顶端，但**花园/喂食器鸟全万级**（乌鸫6万/椋鸟4.4万/知更3.8万/大山雀3.8万/青山雀3万/家麻雀2.2万），cap=500 拉平——**域没被淹没**。
+  - **761<1211 sanity 通过**：缺的 450 种 = 外来种（鹦鹉33/waxbill20）+ 美洲迷鸟（Parulidae 21）→ 本就该缺/折叠属级。
+  - **② 分组抽查抓到相机陷阱空帧**：MACHINE_OBSERVATION 域贴喂食器（RECONYX 图完美），但反面是误触发/鸟太小太糊的**空帧**仍挂单物种标签 → 裁框 center-crop 兜底会毒标。**修：`--drop-no-bird`**（检测无鸟丢弃，不 center-crop），欧洲流默认开。
+  - **占盘**：cap=500 → ~20 万张 → 原图 ~20GB + 裁框 ~8GB（峰值 ~28GB，训练常驻 ~8GB）；训练 VRAM 几 GB。5090（32GB）绰绰有余。
 
 ---
 
