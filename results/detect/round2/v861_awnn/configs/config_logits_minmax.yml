@@ -14,7 +14,7 @@ general_conf:
     model_path: /data/onnx
     model_names:
     -   main_416_fp32_logits.onnx
-    output: /data/build_out/logits
+    output: /data/build_out/logits_minmax
 build_conf:
     build_mode: auto
     export_type: standard
@@ -25,7 +25,7 @@ build_conf:
     cutendname:
     quantize_conf:
         quantized_dtype: symmetric_i8
-        calibration_algorithm: percentile   # 首选; 若激活量化掉点大可换 kl
+        calibration_algorithm: minmax   # 实验:不裁cls头峰值   # 首选; 若激活量化掉点大可换 kl
         quantized_method: per-channel        # depthwise 多, per-channel 必须
     calibration_engine: default
     dataset_conf:
@@ -112,4 +112,4 @@ simulate_conf:
             -   416
     monitor_blobs:
     -   output                               # logits 输出节点; 若 build 后改名, 按日志调整
-    dump_path: /data/build_out/logits/results
+    dump_path: /data/build_out/logits_minmax/results

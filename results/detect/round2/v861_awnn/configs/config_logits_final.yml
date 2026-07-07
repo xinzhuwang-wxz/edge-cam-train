@@ -14,12 +14,13 @@ general_conf:
     model_path: /data/onnx
     model_names:
     -   main_416_fp32_logits.onnx
-    output: /data/build_out/logits
+    output: /data/build_out/logits_final
 build_conf:
     build_mode: auto
     export_type: standard
     debug_enable: true
     enable_onnxsim: true
+    use_npu_preprocess: true   # 板端喂0-255 BGR, 归一化折进NPU
     save_temporary_model: false
     cutstartname:
     cutendname:
@@ -50,6 +51,12 @@ build_conf:
             -   416
             -   416
     opt_level: 1
+    hybrid_quantization_conf:            # 混合精度: cls/reg 头卷积保 fp32(不裁峰值)
+        white_list:
+        -   /head/gfl_cls.0/Conv
+        -   /head/gfl_cls.1/Conv
+        -   /head/gfl_cls.2/Conv
+        -   /head/gfl_cls.3/Conv
 profile_conf:
     gt_model_names:                          # 留空→由 general_conf 推断浮点 gt
     quantized_model_names:
@@ -112,4 +119,4 @@ simulate_conf:
             -   416
     monitor_blobs:
     -   output                               # logits 输出节点; 若 build 后改名, 按日志调整
-    dump_path: /data/build_out/logits/results
+    dump_path: /data/build_out/logits_final/results

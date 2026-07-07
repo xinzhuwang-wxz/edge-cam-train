@@ -11,7 +11,8 @@ set -euo pipefail
 WORK="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"     # = results/detect/round2/v861_awnn
 IMG="awnn:1.0.2"
 PLAT="linux/amd64"
-run() { docker run --rm --platform "$PLAT" -v "$WORK":/data "$IMG" bash -lc "$*" 2>&1 | grep -vE "ttyname failed"; }
+CPUS="${AWNN_CPUS:-3}"   # 限核降温（amd64 模拟满载发热）；可用 AWNN_CPUS=N 覆盖
+run() { docker run --rm --platform "$PLAT" --cpus="$CPUS" -v "$WORK":/data "$IMG" bash -lc "$*" 2>&1 | grep -vE "ttyname failed"; }
 
 cmd="${1:-sh}"; shift || true
 case "$cmd" in

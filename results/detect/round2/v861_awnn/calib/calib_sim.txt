@@ -1,0 +1,4 @@
+/data/calib/demo_bird.jpg
+/data/calib/natural1_sparrow_on_rail.jpg
+/data/calib/natural3_blackbird_on_post.jpg
+/data/calib/class_squirrel.jpg
