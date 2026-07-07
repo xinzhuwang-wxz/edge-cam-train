@@ -36,6 +36,7 @@ CC_CLEAN = ["CC0_1_0", "CC_BY_4_0"]  # 去 NC
 # 只要活体观测：博物馆标本（PRESERVED_SPECIMEN 死鸟剥制）域不符须排除（08）；
 # MACHINE_OBSERVATION=相机陷阱，反贴喂食器域。
 BASIS = ["HUMAN_OBSERVATION", "MACHINE_OBSERVATION", "OBSERVATION"]
+POLITE = 0.5  # 每请求节流（守规矩，避免触发 GBIF IP 限流；每 worker ~2 req/s）
 FIELDS = [
     "ebird_code",
     "scientific_name",
@@ -64,6 +65,7 @@ def _get(params: dict, retries: int = 8) -> dict:
     full = OCC + "?" + urllib.parse.urlencode(params, doseq=True)
     for attempt in range(retries):
         try:
+            time.sleep(POLITE)  # 守规矩节流（避免 GBIF IP 限流）
             with urllib.request.urlopen(full, timeout=60) as r:  # noqa: S310
                 return json.load(r)
         except urllib.error.HTTPError as e:  # noqa: PERF203
