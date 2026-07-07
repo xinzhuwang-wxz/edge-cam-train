@@ -1,0 +1,7 @@
+{
+ "role": "annotation-first 下载清单（GBIF Download API，全量）",
+ "source": "GBIF Occurrence Download DWCA",
+ "n_image_rows": 3735336,
+ "n_species": 761,
+ "note": "Aves+StillImage+CC0/CC_BY+活体观测+欧洲各国+扣iNat；speciesKey→ebird_code"
+}

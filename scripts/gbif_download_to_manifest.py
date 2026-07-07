@@ -20,6 +20,7 @@ import base64
 import csv
 import io
 import json
+import os
 import time
 import urllib.request
 import zipfile
@@ -29,6 +30,7 @@ EUROPE = Path(__file__).resolve().parents[1] / "data" / "region" / "europe"
 KEY_FILE = Path.home() / ".config" / "gbif" / "last_download_key.txt"
 CREDS = Path.home() / ".config" / "gbif" / "creds.json"
 DL_DIR = EUROPE / "gbif_dl"
+LOCK = DL_DIR / ".lock"  # pidfile 锁：防监控 cron 反复触发起多个下载抢同一文件
 OUT_FIELDS = [
     "ebird_code",
     "scientific_name",
@@ -48,6 +50,28 @@ def _norm_license(u: str) -> str:
         if frag in (u or ""):
             return code
     return u or ""
+
+
+def _already_parsed() -> bool:
+    """清单已是 GBIF 全量 → 幂等跳过（防 cron 反复重下 825MB）。"""
+    s = EUROPE / "europe_manifest_summary.json"
+    if not s.exists():
+        return False
+    try:
+        return "Download" in json.loads(s.read_text()).get("source", "")
+    except (ValueError, OSError):
+        return False
+
+
+def _running() -> bool:
+    """已有下载/解析实例在跑（pidfile 锁，检查 PID 存活）→ 跳过，防抢同一文件。"""
+    if not LOCK.exists():
+        return False
+    try:
+        os.kill(int(LOCK.read_text()), 0)
+        return True
+    except (ProcessLookupError, ValueError, OSError):
+        return False  # 死锁/无效 → 视为未锁
 
 
 def status(key: str) -> dict:
@@ -183,6 +207,12 @@ def main() -> None:
     a = ap.parse_args()
     if not a.key:
         raise SystemExit("无 download key（先提交 Download 请求）")
+    if _already_parsed():
+        print("清单已是 GBIF 全量，跳过（幂等，不重下 825MB）。", flush=True)
+        return
+    if _running():
+        print("已有下载/解析实例在跑，跳过本次。", flush=True)
+        return
     st = status(a.key)
     print(
         f"GBIF download {a.key}: {st.get('status')} | records={st.get('totalRecords')}", flush=True
@@ -190,7 +220,12 @@ def main() -> None:
     if st.get("status") != "SUCCEEDED":
         print("未就绪，稍后再试（PREPARING/RUNNING）。", flush=True)
         return
-    parse_to_manifest(download_zip(a.key, int(st.get("size") or 0)))
+    DL_DIR.mkdir(parents=True, exist_ok=True)
+    LOCK.write_text(str(os.getpid()))
+    try:
+        parse_to_manifest(download_zip(a.key, int(st.get("size") or 0)))
+    finally:
+        LOCK.unlink(missing_ok=True)
 
 
 if __name__ == "__main__":
