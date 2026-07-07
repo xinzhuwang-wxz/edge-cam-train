@@ -9,7 +9,8 @@
 #      python scripts/crop_manifest_images.py \
 #        --det results/detect/round2/exports/main_416_fp32_logits.onnx \
 #        --in-root /root/autodl-tmp/classify_raw/europe \
-#        --out-root /root/autodl-tmp/classify_crops/europe --pad 0.15 --size 256
+#        --out-root /root/autodl-tmp/classify_crops/europe --pad 0.15 --size 256 --drop-no-bird
+#      （--drop-no-bird：检测无鸟的帧丢弃，除相机陷阱空帧/误触发毒标——数据审计发现）
 #   3) 组装 manifest（读 crops 根）：
 #      python -m edge_cam.data.adapters.classify.build --config configs/data/classify_europe.yaml
 #   4) 训练：python -m edge_cam.train.classify.train data.manifest=<out_dir>/manifest.json ...

@@ -56,6 +56,7 @@ def _init(
     pad: float,
     drop_ambiguous: bool,
     dom: float,
+    drop_no_bird: bool,
 ) -> None:
     so = ort.SessionOptions()
     so.intra_op_num_threads = 1
@@ -71,6 +72,7 @@ def _init(
         pad=pad,
         drop_ambiguous=drop_ambiguous,
         dom=dom,
+        drop_no_bird=drop_no_bird,
     )
 
 
@@ -110,6 +112,8 @@ def _work(row: dict) -> tuple[str, dict | None]:
         birds = _bird_boxes(im)
         n = len(birds)
         if n == 0:
+            if _G["drop_no_bird"]:
+                return "drop_no_bird", None  # 检测无鸟（空帧/相机陷阱误触发）→ 丢，避免空场景毒标
             w, h = im.size
             s = min(w, h)
             sq = ((w - s) // 2, (h - s) // 2, (w - s) // 2 + s, (h - s) // 2 + s)
@@ -144,6 +148,11 @@ def main() -> None:
     )
     ap.add_argument("--drop-ambiguous", action="store_true", help="多框且首框不占优→丢（疑似混种）")
     ap.add_argument("--dominance", type=float, default=1.8, help="首框面积≥此倍第二框判主体")
+    ap.add_argument(
+        "--drop-no-bird",
+        action="store_true",
+        help="检测无鸟的帧丢弃（空帧/相机陷阱误触发→避免空场景毒标；欧洲流推荐开）",
+    )
     ap.add_argument("--workers", type=int, default=48)
     a = ap.parse_args()
 
@@ -167,6 +176,7 @@ def main() -> None:
         a.pad,
         a.drop_ambiguous,
         a.dominance,
+        a.drop_no_bird,
     )
     with Pool(a.workers, initializer=_init, initargs=init_args) as pool:
         for status, crop_row in pool.imap_unordered(_work, rows, chunksize=32):
