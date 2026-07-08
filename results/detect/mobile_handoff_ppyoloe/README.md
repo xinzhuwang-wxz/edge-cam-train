@@ -52,7 +52,7 @@ mobile_handoff_ppyoloe/
 |---|---|---|
 | 输入尺寸 | 416 | **640** |
 | 归一化 | BGR，mean/std 焊进图 | **RGB + ÷255**（在 detect.py 里做）|
-| 模型原始输出 | `[3598,37]` | `boxes[8400,4]` + `scores[5,8400]`（已 sigmoid）|
+| 模型原始输出 | 单张量 `[1,3598,37]` | **两个张量**：`boxes[1,8400,4]` ＋ `scores[1,5,8400]`（已 sigmoid）|
 | decode/NMS | CPU | **CPU（在 detect.py 里，同样逻辑）** |
 
 调用接口 `detect(image_bgr) -> [{label,score,box}]` **完全一致**,同事换模型只改模型路径。
@@ -65,7 +65,25 @@ mobile_handoff_ppyoloe/
 |---|---|---|
 | **1 预处理** | 喂 **BGR、0-255 原始像素**（归一化焊进图，啥都不用做）| 必须 **BGR→RGB + 每通道 ÷255.0**（归一化**没**焊进图）。**漏 ÷255 → 模型输出所有类分数塌到 ~0.01,`≥0.5` 一个都过不了 = 能跑但永远检不到**（实测检测数直接归零）。**这是最可能的病根。** |
 | **2 模型输入** | **单输入** `image[1,3,416,416]` | **双输入**:`image[1,3,640,640]` **＋ `scale_factor[1,2] = [640/原图高, 640/原图宽]`**。模型内部用它把框缩回原图。**漏喂 → onnxruntime 直接报 "missing input scale_factor";乱填 [1,1] 或高宽写反 → 框坐标全错、越界到画面外**（非正方形图实测越界）。 |
-| **3 模型输出** | `[3598,37]`,要做**重型 DFL decode**（softmax 8bin＋anchor＋stride）| `boxes[8400,4]`（**已是解好的 xyxy 框、已在原图坐标**）＋ `scores[5,8400]`（**已 sigmoid**）。**不要**套 nanodet 的 DFL/anchor;只需：`scores` **转置成 [8400,5]** → 每 anchor 取 max 类 → conf 过滤 → 逐类 NMS。注意 scores 原始布局是 **[类,anchor]**,不转置 argmax 维度就错。 |
+| **3 模型输出** | **一个**张量 `[1,3598,37]`,要做**重型 DFL decode**（softmax 8bin＋anchor＋stride）| **两个独立张量**：`scores[1,5,8400]`（**已 sigmoid**）＋ `boxes[1,8400,4]`（**已是解好的 xyxy 框、已在原图坐标**）。**不要**套 nanodet 的 DFL/anchor;只需：`scores` **转置成 [8400,5]** → 每 anchor 取 max 类 → conf 过滤 → 逐类 NMS,框直接从 boxes 按同下标取。注意 scores 原始布局是 **[类,anchor]**,不转置 argmax 维度就错。 |
+
+> **⚠️ 两个易错点(同事实际踩到的)**：
+> 1. **runtime 输出带 batch 维**：本文档为简洁写 `scores[5,8400]`/`boxes[8400,4]`,但 onnxruntime/tflite 实际吐的是 **`[1,5,8400]` / `[1,8400,4]`**(前面多个 batch=1)。先 `[0]` 去掉 batch 再按上面处理。
+> 2. **框在"另一个"输出里、不在 scores 里**：模型有**两个输出张量**。`[1,5,8400]` 只是分数(那"一大堆数"=5×8400=42000 个分)。**框是第二个输出 `[1,8400,4]`**,得单独接出来。配对规则:分数第 `i` 号候选框(anchor)的框 = **`boxes[0, i, :]` = `[x1,y1,x2,y2]`**,同下标一一对应,**已是原图坐标、不用再缩放/解码**。
+>
+> 语言无关伪代码(照抄即可)：
+> ```
+> scores = out_scores[0]          # [5,8400]  ← 去 batch
+> boxes  = out_boxes[0]           # [8400,4]  ← 去 batch, 就是那个"另一个"输出
+> dets = []
+> for i in 0..8399:               # 遍历 8400 个候选框
+>     c    = argmax over 5 类 of scores[:, i]   # 该框最强的类
+>     conf = scores[c, i]                        # 已 sigmoid, 直接比阈值
+>     if conf >= 0.5:
+>         x1,y1,x2,y2 = boxes[i]                  # ← 关键: 同一个 i 去 boxes 取框
+>         dets.push({label:NAMES[c], score:conf, box:[x1,y1,x2,y2]})
+> dets = perClassNMS(dets, 0.5)   # 逐类 NMS
+> ```
 
 **一句话自查**（给移动端同事）：先打印模型**原始输出**分数峰值——
 - 峰值全 `<0.05` → **预处理错(99% 是没 ÷255 或没转 RGB)**；
