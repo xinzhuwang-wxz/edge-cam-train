@@ -2,10 +2,12 @@
 
 NanoDet-Plus-m（ShuffleNetV2 1.0x, 416, 5 类）的 **Allwinner V861 NPU 部署包**。板端由 **AWNN Runtime** 加载 `_ipu.param/.bin`。**同类型 = 同接口**：I/O 契约与 `awnn_verify` 板端用法对所有轮通用；**按 round 分层**，每个 `roundX/` 是可直接推板的**自包含交付物**。
 > 检测 5 类：`bird / squirrel / cat / person / other_animal`。命门 = bird。
+> **自包含**：本包不依赖仓库其它文件——`git pull` 后把整个 `v861_awnn_nanodet/` 拷走即可用（decode 参考 `decode_ref.py` 只需 numpy，不 import `edge_cam`）。与移动端 `mobile_handoff_*` 一致。`_build/` 里的转换脚本 import `edge_cam`，但那是我们重转模型时用、**不随交接**。
 
 ```
 v861_awnn_nanodet/
 ├── README.md          ← 本文件（通用：I/O 契约 + awnn_verify 用法 + 目录规范）
+├── decode_ref.py      ← ★CPU 后处理参考 sigmoid+DFL+NMS（自包含，只依赖 numpy，跨轮通用）
 ├── round2/            ← ★可上板交付物（自包含，整个目录推到板上）
 │   ├── model/nanodet_feeder5_v861_416_ipu.param / .bin   板端 INT8 模型（1.3MB）
 │   ├── config.txt     awnn_verify 配置（路径相对本目录，铺平后无需改）
@@ -24,7 +26,8 @@ v861_awnn_nanodet/
 - **输入**：**0-255 BGR、HWC**、resize **416×416（直接拉伸）**。⚠ BGR 不是 RGB；⚠ **不用自己归一化**（mean/std 已焊进 NPU，`use_npu_preprocess`）。blob 名 `data`。
 - **输出**：blob `output`，**logits** `[1, 3598, 37]`（**sigmoid 前**）。
 - **CPU 后处理**（玄铁 RISC-V，不在 NPU 图）：`sigmoid(前5类) + DFL(reg_max=7) + 逐类 NMS`。
-  - 权威参考实现：`src/edge_cam/cascade/adapters.py:decode_nanodet(out, orig_wh, num_classes=5, strides=(8,16,32,64), reg_max=7, conf_thr=0.4, nms_iou=0.5)`。
+  - **权威参考实现（自包含）**：本包 `decode_ref.py`（只依赖 numpy，不 import `edge_cam`）——`python decode_ref.py round2/ref/demo_bird_output_fp32.bin round2/ref/demo_bird.jpg` 复现 bird 0.850。移植 C/RISC-V 照它 ~40 行翻译。
+  - 仓库内同款（全链复用，非本包必需）：`src/edge_cam/cascade/adapters.py:decode_nanodet`。
   - `3598` = 52²(s8)+26²(s16)+13²(s32)+7²(s64)；`37` = 5类 + 4×8 DFL。
 
 ## 板端用法（awnn_verify · 通用）

@@ -25,7 +25,7 @@
 - **输入**：**0-255 BGR、HWC**、resize **416×416（直接拉伸）**。⚠ BGR 不是 RGB；⚠ 不用自己归一化（已焊进 NPU）。blob 名 `data`。
 - **输出**：blob `output`，**logits** `[1, 3598, 37]`（**sigmoid 前**）。
 - **CPU 后处理**（玄铁 RISC-V，不在 NPU 图）：`sigmoid(前5类) + DFL(reg_max=7) + 逐类 NMS`。
-  - 参考实现 `src/edge_cam/cascade/adapters.py:decode_nanodet(out, orig_wh, num_classes=5, strides=(8,16,32,64), reg_max=7, conf_thr=0.4, nms_iou=0.5)`。
+  - 参考实现见上层自包含 `../decode_ref.py`（numpy-only，不 import `edge_cam`）；仓库内同款 `src/edge_cam/cascade/adapters.py:decode_nanodet`。
   - `3598` = 52²(s8)+26²(s16)+13²(s32)+7²(s64)；`37` = 5类 + 4×8 DFL。
 
 ## 本轮文件（`round2/`，整个目录即可推板）
