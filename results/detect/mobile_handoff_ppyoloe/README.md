@@ -57,6 +57,23 @@ mobile_handoff_ppyoloe/
 
 调用接口 `detect(image_bgr) -> [{label,score,box}]` **完全一致**,同事换模型只改模型路径。
 
+### 🚨 自己用 Java / Kotlin / C++ 重写 decode 时——上面三处差异**不再"无感",必须逐一照抄 `ppyoloe_detect.py`**
+
+> 若拿 nanodet 的 Java 移植当模板改本包,**接口一样但底层三处全不同**,是"nanodet 转换 OK、ppyoloe 一直不行"的根因。已用真模型逐一复现:
+
+| # | nanodet 的做法（你可能照抄了） | ppyoloe 必须这样（否则的后果） |
+|---|---|---|
+| **1 预处理** | 喂 **BGR、0-255 原始像素**（归一化焊进图，啥都不用做）| 必须 **BGR→RGB + 每通道 ÷255.0**（归一化**没**焊进图）。**漏 ÷255 → 模型输出所有类分数塌到 ~0.01,`≥0.5` 一个都过不了 = 能跑但永远检不到**（实测检测数直接归零）。**这是最可能的病根。** |
+| **2 模型输入** | **单输入** `image[1,3,416,416]` | **双输入**:`image[1,3,640,640]` **＋ `scale_factor[1,2] = [640/原图高, 640/原图宽]`**。模型内部用它把框缩回原图。**漏喂 → onnxruntime 直接报 "missing input scale_factor";乱填 [1,1] 或高宽写反 → 框坐标全错、越界到画面外**（非正方形图实测越界）。 |
+| **3 模型输出** | `[3598,37]`,要做**重型 DFL decode**（softmax 8bin＋anchor＋stride）| `boxes[8400,4]`（**已是解好的 xyxy 框、已在原图坐标**）＋ `scores[5,8400]`（**已 sigmoid**）。**不要**套 nanodet 的 DFL/anchor;只需：`scores` **转置成 [8400,5]** → 每 anchor 取 max 类 → conf 过滤 → 逐类 NMS。注意 scores 原始布局是 **[类,anchor]**,不转置 argmax 维度就错。 |
+
+**一句话自查**（给移动端同事）：先打印模型**原始输出**分数峰值——
+- 峰值全 `<0.05` → **预处理错(99% 是没 ÷255 或没转 RGB)**；
+- onnxruntime 报缺输入 → **漏了 `scale_factor`**；
+- 检到框但都跑到画面外 → **`scale_factor` 值/顺序错，或 `scores` 没转置**。
+
+decode 的**权威逐行参照**就是本目录 `ppyoloe_detect.py`（`_preprocess` + `detect`,不到 60 行),照它翻译即可,别照 nanodet。
+
 ---
 
 ## 用法
