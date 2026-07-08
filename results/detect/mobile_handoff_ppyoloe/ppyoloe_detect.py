@@ -13,6 +13,8 @@
     for d in det.detect(cv2.imread("x.jpg")): print(d)
 """
 
+from __future__ import annotations  # list[int]/list[dict] 注解惰性化 → Python 3.7/3.8 也能 import(与 nanodet 包一致)
+
 import cv2
 import numpy as np
 

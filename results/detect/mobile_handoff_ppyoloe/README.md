@@ -71,7 +71,7 @@ for d in det.detect(cv2.imread("photo.jpg")):
 ```
 命令行自测：`python ppyoloe_detect.py round3/onnx/ppyoloe_s_640.onnx round3/demos/demo_bird.jpg`
 
-依赖：`onnxruntime`（onnx）或 `ai_edge_litert`/`tensorflow`（tflite）+ `opencv-python` + `numpy`。
+依赖：`onnxruntime`（onnx）或 `ai_edge_litert`/`tensorflow`（tflite）+ `opencv-python` + `numpy`。**Python ≥ 3.7**（脚本已 `from __future__ import annotations`，与 nanodet 包同样对 3.7/3.8/3.9+ 通用；早期版本曾用 `list[...]` 注解，在 Python 3.8 上 import 即报 `TypeError: 'type' object is not subscriptable`，已修）。
 
 ---
 
