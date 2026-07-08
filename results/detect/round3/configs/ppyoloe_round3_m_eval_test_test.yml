@@ -1,0 +1,12 @@
+# M-ft 评估：在与 NanoDet P 线**完全相同**的 test_test.json 上评 ppyoloe → apples-to-apples。
+# 跑(box, M-ft训完): cd PaddleDetection && python tools/eval.py -c configs/ppyoloe/ppyoloe_round3_m_eval_test_test.yml \
+#   -o weights=<M-ft最佳权重路径>   (best_model.pdparams,训完确认)
+_BASE_: [
+  'ppyoloe_round3_m.yml',
+]
+EvalDataset:
+  name: COCODataSet
+  image_dir: ""
+  anno_path: /root/autodl-tmp/detect_round3/labels/test_test.json
+  dataset_dir: /root/autodl-tmp/detect_raw
+  allow_empty: true

@@ -186,8 +186,72 @@ class RoboflowSquirrelDetAdapter(RoboflowFeederAdapter):
         super().__init__(raw_root, **kw)
 
 
+class RoboflowSquirrelGardenAdapter(RoboflowFeederAdapter):
+    """squirrel-iest3/squirrel-xgfti（CC-BY-4.0）：庭院松鼠、攀爬/竖直姿态
+    （补 round3 头号短板"站立/爬台松鼠"，M1 squirrel recall 弱）→ squirrel（catch_all）。
+    round2 已下未用：`detect_raw/commercial/roboflow_squirrelgarden`。"""
+
+    def __init__(self, raw_root: str, **kw) -> None:
+        kw.setdefault("name", "roboflow_squirrelgarden")
+        kw.setdefault("workspace", "squirrel-iest3")
+        kw.setdefault("project", "squirrel-xgfti")
+        kw.setdefault("version", 1)
+        kw.setdefault("catch_all_label", "squirrel")  # Squirrel(id0 根 + id1) → squirrel
+        super().__init__(raw_root, **kw)
+
+
+class RoboflowWanfirdausSquirrelAdapter(RoboflowFeederAdapter):
+    """wan-firdaus/squirrel-detection-xdkhr（CC-BY-4.0）：**站立/直立大姿态地松鼠**
+    （round3 头号需求，肉眼核过）→ squirrel（catch_all）。实测 1027 图 / 1105 松鼠框。"""
+
+    def __init__(self, raw_root: str, **kw) -> None:
+        kw.setdefault("name", "roboflow_wanfirdaus_squirrel")
+        kw.setdefault("workspace", "wan-firdaus")
+        kw.setdefault("project", "squirrel-detection-xdkhr")
+        kw.setdefault("version", 1)
+        kw.setdefault("catch_all_label", "squirrel")
+        super().__init__(raw_root, **kw)
+
+
+class RoboflowBccAnimalsAdapter(RoboflowFeederAdapter):
+    """aiforestpublic/bcc-animals（CC-BY-4.0）：后院 critter-cam 20 类 → 5 类（**显式 map**）。
+    补 bird(swallow/pigeon/geese) + **other 多样性**(raccoon/fox/skunk/possum… 治 other 黑洞)。
+    **丢**：昆虫(cockroach/butterfly)、**chipmunk**（松鼠脸，免污染 squirrel↔other）、misc/根类
+    （不映射即丢；纯丢图落负样本被 negative_quota=0 清掉）。实测 2157 图。"""
+
+    LABEL_MAP = {
+        "swallow": "bird",
+        "geese": "bird",
+        "pigeon": "bird",
+        "bird": "bird",
+        "squirrel": "squirrel",
+        "skunk": "other_animal",
+        "raccoon": "other_animal",
+        "bobcat": "other_animal",
+        "rat": "other_animal",
+        "fox": "other_animal",
+        "possum": "other_animal",
+        "wild-rabbit": "other_animal",
+        "coyote": "other_animal",
+        "deer": "other_animal",
+        "person": "person",
+        # 丢（不映射）：cockroach, butterfly, chipmunk, misc, "Animals - v1 …"(根)
+    }
+
+    def __init__(self, raw_root: str, **kw) -> None:
+        kw.setdefault("name", "roboflow_bcc_animals")
+        kw.setdefault("workspace", "aiforestpublic")
+        kw.setdefault("project", "bcc-animals")
+        kw.setdefault("version", 4)
+        kw.setdefault("label_map", self.LABEL_MAP)
+        super().__init__(raw_root, **kw)
+
+
 register_adapter("roboflow_feeder", RoboflowFeederAdapter)
 register_adapter("roboflow_birdv2", RoboflowBirdV2Adapter)
 register_adapter("roboflow_meproject", RoboflowMeprojectAdapter)
 register_adapter("roboflow_csp", RoboflowCspAdapter)
 register_adapter("roboflow_squirreldet", RoboflowSquirrelDetAdapter)
+register_adapter("roboflow_squirrelgarden", RoboflowSquirrelGardenAdapter)
+register_adapter("roboflow_wanfirdaus_squirrel", RoboflowWanfirdausSquirrelAdapter)
+register_adapter("roboflow_bcc_animals", RoboflowBccAnimalsAdapter)
