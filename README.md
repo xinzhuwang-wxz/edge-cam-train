@@ -25,8 +25,8 @@
 - **数据**：5 类（bird / squirrel / cat / person / other_animal），`DatasetAdapter` 统一多源 + MegaDetector 出框伪标 + 逐图 provenance。
 - **训练**：NanoDet-Plus（Apache，fork 锁版），导 FP32 ONNX（剥 sigmoid、后处理留 CPU）。
 - **评测**：`class_precision/recall` + 零样本同尺（`zeroshot_eval`）。
-- **产物**：移动端 **NCNN 交接包**（`results/detect/round2/mobile_handoff/`，C++≡Python 对齐验证）。
-- **现状**：round1/round2 收官，固定 held-out test **bird AP50 85.0**（工作场景 94.9）。
+- **产物**：移动端交接包按类型/轮组织于 `results/detect/mobile_handoff_{nanodet,ppyoloe}/round几/`（round2 NanoDet 含 NCNN；round3 P0/P2 + ppyoloe-s 均 ONNX+TFLite，onnx≡tflite 已验）；板端 AWNN 包在 `results/detect/v861_awnn_nanodet/`。
+- **现状**：round1/round2 收官（固定 test **bird AP50 85.0**）；round3 = 数据(P0 feeder +21.6)+crop(P2)+模型(ppyoloe-s 相机陷阱 +9.6)三线收敛。
 
 ### 分类段（`train/classify` + `data/adapters/classify` + `eval/`）
 - **数据**：多源逐图 CC0/CC-BY 过滤 → 检测器 **crop** 裁框 → **taxonomy**（eBird 规范键，接姊妹 registry）→ 防泄漏 split（按 observer 分组）→ 校准集。

@@ -1,0 +1,5 @@
+bird
+squirrel
+cat
+person
+other_animal
