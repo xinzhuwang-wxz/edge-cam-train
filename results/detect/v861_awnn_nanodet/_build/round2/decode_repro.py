@@ -9,8 +9,8 @@ import sys, glob, os
 from pathlib import Path
 import numpy as np
 
-V = str(Path(__file__).resolve().parent)  # results/detect/round2/v861_awnn
-sys.path.insert(0, str(Path(V).parents[3] / "src"))  # 仓库根/src
+V = str(Path(__file__).resolve().parent)  # .../v861_awnn_nanodet/_build/round2
+sys.path.insert(0, str(Path(V).parents[4] / "src"))  # 仓库根/src
 from edge_cam.cascade.adapters import decode_nanodet  # noqa: E402
 import onnxruntime as ort  # noqa: E402
 

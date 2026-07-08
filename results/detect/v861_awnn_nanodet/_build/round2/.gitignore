@@ -3,7 +3,5 @@
 onnx/
 # _ipu.param/.bin / .table / _opt.* / profile.csv（awnntools build 产出）
 build_out/
-# int8 输入/参考输出二进制
-board_handoff/*.bin
 # 下载的 worksite 校准图(62MB, 可从租卡机重下)
 calib/worksite/

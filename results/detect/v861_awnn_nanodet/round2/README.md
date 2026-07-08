@@ -2,6 +2,7 @@
 
 喂食台粗检测（NanoDet-Plus-m 416，5 类）的 **Allwinner V861 NPU 部署包**。板端由 **AWNN Runtime** 加载 `_ipu.param/.bin`。
 > 检测 5 类：`bird / squirrel / cat / person / other_animal`。命门 = bird。
+> **本文件只讲 round2 这一轮的来源 / 量化 / 验证；I/O 契约 + 板端 `awnn_verify` 用法（所有轮通用）见上层 [`../README.md`](../README.md)，转换工程见 `../_build/round2/`。**
 
 ---
 
@@ -27,12 +28,12 @@
   - 参考实现 `src/edge_cam/cascade/adapters.py:decode_nanodet(out, orig_wh, num_classes=5, strides=(8,16,32,64), reg_max=7, conf_thr=0.4, nms_iou=0.5)`。
   - `3598` = 52²(s8)+26²(s16)+13²(s32)+7²(s64)；`37` = 5类 + 4×8 DFL。
 
-## 文件
+## 本轮文件（`round2/`，整个目录即可推板）
 
 ```
-board_handoff/
+round2/
 ├── model/nanodet_feeder5_v861_416_ipu.param / .bin   板端 INT8 模型（AWNN Runtime 加载, 1.3MB）
-├── config.txt                                        awnn_verify 验证配置
+├── config.txt                                        awnn_verify 验证配置（路径相对本目录）
 ├── labels.txt                                        5 类名（行号=id）
 └── ref/  demo_bird.jpg + _input_int8.bin + _output_fp32.bin   板端对拍参考(input + 仿真参考输出)
 ```

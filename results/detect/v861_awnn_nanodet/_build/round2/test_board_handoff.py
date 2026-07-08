@@ -14,9 +14,9 @@ import numpy as np
 import onnxruntime as ort
 from PIL import Image
 
-V = Path(__file__).resolve().parent  # results/detect/round2/v861_awnn
-BH = V / "board_handoff"
-sys.path.insert(0, str(V.parents[3] / "src"))  # 仓库根/src
+V = Path(__file__).resolve().parent  # .../v861_awnn_nanodet/_build/round2
+BH = V.parents[1] / "round2"  # 交付物在 _build/round2/ 的上两级 → v861_awnn_nanodet/round2
+sys.path.insert(0, str(V.parents[4] / "src"))  # 仓库根/src
 from edge_cam.cascade.adapters import decode_nanodet  # noqa: E402
 
 fails, checks = [], []
