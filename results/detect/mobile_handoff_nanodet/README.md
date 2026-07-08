@@ -6,9 +6,10 @@ NanoDet 检测器（ShuffleNetV2 1.0x, 416, 5 类）的移动端交接包。**�
 mobile_handoff_nanodet/
 ├── nanodet_detect.py   ← decode+NMS 参考（onnx/tflite 通用，喂 BGR 0-255 resize 416）
 ├── labels.txt          ← 5 类名（行号=id，与 round2 同序）
-├── round2/             ← round2 最佳 feeder 模型
+├── round2/             ← round2 最佳 feeder 模型（另含 ncnn/ C++ 全套，round2 独有；见 round2/README）
 │   ├── onnx/feeder_416.onnx
-│   └── tflite/feeder_416.{fp16,fp32}.tflite
+│   ├── tflite/feeder_416.{fp16,fp32}.tflite
+│   └── ncnn/           ← C++ 部署路径（.param/.bin + feeder_detector.cpp，自带 decode）
 └── round3/
     ├── p2/  ← ★最佳 NanoDet 部署（P0+数据+crop，feeder AP50 89.3、V861 零回退）
     │   ├── onnx/p2_416.onnx
