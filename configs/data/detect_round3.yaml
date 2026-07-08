@@ -1,0 +1,42 @@
+# 检测 round3 装配（docs/detect/round3-计划.md）。
+# = round2 全源【逐字复用，同源名+同 split_ratios → split 确定性复现】
+#   + round3 新源【split_ratios [0.85,0.15,0.0]：只进 train/val，test 恒 0】。
+# ⇒ round3 test manifest == round2 test_test.json 逐字节相同（hash(path+源名)%100 决定 split）
+#   → round3 vs round2 同一固定 held-out test，公平对比。
+# P0 = 热启 + 并集（新 squirrel/bird/other 源），保 round2 过滤设置（critic §9）。crop/远景放开/stray-cats 后续单列。
+# 跑（box, 无卡）：PYTHONPATH=src python -m edge_cam.data.adapters.detect.build --config configs/data/detect_round3.yaml
+name: detect_round3
+version: v1
+raw_root: /root/autodl-tmp/detect_raw
+out_dir: /root/autodl-tmp/detect_round3
+
+datasets:
+  # ══ round2 全源（逐字复用，保持 split 与 round2 一致 → test 固定）══
+  ena24:
+    negative_quota: 0
+    split_ratios: [0.7, 0.15, 0.15]
+  caltech_ct:
+    negative_quota: 10000
+    max_per_class: { other_animal: 5000 }
+    split_ratios: [0.7, 0.15, 0.15]
+  open_images_v7: # P0 保持 round2 设置（固定 test）；小/远鸟放开是 P1 单列（见下注）
+    min_box_area_frac: 0.005
+    max_per_class: { bird: 2500 }
+    # P1（另跑）= 此处放 0.002 + bird 上限提高 → 补小/中远鸟丰富尺度模式（用户2026-07-07），单独看归因
+  roboflow_feeder: {}
+  roboflow_meproject: {}
+  roboflow_birdv2:
+    max_per_class: { bird: 4000 }
+  roboflow_csp: {}
+  roboflow_squirreldet: {}
+  inat_md:
+    min_box_area_frac: 0.005
+  coco2017: {} # eval_only（防许可传染）
+
+  # ══ round3 新源（split_ratios test=0 → 只进 train/val，不污染固定 test）══
+  roboflow_squirrelgarden: # 庭院攀爬/竖直松鼠（补站立松鼠，1166图/1246框，已在手）
+    split_ratios: [0.85, 0.15, 0.0]
+  roboflow_wanfirdaus_squirrel: # 站立大姿态地松鼠（#1需求，1027图/1105框）
+    split_ratios: [0.85, 0.15, 0.0]
+  roboflow_bcc_animals: # 后院critter-cam：bird(swallow/pigeon/geese)+other多样性(raccoon/fox/skunk…)
+    split_ratios: [0.85, 0.15, 0.0]

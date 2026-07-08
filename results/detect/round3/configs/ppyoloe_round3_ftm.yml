@@ -1,0 +1,51 @@
+# M线补充:ppyoloe_plus_crn_**m**(中号,depth0.67/width0.75)微调 round3(5类)。与 s 版(ppyoloe_round3_m.yml)同法。
+# ★定位=精度容量天花板参考,非部署候选:V861 表 m=1.81fps/551ms/43MB NPU内存(太慢太重);s=4.24fps。
+# 换 m 的 **COCO 全模型**权重(非默认 obj365 backbone)→ 与 s 一致从 COCO 微调。
+# 跑(box, paddle-venv, GPU): cd PaddleDetection && python tools/train.py -c configs/ppyoloe/ppyoloe_round3_ftm.yml --eval
+_BASE_: [
+  'ppyoloe_plus_crn_m_80e_coco.yml',
+]
+
+metric: COCO
+num_classes: 5
+worker_num: 12
+save_dir: output_ftm  # ★与 s(默认output/)隔离,防 best_model 覆盖
+weights: /root/autodl-tmp/ppyoloe_round3_m/model_final
+# m 的 COCO 训好全模型(5类头与80类不匹配→自动跳过重初始化,backbone+neck 全用上)
+pretrain_weights: https://bj.bcebos.com/v1/paddledet/models/ppyoloe_plus_crn_m_80e_coco.pdparams
+
+TrainDataset:
+  name: COCODataSet
+  image_dir: ""
+  anno_path: /root/autodl-tmp/detect_round3/labels/train_train.json
+  dataset_dir: /root/autodl-tmp/detect_raw
+  data_fields: ['image', 'gt_bbox', 'gt_class', 'is_crowd']
+
+EvalDataset:
+  name: COCODataSet
+  image_dir: ""
+  anno_path: /root/autodl-tmp/detect_round3/labels/train_val.json
+  dataset_dir: /root/autodl-tmp/detect_raw
+  allow_empty: true
+
+TestDataset:
+  name: ImageFolder
+  anno_path: /root/autodl-tmp/detect_round3/labels/train_val.json
+  dataset_dir: /root/autodl-tmp/detect_raw
+
+# m 更大 → batch 16(32G@640²稳),lr 线性缩放(0.001@batch64 → 0.00025@batch16)+ 早停
+epoch: 40
+LearningRate:
+  base_lr: 0.00025
+  schedulers:
+    - name: CosineDecay
+      max_epochs: 48
+    - name: LinearWarmup
+      start_factor: 0.
+      epochs: 2
+
+TrainReader:
+  batch_size: 16
+
+log_iter: 50
+snapshot_epoch: 3

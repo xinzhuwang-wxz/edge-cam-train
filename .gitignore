@@ -52,3 +52,9 @@ results/**/*.pth
 # round2：模型权重(541MB, DVC 领域不进 git)；exports 为冗余中间件(ncnn 正本在 mobile_handoff/)
 results/detect/round2/checkpoints/
 results/detect/round2/exports/
+results/detect/mobile_handoff_nanodet/round3/p*/ckpt/
+results/detect/mobile_handoff_ppyoloe/round3/ckpt/
+
+# handoff 交接包：onnx 随包进 git（自足包，对齐 round2；覆盖上面 *.onnx 全局忽略）。tflite 无全局规则、本就入库；ckpt 续训权重上面已忽略。
+!results/detect/mobile_handoff_nanodet/**/*.onnx
+!results/detect/mobile_handoff_ppyoloe/**/*.onnx
