@@ -1,0 +1,52 @@
+# !!!Config file disallow TABs!!!  (AWNN 要求禁 Tab, 全空格)
+# ============================================================================
+# PP-YOLOE-s 640 → V861 _ipu  (round3 板端交接包)
+#   - NPU 图 = 裸 backbone+head → 6 输出: 3 尺度 x (cls[5] + reg/DFL[68]) logits
+#   - CPU 后处理 = sigmoid(cls) + Softmax(DFL,reg_max=17->16?) + anchor decode + NMS  (decode_ref.py)
+#   - cutendname 砍掉 ONNX 自带后处理(Reshape/Transpose/Softmax/Split/decode)
+#   - 预处理: RGB + /255 (mean=0, norm=1/255)。use_npu_preprocess 把 /255 折进 NPU,
+#     板端喂 0-255 **RGB** HWC (注意: 与 nanodet 的 BGR 不同!)
+#   - ★PP-YOLOE backbone 全标准 Conv+Concat, 无 ShuffleNet channel-split → 过 16 对齐约束
+# ============================================================================
+general_conf:
+    model_type: onnx
+    model_path: /data/onnx
+    model_names:
+    -   ppyoloe_s_640_logits.onnx
+    output: /data/build_out/ppyoloe_s
+build_conf:
+    build_mode: auto
+    export_type: standard
+    debug_enable: true
+    enable_onnxsim: true
+    use_npu_preprocess: true
+    save_temporary_model: false
+    cutstartname:
+    cutendname:
+    quantize_conf:
+        quantized_dtype: symmetric_i8
+        calibration_algorithm: percentile
+        quantized_method: per-channel
+    calibration_engine: default
+    dataset_conf:
+    -   type: DATASET_TYPE_TXT
+        path: /data/calib/calib_list.txt
+        image_types: []
+        preprocess_conf:
+        -   name: image
+            color_space: RGB
+            mean:
+            -   0.0
+            -   0.0
+            -   0.0
+            norm:
+            -   0.003921
+            -   0.003921
+            -   0.003921
+            tensor_layout: NCHW
+            shape:
+            -   1
+            -   3
+            -   640
+            -   640
+    opt_level: 1

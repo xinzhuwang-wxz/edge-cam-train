@@ -1,0 +1,653 @@
+[
+ {
+  "tag": "b17",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw/17.jpg",
+  "gt": "bird",
+  "w": 1920,
+  "h": 2560
+ },
+ {
+  "tag": "b19",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw/19.jpg",
+  "gt": "bird",
+  "w": 1920,
+  "h": 2560
+ },
+ {
+  "tag": "b21",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw/21.jpg",
+  "gt": "bird",
+  "w": 1920,
+  "h": 2560
+ },
+ {
+  "tag": "b23",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw/23.jpg",
+  "gt": "bird",
+  "w": 1920,
+  "h": 2560
+ },
+ {
+  "tag": "b25",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw/25.jpg",
+  "gt": "bird",
+  "w": 1920,
+  "h": 2327
+ },
+ {
+  "tag": "b26",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw/26.jpg",
+  "gt": "bird",
+  "w": 1903,
+  "h": 2048
+ },
+ {
+  "tag": "b28",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw/28.jpg",
+  "gt": "bird",
+  "w": 1400,
+  "h": 1050
+ },
+ {
+  "tag": "b30",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw/30.jpg",
+  "gt": "bird",
+  "w": 1920,
+  "h": 1440
+ },
+ {
+  "tag": "b33",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw/33.jpg",
+  "gt": "bird",
+  "w": 1920,
+  "h": 1280
+ },
+ {
+  "tag": "b35",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw/35.jpg",
+  "gt": "bird",
+  "w": 1920,
+  "h": 1280
+ },
+ {
+  "tag": "b37",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw/37.jpg",
+  "gt": "bird",
+  "w": 732,
+  "h": 1024
+ },
+ {
+  "tag": "b38",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw/38.jpg",
+  "gt": "bird",
+  "w": 1920,
+  "h": 1440
+ },
+ {
+  "tag": "b39",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw/39.jpg",
+  "gt": "bird",
+  "w": 1920,
+  "h": 2868
+ },
+ {
+  "tag": "b41",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw/41.jpg",
+  "gt": "bird",
+  "w": 1920,
+  "h": 2560
+ },
+ {
+  "tag": "b43",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw/43.jpg",
+  "gt": "bird",
+  "w": 1920,
+  "h": 1080
+ },
+ {
+  "tag": "b45",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw/45.jpg",
+  "gt": "bird",
+  "w": 1758,
+  "h": 1493
+ },
+ {
+  "tag": "b47",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw/47.jpg",
+  "gt": "bird",
+  "w": 1920,
+  "h": 1563
+ },
+ {
+  "tag": "b49",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw/49.jpg",
+  "gt": "bird",
+  "w": 1920,
+  "h": 1478
+ },
+ {
+  "tag": "b53",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw/53.jpg",
+  "gt": "bird",
+  "w": 1920,
+  "h": 1440
+ },
+ {
+  "tag": "b55",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw/55.jpg",
+  "gt": "bird",
+  "w": 1920,
+  "h": 2880
+ },
+ {
+  "tag": "b58",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw/58.jpg",
+  "gt": "bird",
+  "w": 1920,
+  "h": 1281
+ },
+ {
+  "tag": "b61",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw/61.jpg",
+  "gt": "bird",
+  "w": 1442,
+  "h": 2159
+ },
+ {
+  "tag": "b71",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw/71.jpg",
+  "gt": "bird",
+  "w": 1802,
+  "h": 1306
+ },
+ {
+  "tag": "b75",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw/75.jpg",
+  "gt": "bird",
+  "w": 1920,
+  "h": 1281
+ },
+ {
+  "tag": "cat00",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/cat00.jpg",
+  "gt": "cat",
+  "w": 828,
+  "h": 829
+ },
+ {
+  "tag": "cat01",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/cat01.jpg",
+  "gt": "cat",
+  "w": 1920,
+  "h": 1275
+ },
+ {
+  "tag": "cat02",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/cat02.jpg",
+  "gt": "cat",
+  "w": 1024,
+  "h": 768
+ },
+ {
+  "tag": "cat03",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/cat03.jpg",
+  "gt": "cat",
+  "w": 1920,
+  "h": 1280
+ },
+ {
+  "tag": "cat04",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/cat04.jpg",
+  "gt": "cat",
+  "w": 1920,
+  "h": 1244
+ },
+ {
+  "tag": "cat05",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/cat05.jpg",
+  "gt": "cat",
+  "w": 1920,
+  "h": 2560
+ },
+ {
+  "tag": "cat06",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/cat06.jpg",
+  "gt": "cat",
+  "w": 1803,
+  "h": 1200
+ },
+ {
+  "tag": "cat07",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/cat07.jpg",
+  "gt": "cat",
+  "w": 1920,
+  "h": 1440
+ },
+ {
+  "tag": "cat08",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/cat08.jpg",
+  "gt": "cat",
+  "w": 1920,
+  "h": 1440
+ },
+ {
+  "tag": "cat09",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/cat09.jpg",
+  "gt": "cat",
+  "w": 1920,
+  "h": 1440
+ },
+ {
+  "tag": "cat10",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/cat10.jpg",
+  "gt": "cat",
+  "w": 1920,
+  "h": 1440
+ },
+ {
+  "tag": "cat11",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/cat11.jpg",
+  "gt": "cat",
+  "w": 1920,
+  "h": 1280
+ },
+ {
+  "tag": "cat12",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/cat12.jpg",
+  "gt": "cat",
+  "w": 1920,
+  "h": 1280
+ },
+ {
+  "tag": "cat13",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/cat13.jpg",
+  "gt": "cat",
+  "w": 719,
+  "h": 720
+ },
+ {
+  "tag": "cat14",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/cat14.jpg",
+  "gt": "cat",
+  "w": 1920,
+  "h": 1280
+ },
+ {
+  "tag": "cat15",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/cat15.jpg",
+  "gt": "cat",
+  "w": 1920,
+  "h": 1440
+ },
+ {
+  "tag": "cat16",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/cat16.jpg",
+  "gt": "cat",
+  "w": 1920,
+  "h": 1440
+ },
+ {
+  "tag": "cat17",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/cat17.jpg",
+  "gt": "cat",
+  "w": 1920,
+  "h": 1277
+ },
+ {
+  "tag": "cat18",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/cat18.jpg",
+  "gt": "cat",
+  "w": 1600,
+  "h": 1200
+ },
+ {
+  "tag": "cat19",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/cat19.jpg",
+  "gt": "cat",
+  "w": 1920,
+  "h": 1280
+ },
+ {
+  "tag": "cat20",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/cat20.jpg",
+  "gt": "cat",
+  "w": 1920,
+  "h": 1440
+ },
+ {
+  "tag": "cat21",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/cat21.jpg",
+  "gt": "cat",
+  "w": 1920,
+  "h": 1440
+ },
+ {
+  "tag": "cat22",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/cat22.jpg",
+  "gt": "cat",
+  "w": 1920,
+  "h": 1440
+ },
+ {
+  "tag": "cat23",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/cat23.jpg",
+  "gt": "cat",
+  "w": 1920,
+  "h": 1440
+ },
+ {
+  "tag": "cat24",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/cat24.jpg",
+  "gt": "cat",
+  "w": 1920,
+  "h": 2560
+ },
+ {
+  "tag": "cat25",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/cat25.jpg",
+  "gt": "cat",
+  "w": 1920,
+  "h": 1440
+ },
+ {
+  "tag": "far00",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/far00.jpg",
+  "gt": "squirrel",
+  "w": 1023,
+  "h": 498
+ },
+ {
+  "tag": "far01",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/far01.jpg",
+  "gt": "squirrel",
+  "w": 1920,
+  "h": 1281
+ },
+ {
+  "tag": "oth00",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/oth00.jpg",
+  "gt": "other_animal",
+  "w": 1920,
+  "h": 1280
+ },
+ {
+  "tag": "oth01",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/oth01.jpg",
+  "gt": "other_animal",
+  "w": 1920,
+  "h": 1277
+ },
+ {
+  "tag": "oth02",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/oth02.jpg",
+  "gt": "other_animal",
+  "w": 1920,
+  "h": 1440
+ },
+ {
+  "tag": "oth03",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/oth03.jpg",
+  "gt": "other_animal",
+  "w": 1920,
+  "h": 2560
+ },
+ {
+  "tag": "oth04",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/oth04.jpg",
+  "gt": "other_animal",
+  "w": 1920,
+  "h": 1440
+ },
+ {
+  "tag": "oth05",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/oth05.jpg",
+  "gt": "other_animal",
+  "w": 1406,
+  "h": 2560
+ },
+ {
+  "tag": "oth06",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/oth06.jpg",
+  "gt": "other_animal",
+  "w": 1920,
+  "h": 1219
+ },
+ {
+  "tag": "oth07",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/oth07.jpg",
+  "gt": "other_animal",
+  "w": 1536,
+  "h": 2048
+ },
+ {
+  "tag": "oth08",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/oth08.jpg",
+  "gt": "other_animal",
+  "w": 1920,
+  "h": 2560
+ },
+ {
+  "tag": "oth09",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/oth09.jpg",
+  "gt": "other_animal",
+  "w": 1920,
+  "h": 1440
+ },
+ {
+  "tag": "oth10",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/oth10.jpg",
+  "gt": "other_animal",
+  "w": 1920,
+  "h": 1419
+ },
+ {
+  "tag": "oth11",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/oth11.jpg",
+  "gt": "other_animal",
+  "w": 1920,
+  "h": 1440
+ },
+ {
+  "tag": "oth12",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/oth12.jpg",
+  "gt": "other_animal",
+  "w": 1920,
+  "h": 1440
+ },
+ {
+  "tag": "oth13",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/oth13.jpg",
+  "gt": "other_animal",
+  "w": 1920,
+  "h": 1217
+ },
+ {
+  "tag": "oth14",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/oth14.jpg",
+  "gt": "other_animal",
+  "w": 1920,
+  "h": 1280
+ },
+ {
+  "tag": "oth15",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/oth15.jpg",
+  "gt": "other_animal",
+  "w": 1920,
+  "h": 1280
+ },
+ {
+  "tag": "oth16",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/oth16.jpg",
+  "gt": "other_animal",
+  "w": 1920,
+  "h": 1280
+ },
+ {
+  "tag": "oth17",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/oth17.jpg",
+  "gt": "other_animal",
+  "w": 1920,
+  "h": 1275
+ },
+ {
+  "tag": "oth18",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/oth18.jpg",
+  "gt": "other_animal",
+  "w": 1920,
+  "h": 1440
+ },
+ {
+  "tag": "oth19",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/oth19.jpg",
+  "gt": "other_animal",
+  "w": 1500,
+  "h": 1125
+ },
+ {
+  "tag": "oth20",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/oth20.jpg",
+  "gt": "other_animal",
+  "w": 1920,
+  "h": 1314
+ },
+ {
+  "tag": "oth21",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/oth21.jpg",
+  "gt": "other_animal",
+  "w": 1920,
+  "h": 1167
+ },
+ {
+  "tag": "oth22",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/oth22.jpg",
+  "gt": "other_animal",
+  "w": 1920,
+  "h": 1250
+ },
+ {
+  "tag": "oth23",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/oth23.jpg",
+  "gt": "other_animal",
+  "w": 1620,
+  "h": 1080
+ },
+ {
+  "tag": "oth24",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/oth24.jpg",
+  "gt": "other_animal",
+  "w": 1920,
+  "h": 2560
+ },
+ {
+  "tag": "oth25",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/oth25.jpg",
+  "gt": "other_animal",
+  "w": 1920,
+  "h": 1080
+ },
+ {
+  "tag": "per00",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/per00.jpg",
+  "gt": "person",
+  "w": 1920,
+  "h": 1277
+ },
+ {
+  "tag": "per01",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/per01.jpg",
+  "gt": "person",
+  "w": 1920,
+  "h": 1277
+ },
+ {
+  "tag": "per02",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/per02.jpg",
+  "gt": "person",
+  "w": 1920,
+  "h": 1277
+ },
+ {
+  "tag": "per03",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/per03.jpg",
+  "gt": "person",
+  "w": 1920,
+  "h": 1277
+ },
+ {
+  "tag": "per04",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/per04.jpg",
+  "gt": "person",
+  "w": 1920,
+  "h": 1442
+ },
+ {
+  "tag": "per05",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/per05.jpg",
+  "gt": "person",
+  "w": 1920,
+  "h": 1374
+ },
+ {
+  "tag": "per06",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/per06.jpg",
+  "gt": "person",
+  "w": 1147,
+  "h": 1600
+ },
+ {
+  "tag": "per07",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/per07.jpg",
+  "gt": "person",
+  "w": 1920,
+  "h": 1440
+ },
+ {
+  "tag": "per08",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/per08.jpg",
+  "gt": "person",
+  "w": 1920,
+  "h": 1478
+ },
+ {
+  "tag": "squ00",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/squ00.jpg",
+  "gt": "squirrel",
+  "w": 1920,
+  "h": 1080
+ },
+ {
+  "tag": "squ01",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/squ01.jpg",
+  "gt": "squirrel",
+  "w": 1920,
+  "h": 1080
+ },
+ {
+  "tag": "squ02",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/squ02.jpg",
+  "gt": "squirrel",
+  "w": 1920,
+  "h": 1440
+ },
+ {
+  "tag": "squ03",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/squ03.jpg",
+  "gt": "squirrel",
+  "w": 1920,
+  "h": 1440
+ },
+ {
+  "tag": "squ04",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/squ04.jpg",
+  "gt": "squirrel",
+  "w": 1920,
+  "h": 1440
+ },
+ {
+  "tag": "squ05",
+  "src": "/private/tmp/claude-501/-Users-bamboo-Githubs-edge-cam-train/41e34112-fe0a-4629-9138-d6d1c01ec715/scratchpad/feeder_pool/raw2/squ05.jpg",
+  "gt": "squirrel",
+  "w": 1920,
+  "h": 1600
+ }
+]

@@ -1,0 +1,16 @@
+# 大/可再生产物不进 git（./awnn.sh build configs/config_ppyoloe_sppf.yml 可重建）
+# onnx 源副本 + 裸子图 + SPPF/416 改写版（各 29MB；由 mobile_handoff_ppyoloe 的 onnx 用
+# onnx.utils.extract_model 抽子图 + SPP→SPPF 手术重建，脚本见 README/实录）
+onnx/
+# awnntools build 产出：_ipu.param/.bin、_opt.*、中间 .bin（数百 MB）
+build_out/
+# 上板测试用的临时目录（模型副本 + 板端 dump，可从 build_out 重建）
+board_test/
+board_test_opt/
+board_test_sppf/
+# 构建日志
+*.log
+# 板端临时目录（模型副本 + dump，可从 build_out 重建）
+board_test_final/
+board_batch/
+batch_out/

@@ -1,0 +1,17 @@
+input_paths=ref/demo_bird_input_rgb_u8.bin
+output_paths=ref/o0.bin,ref/o1.bin,ref/o2.bin,ref/o3.bin,ref/o4.bin,ref/o5.bin
+input_blob_names=image
+output_blob_names=conv2d_81.tmp_0,conv2d_84.tmp_0,conv2d_74.tmp_0,conv2d_77.tmp_0,conv2d_67.tmp_0,conv2d_70.tmp_0
+inputs_w=640
+inputs_h=640
+inputs_c=3
+input_data_type=DATA_TYPE_INT8
+output_data_type=DATA_TYPE_FP32,DATA_TYPE_FP32,DATA_TYPE_FP32,DATA_TYPE_FP32,DATA_TYPE_FP32,DATA_TYPE_FP32
+model_path=model/ppyoloe_s_640_ipu.bin
+param_path=model/ppyoloe_s_640_ipu.param
+use_static_mode=0
+use_awnn_profiler=1
+is_compare_result=0
+dump_output_result=1
+net_name=ppyoloe_s_v861
+loop_count=1

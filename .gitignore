@@ -58,3 +58,7 @@ results/detect/mobile_handoff_ppyoloe/round3/ckpt/
 # handoff 交接包：onnx 随包进 git（自足包，对齐 round2；覆盖上面 *.onnx 全局忽略）。tflite 无全局规则、本就入库；ckpt 续训权重上面已忽略。
 !results/detect/mobile_handoff_nanodet/**/*.onnx
 !results/detect/mobile_handoff_ppyoloe/**/*.onnx
+
+# V861 vendor SDK + 原始工作日志（含内网/口令细节，1.6GB）——不进 git
+# 清洁版 know-how 见 docs/detect/05-V861-真板部署.md，工具见 deploy/v861_awnn_batch/
+vs861/

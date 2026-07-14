@@ -1,0 +1,56 @@
+# !!!Config file disallow TABs!!!
+# ============================================================================
+# PP-YOLOE-s 640 优化版 → V861 _ipu
+#   优化 1: SPP → SPPF (9x9→2串5x5, 13x13→3串5x5; 逐位等价, 实测误差 0.0)
+#           → 原本回退 CPU 的 2 个大核 MaxPool 全部上 NPU, 省 ~44ms
+#   优化 2: cls 头保 FP32 (混合精度) → 救回 INT8 掉分导致的临界漏检
+#   优化 3: 校准集 13 → 21 张
+#   ✗ 不降输入尺寸: 实测 416 会严重掉精度(整类漏检/误检, 模型是640训的)
+# ============================================================================
+general_conf:
+    model_type: onnx
+    model_path: /data/onnx
+    model_names:
+    -   ppyoloe_s_640_sppf_logits.onnx
+    output: /data/build_out/ppyoloe_s_opt
+build_conf:
+    build_mode: auto
+    export_type: standard
+    debug_enable: true
+    enable_onnxsim: true
+    use_npu_preprocess: true
+    save_temporary_model: false
+    cutstartname:
+    cutendname:
+    quantize_conf:
+        quantized_dtype: symmetric_i8
+        calibration_algorithm: percentile
+        quantized_method: per-channel
+    calibration_engine: default
+    dataset_conf:
+    -   type: DATASET_TYPE_TXT
+        path: /data/calib/calib_list.txt
+        image_types: []
+        preprocess_conf:
+        -   name: image
+            color_space: RGB
+            mean:
+            -   0.0
+            -   0.0
+            -   0.0
+            norm:
+            -   0.003921
+            -   0.003921
+            -   0.003921
+            tensor_layout: NCHW
+            shape:
+            -   1
+            -   3
+            -   640
+            -   640
+    opt_level: 1
+    hybrid_quantization_conf:        # cls 头卷积保 fp32(不裁峰值) —— nanodet 那轮验证有效
+        white_list:
+        -   Conv.81
+        -   Conv.74
+        -   Conv.67
