@@ -1,0 +1,1467 @@
+{
+ "rows": [
+  {
+   "tag": "b17",
+   "gt": "bird",
+   "n_fp32": 0,
+   "n_board": 1,
+   "matched": 0,
+   "iou": null,
+   "dconf": null
+  },
+  {
+   "tag": "b19",
+   "gt": "bird",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9909,
+   "dconf": 0.0104
+  },
+  {
+   "tag": "b21",
+   "gt": "bird",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9925,
+   "dconf": 0.0019
+  },
+  {
+   "tag": "b23",
+   "gt": "bird",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9579,
+   "dconf": 0.0271
+  },
+  {
+   "tag": "b25",
+   "gt": "bird",
+   "n_fp32": 1,
+   "n_board": 2,
+   "matched": 1,
+   "iou": 0.9581,
+   "dconf": 0.1029
+  },
+  {
+   "tag": "b26",
+   "gt": "bird",
+   "n_fp32": 2,
+   "n_board": 2,
+   "matched": 2,
+   "iou": 0.9314,
+   "dconf": 0.0546
+  },
+  {
+   "tag": "b28",
+   "gt": "bird",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.968,
+   "dconf": 0.0003
+  },
+  {
+   "tag": "b30",
+   "gt": "bird",
+   "n_fp32": 4,
+   "n_board": 3,
+   "matched": 3,
+   "iou": 0.99,
+   "dconf": 0.0388
+  },
+  {
+   "tag": "b33",
+   "gt": "bird",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9939,
+   "dconf": 0.0032
+  },
+  {
+   "tag": "b35",
+   "gt": "bird",
+   "n_fp32": 2,
+   "n_board": 2,
+   "matched": 2,
+   "iou": 0.9778,
+   "dconf": 0.0246
+  },
+  {
+   "tag": "b37",
+   "gt": "bird",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9742,
+   "dconf": 0.0288
+  },
+  {
+   "tag": "b38",
+   "gt": "bird",
+   "n_fp32": 0,
+   "n_board": 0,
+   "matched": 0,
+   "iou": null,
+   "dconf": null
+  },
+  {
+   "tag": "b39",
+   "gt": "bird",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9943,
+   "dconf": 0.0057
+  },
+  {
+   "tag": "b41",
+   "gt": "bird",
+   "n_fp32": 2,
+   "n_board": 2,
+   "matched": 2,
+   "iou": 0.9535,
+   "dconf": 0.1233
+  },
+  {
+   "tag": "b43",
+   "gt": "bird",
+   "n_fp32": 2,
+   "n_board": 2,
+   "matched": 2,
+   "iou": 0.9855,
+   "dconf": 0.0055
+  },
+  {
+   "tag": "b45",
+   "gt": "bird",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9871,
+   "dconf": 0.0125
+  },
+  {
+   "tag": "b47",
+   "gt": "bird",
+   "n_fp32": 2,
+   "n_board": 2,
+   "matched": 2,
+   "iou": 0.9673,
+   "dconf": 0.0337
+  },
+  {
+   "tag": "b49",
+   "gt": "bird",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.99,
+   "dconf": 0.0034
+  },
+  {
+   "tag": "b53",
+   "gt": "bird",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9715,
+   "dconf": 0.0049
+  },
+  {
+   "tag": "b55",
+   "gt": "bird",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9874,
+   "dconf": 0.0006
+  },
+  {
+   "tag": "b58",
+   "gt": "bird",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9846,
+   "dconf": 0.0053
+  },
+  {
+   "tag": "b61",
+   "gt": "bird",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9882,
+   "dconf": 0.0026
+  },
+  {
+   "tag": "b71",
+   "gt": "bird",
+   "n_fp32": 2,
+   "n_board": 2,
+   "matched": 2,
+   "iou": 0.9928,
+   "dconf": 0.007
+  },
+  {
+   "tag": "b75",
+   "gt": "bird",
+   "n_fp32": 2,
+   "n_board": 2,
+   "matched": 2,
+   "iou": 0.966,
+   "dconf": 0.0492
+  },
+  {
+   "tag": "cat00",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 2,
+   "matched": 1,
+   "iou": 0.9821,
+   "dconf": 0.3878
+  },
+  {
+   "tag": "cat01",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9909,
+   "dconf": 0.0232
+  },
+  {
+   "tag": "cat02",
+   "gt": "cat",
+   "n_fp32": 0,
+   "n_board": 1,
+   "matched": 0,
+   "iou": null,
+   "dconf": null
+  },
+  {
+   "tag": "cat03",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.7416,
+   "dconf": 0.0287
+  },
+  {
+   "tag": "cat04",
+   "gt": "cat",
+   "n_fp32": 2,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9795,
+   "dconf": 0.0527
+  },
+  {
+   "tag": "cat05",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9436,
+   "dconf": 0.0316
+  },
+  {
+   "tag": "cat06",
+   "gt": "cat",
+   "n_fp32": 2,
+   "n_board": 2,
+   "matched": 2,
+   "iou": 0.9965,
+   "dconf": 0.0542
+  },
+  {
+   "tag": "cat07",
+   "gt": "cat",
+   "n_fp32": 2,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9931,
+   "dconf": 0.0331
+  },
+  {
+   "tag": "cat08",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9921,
+   "dconf": 0.0164
+  },
+  {
+   "tag": "cat09",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9737,
+   "dconf": 0.0046
+  },
+  {
+   "tag": "cat10",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.994,
+   "dconf": 0.0024
+  },
+  {
+   "tag": "cat11",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9901,
+   "dconf": 0.0213
+  },
+  {
+   "tag": "cat12",
+   "gt": "cat",
+   "n_fp32": 0,
+   "n_board": 0,
+   "matched": 0,
+   "iou": null,
+   "dconf": null
+  },
+  {
+   "tag": "cat13",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9862,
+   "dconf": 0.0877
+  },
+  {
+   "tag": "cat14",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9458,
+   "dconf": 0.0412
+  },
+  {
+   "tag": "cat15",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9313,
+   "dconf": 0.076
+  },
+  {
+   "tag": "cat16",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9826,
+   "dconf": 0.0
+  },
+  {
+   "tag": "cat17",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9845,
+   "dconf": 0.0067
+  },
+  {
+   "tag": "cat18",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9654,
+   "dconf": 0.0321
+  },
+  {
+   "tag": "cat19",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.961,
+   "dconf": 0.0265
+  },
+  {
+   "tag": "cat20",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9962,
+   "dconf": 0.0102
+  },
+  {
+   "tag": "cat21",
+   "gt": "cat",
+   "n_fp32": 2,
+   "n_board": 2,
+   "matched": 2,
+   "iou": 0.9854,
+   "dconf": 0.044
+  },
+  {
+   "tag": "cat22",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9896,
+   "dconf": 0.009
+  },
+  {
+   "tag": "cat23",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9843,
+   "dconf": 0.0034
+  },
+  {
+   "tag": "cat24",
+   "gt": "cat",
+   "n_fp32": 0,
+   "n_board": 0,
+   "matched": 0,
+   "iou": null,
+   "dconf": null
+  },
+  {
+   "tag": "cat25",
+   "gt": "cat",
+   "n_fp32": 3,
+   "n_board": 3,
+   "matched": 2,
+   "iou": 0.9593,
+   "dconf": 0.1061
+  },
+  {
+   "tag": "far00",
+   "gt": "squirrel",
+   "n_fp32": 0,
+   "n_board": 1,
+   "matched": 0,
+   "iou": null,
+   "dconf": null
+  },
+  {
+   "tag": "far01",
+   "gt": "squirrel",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9881,
+   "dconf": 0.0714
+  },
+  {
+   "tag": "oth00",
+   "gt": "other_animal",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9927,
+   "dconf": 0.0078
+  },
+  {
+   "tag": "oth01",
+   "gt": "other_animal",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 0,
+   "iou": null,
+   "dconf": null
+  },
+  {
+   "tag": "oth02",
+   "gt": "other_animal",
+   "n_fp32": 2,
+   "n_board": 2,
+   "matched": 2,
+   "iou": 0.9517,
+   "dconf": 0.0369
+  },
+  {
+   "tag": "oth03",
+   "gt": "other_animal",
+   "n_fp32": 2,
+   "n_board": 3,
+   "matched": 2,
+   "iou": 0.906,
+   "dconf": 0.1033
+  },
+  {
+   "tag": "oth04",
+   "gt": "other_animal",
+   "n_fp32": 2,
+   "n_board": 2,
+   "matched": 2,
+   "iou": 0.978,
+   "dconf": 0.0754
+  },
+  {
+   "tag": "oth05",
+   "gt": "other_animal",
+   "n_fp32": 1,
+   "n_board": 2,
+   "matched": 1,
+   "iou": 0.8777,
+   "dconf": 0.0082
+  },
+  {
+   "tag": "oth06",
+   "gt": "other_animal",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9895,
+   "dconf": 0.017
+  },
+  {
+   "tag": "oth07",
+   "gt": "other_animal",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9499,
+   "dconf": 0.0154
+  },
+  {
+   "tag": "oth08",
+   "gt": "other_animal",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.937,
+   "dconf": 0.0462
+  },
+  {
+   "tag": "oth09",
+   "gt": "other_animal",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.963,
+   "dconf": 0.0478
+  },
+  {
+   "tag": "oth10",
+   "gt": "other_animal",
+   "n_fp32": 2,
+   "n_board": 2,
+   "matched": 2,
+   "iou": 0.9737,
+   "dconf": 0.0336
+  },
+  {
+   "tag": "oth11",
+   "gt": "other_animal",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9956,
+   "dconf": 0.0086
+  },
+  {
+   "tag": "oth12",
+   "gt": "other_animal",
+   "n_fp32": 2,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9883,
+   "dconf": 0.0461
+  },
+  {
+   "tag": "oth13",
+   "gt": "other_animal",
+   "n_fp32": 2,
+   "n_board": 2,
+   "matched": 2,
+   "iou": 0.9799,
+   "dconf": 0.0638
+  },
+  {
+   "tag": "oth14",
+   "gt": "other_animal",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9888,
+   "dconf": 0.0551
+  },
+  {
+   "tag": "oth15",
+   "gt": "other_animal",
+   "n_fp32": 2,
+   "n_board": 2,
+   "matched": 2,
+   "iou": 0.9881,
+   "dconf": 0.0784
+  },
+  {
+   "tag": "oth16",
+   "gt": "other_animal",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9921,
+   "dconf": 0.1113
+  },
+  {
+   "tag": "oth17",
+   "gt": "other_animal",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9716,
+   "dconf": 0.0589
+  },
+  {
+   "tag": "oth18",
+   "gt": "other_animal",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9912,
+   "dconf": 0.0209
+  },
+  {
+   "tag": "oth19",
+   "gt": "other_animal",
+   "n_fp32": 1,
+   "n_board": 0,
+   "matched": 0,
+   "iou": null,
+   "dconf": null
+  },
+  {
+   "tag": "oth20",
+   "gt": "other_animal",
+   "n_fp32": 2,
+   "n_board": 2,
+   "matched": 2,
+   "iou": 0.9917,
+   "dconf": 0.1008
+  },
+  {
+   "tag": "oth21",
+   "gt": "other_animal",
+   "n_fp32": 3,
+   "n_board": 2,
+   "matched": 2,
+   "iou": 0.9797,
+   "dconf": 0.0766
+  },
+  {
+   "tag": "oth22",
+   "gt": "other_animal",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9865,
+   "dconf": 0.02
+  },
+  {
+   "tag": "oth23",
+   "gt": "other_animal",
+   "n_fp32": 3,
+   "n_board": 3,
+   "matched": 3,
+   "iou": 0.9735,
+   "dconf": 0.0377
+  },
+  {
+   "tag": "oth24",
+   "gt": "other_animal",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9993,
+   "dconf": 0.0039
+  },
+  {
+   "tag": "oth25",
+   "gt": "other_animal",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9646,
+   "dconf": 0.0487
+  },
+  {
+   "tag": "per00",
+   "gt": "person",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9969,
+   "dconf": 0.0125
+  },
+  {
+   "tag": "per01",
+   "gt": "person",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9769,
+   "dconf": 0.0039
+  },
+  {
+   "tag": "per02",
+   "gt": "person",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9843,
+   "dconf": 0.0184
+  },
+  {
+   "tag": "per03",
+   "gt": "person",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9971,
+   "dconf": 0.0143
+  },
+  {
+   "tag": "per04",
+   "gt": "person",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9504,
+   "dconf": 0.0694
+  },
+  {
+   "tag": "per05",
+   "gt": "person",
+   "n_fp32": 0,
+   "n_board": 0,
+   "matched": 0,
+   "iou": null,
+   "dconf": null
+  },
+  {
+   "tag": "per06",
+   "gt": "person",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.8398,
+   "dconf": 0.0411
+  },
+  {
+   "tag": "per07",
+   "gt": "person",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.8366,
+   "dconf": 0.0718
+  },
+  {
+   "tag": "per08",
+   "gt": "person",
+   "n_fp32": 0,
+   "n_board": 0,
+   "matched": 0,
+   "iou": null,
+   "dconf": null
+  },
+  {
+   "tag": "squ00",
+   "gt": "squirrel",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9917,
+   "dconf": 0.0001
+  },
+  {
+   "tag": "squ01",
+   "gt": "squirrel",
+   "n_fp32": 2,
+   "n_board": 2,
+   "matched": 2,
+   "iou": 0.9477,
+   "dconf": 0.0193
+  },
+  {
+   "tag": "squ02",
+   "gt": "squirrel",
+   "n_fp32": 2,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9753,
+   "dconf": 0.0026
+  },
+  {
+   "tag": "squ03",
+   "gt": "squirrel",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.979,
+   "dconf": 0.0027
+  },
+  {
+   "tag": "squ04",
+   "gt": "squirrel",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9886,
+   "dconf": 0.0085
+  },
+  {
+   "tag": "squ05",
+   "gt": "squirrel",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9712,
+   "dconf": 0.0288
+  }
+ ],
+ "cos": {
+  "conv2d_81.tmp_0": 0.9995774533788421,
+  "conv2d_84.tmp_0": 0.9885403878343534,
+  "conv2d_74.tmp_0": 0.9995298272287824,
+  "conv2d_77.tmp_0": 0.9914008272520825,
+  "conv2d_67.tmp_0": 0.9993243505945112,
+  "conv2d_70.tmp_0": 0.9947286060487843
+ },
+ "confusion": [
+  [
+   21,
+   0,
+   0,
+   1,
+   1,
+   1
+  ],
+  [
+   1,
+   7,
+   0,
+   0,
+   0,
+   0
+  ],
+  [
+   4,
+   2,
+   3,
+   1,
+   14,
+   2
+  ],
+  [
+   0,
+   0,
+   0,
+   7,
+   0,
+   2
+  ],
+  [
+   8,
+   1,
+   0,
+   1,
+   15,
+   1
+  ]
+ ],
+ "names": [
+  "bird",
+  "squirrel",
+  "cat",
+  "person",
+  "other_animal"
+ ],
+ "summary": {
+  "n": 93,
+  "tot_fp32": 115,
+  "tot_board": 115,
+  "tot_match": 106,
+  "mean_iou": 0.9697036144578313,
+  "mean_dconf": 0.03773975903614458,
+  "exact": 77
+ },
+ "summary_scoped": {
+  "n": 61,
+  "tot_fp32": 78,
+  "tot_board": 80,
+  "tot_match": 74,
+  "mean_iou": 0.9727793103448277,
+  "mean_dconf": 0.03415689655172414,
+  "exact": 51
+ },
+ "rows_scoped": [
+  {
+   "tag": "b17",
+   "gt": "bird",
+   "n_fp32": 0,
+   "n_board": 1,
+   "matched": 0,
+   "iou": null,
+   "dconf": null
+  },
+  {
+   "tag": "b19",
+   "gt": "bird",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9909,
+   "dconf": 0.0104
+  },
+  {
+   "tag": "b21",
+   "gt": "bird",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9925,
+   "dconf": 0.0019
+  },
+  {
+   "tag": "b23",
+   "gt": "bird",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9579,
+   "dconf": 0.0271
+  },
+  {
+   "tag": "b25",
+   "gt": "bird",
+   "n_fp32": 1,
+   "n_board": 2,
+   "matched": 1,
+   "iou": 0.9581,
+   "dconf": 0.1029
+  },
+  {
+   "tag": "b26",
+   "gt": "bird",
+   "n_fp32": 2,
+   "n_board": 2,
+   "matched": 2,
+   "iou": 0.9314,
+   "dconf": 0.0546
+  },
+  {
+   "tag": "b28",
+   "gt": "bird",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.968,
+   "dconf": 0.0003
+  },
+  {
+   "tag": "b30",
+   "gt": "bird",
+   "n_fp32": 4,
+   "n_board": 3,
+   "matched": 3,
+   "iou": 0.99,
+   "dconf": 0.0388
+  },
+  {
+   "tag": "b33",
+   "gt": "bird",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9939,
+   "dconf": 0.0032
+  },
+  {
+   "tag": "b35",
+   "gt": "bird",
+   "n_fp32": 2,
+   "n_board": 2,
+   "matched": 2,
+   "iou": 0.9778,
+   "dconf": 0.0246
+  },
+  {
+   "tag": "b37",
+   "gt": "bird",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9742,
+   "dconf": 0.0288
+  },
+  {
+   "tag": "b39",
+   "gt": "bird",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9943,
+   "dconf": 0.0057
+  },
+  {
+   "tag": "b41",
+   "gt": "bird",
+   "n_fp32": 2,
+   "n_board": 2,
+   "matched": 2,
+   "iou": 0.9535,
+   "dconf": 0.1233
+  },
+  {
+   "tag": "b43",
+   "gt": "bird",
+   "n_fp32": 2,
+   "n_board": 2,
+   "matched": 2,
+   "iou": 0.9855,
+   "dconf": 0.0055
+  },
+  {
+   "tag": "b45",
+   "gt": "bird",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9871,
+   "dconf": 0.0125
+  },
+  {
+   "tag": "b47",
+   "gt": "bird",
+   "n_fp32": 2,
+   "n_board": 2,
+   "matched": 2,
+   "iou": 0.9673,
+   "dconf": 0.0337
+  },
+  {
+   "tag": "b49",
+   "gt": "bird",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.99,
+   "dconf": 0.0034
+  },
+  {
+   "tag": "b53",
+   "gt": "bird",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9715,
+   "dconf": 0.0049
+  },
+  {
+   "tag": "b55",
+   "gt": "bird",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9874,
+   "dconf": 0.0006
+  },
+  {
+   "tag": "b58",
+   "gt": "bird",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9846,
+   "dconf": 0.0053
+  },
+  {
+   "tag": "b61",
+   "gt": "bird",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9882,
+   "dconf": 0.0026
+  },
+  {
+   "tag": "b71",
+   "gt": "bird",
+   "n_fp32": 2,
+   "n_board": 2,
+   "matched": 2,
+   "iou": 0.9928,
+   "dconf": 0.007
+  },
+  {
+   "tag": "cat00",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 2,
+   "matched": 1,
+   "iou": 0.9821,
+   "dconf": 0.3878
+  },
+  {
+   "tag": "cat01",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9909,
+   "dconf": 0.0232
+  },
+  {
+   "tag": "cat02",
+   "gt": "cat",
+   "n_fp32": 0,
+   "n_board": 1,
+   "matched": 0,
+   "iou": null,
+   "dconf": null
+  },
+  {
+   "tag": "cat03",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.7416,
+   "dconf": 0.0287
+  },
+  {
+   "tag": "cat05",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9436,
+   "dconf": 0.0316
+  },
+  {
+   "tag": "cat06",
+   "gt": "cat",
+   "n_fp32": 2,
+   "n_board": 2,
+   "matched": 2,
+   "iou": 0.9965,
+   "dconf": 0.0542
+  },
+  {
+   "tag": "cat07",
+   "gt": "cat",
+   "n_fp32": 2,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9931,
+   "dconf": 0.0331
+  },
+  {
+   "tag": "cat08",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9921,
+   "dconf": 0.0164
+  },
+  {
+   "tag": "cat09",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9737,
+   "dconf": 0.0046
+  },
+  {
+   "tag": "cat10",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.994,
+   "dconf": 0.0024
+  },
+  {
+   "tag": "cat11",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9901,
+   "dconf": 0.0213
+  },
+  {
+   "tag": "cat13",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9862,
+   "dconf": 0.0877
+  },
+  {
+   "tag": "cat14",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9458,
+   "dconf": 0.0412
+  },
+  {
+   "tag": "cat15",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9313,
+   "dconf": 0.076
+  },
+  {
+   "tag": "cat16",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9826,
+   "dconf": 0.0
+  },
+  {
+   "tag": "cat17",
+   "gt": "cat",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9845,
+   "dconf": 0.0067
+  },
+  {
+   "tag": "far00",
+   "gt": "squirrel",
+   "n_fp32": 0,
+   "n_board": 1,
+   "matched": 0,
+   "iou": null,
+   "dconf": null
+  },
+  {
+   "tag": "far01",
+   "gt": "squirrel",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9881,
+   "dconf": 0.0714
+  },
+  {
+   "tag": "oth00",
+   "gt": "other_animal",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9927,
+   "dconf": 0.0078
+  },
+  {
+   "tag": "oth02",
+   "gt": "other_animal",
+   "n_fp32": 2,
+   "n_board": 2,
+   "matched": 2,
+   "iou": 0.9517,
+   "dconf": 0.0369
+  },
+  {
+   "tag": "oth03",
+   "gt": "other_animal",
+   "n_fp32": 2,
+   "n_board": 3,
+   "matched": 2,
+   "iou": 0.906,
+   "dconf": 0.1033
+  },
+  {
+   "tag": "oth04",
+   "gt": "other_animal",
+   "n_fp32": 2,
+   "n_board": 2,
+   "matched": 2,
+   "iou": 0.978,
+   "dconf": 0.0754
+  },
+  {
+   "tag": "oth09",
+   "gt": "other_animal",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.963,
+   "dconf": 0.0478
+  },
+  {
+   "tag": "oth10",
+   "gt": "other_animal",
+   "n_fp32": 2,
+   "n_board": 2,
+   "matched": 2,
+   "iou": 0.9737,
+   "dconf": 0.0336
+  },
+  {
+   "tag": "oth11",
+   "gt": "other_animal",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9956,
+   "dconf": 0.0086
+  },
+  {
+   "tag": "oth12",
+   "gt": "other_animal",
+   "n_fp32": 2,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9883,
+   "dconf": 0.0461
+  },
+  {
+   "tag": "oth22",
+   "gt": "other_animal",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9865,
+   "dconf": 0.02
+  },
+  {
+   "tag": "oth23",
+   "gt": "other_animal",
+   "n_fp32": 3,
+   "n_board": 3,
+   "matched": 3,
+   "iou": 0.9735,
+   "dconf": 0.0377
+  },
+  {
+   "tag": "per00",
+   "gt": "person",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9969,
+   "dconf": 0.0125
+  },
+  {
+   "tag": "per01",
+   "gt": "person",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9769,
+   "dconf": 0.0039
+  },
+  {
+   "tag": "per02",
+   "gt": "person",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9843,
+   "dconf": 0.0184
+  },
+  {
+   "tag": "per03",
+   "gt": "person",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9971,
+   "dconf": 0.0143
+  },
+  {
+   "tag": "per04",
+   "gt": "person",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9504,
+   "dconf": 0.0694
+  },
+  {
+   "tag": "squ00",
+   "gt": "squirrel",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9917,
+   "dconf": 0.0001
+  },
+  {
+   "tag": "squ01",
+   "gt": "squirrel",
+   "n_fp32": 2,
+   "n_board": 2,
+   "matched": 2,
+   "iou": 0.9477,
+   "dconf": 0.0193
+  },
+  {
+   "tag": "squ02",
+   "gt": "squirrel",
+   "n_fp32": 2,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9753,
+   "dconf": 0.0026
+  },
+  {
+   "tag": "squ03",
+   "gt": "squirrel",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.979,
+   "dconf": 0.0027
+  },
+  {
+   "tag": "squ04",
+   "gt": "squirrel",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9886,
+   "dconf": 0.0085
+  },
+  {
+   "tag": "squ05",
+   "gt": "squirrel",
+   "n_fp32": 1,
+   "n_board": 1,
+   "matched": 1,
+   "iou": 0.9712,
+   "dconf": 0.0288
+  }
+ ]
+}
