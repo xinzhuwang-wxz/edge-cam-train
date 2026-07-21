@@ -179,9 +179,9 @@ static int cmp_det(const void* pa, const void* pb) {
     return d > 0 ? 1 : (d < 0 ? -1 : 0);
 }
 
-/* cls[3]/reg[3]: HWC INT8 输出(每 anchor 连续) + 各自量化 scale；返回 NMS 后检出数 */
-static int decode(signed char* const cls[3], signed char* const reg[3], const float cls_sc[3],
-                  const float reg_sc[3], int ow, int oh, float conf, float nms_thr, det_t* out) {
+/* cls[3]/reg[3]: CHW float 输出；返回 NMS 后检出数 */
+static int decode(float* const cls[3], float* const reg[3], int ow, int oh, float conf,
+                  float nms_thr, det_t* out) {
     const float thr_logit = logf(conf / (1.0f - conf));
     const float sx = (float)ow / INPUT_SIZE, sy = (float)oh / INPUT_SIZE;
     det_t cand[MAX_DETS * 4];
@@ -189,28 +189,23 @@ static int decode(signed char* const cls[3], signed char* const reg[3], const fl
 
     for (int s = 0; s < 3; s++) {
         const int g = GRIDS[s], hw = g * g, stride = STRIDES[s];
-        /* 阈值直接换算到 int8 域: 扫描零浮点运算 */
-        const float csc = cls_sc[s], rsc = reg_sc[s];
-        int thr_i8 = (int)ceilf(thr_logit / csc);
-        if (thr_i8 > 127) continue; /* 阈值高于该尺度可表示上限 → 无候选 */
         for (int i = 0; i < hw && nc < MAX_DETS * 4 - NUM_CLASS; i++) {
-            const signed char* cp = cls[s] + (size_t)i * NUM_CLASS; /* HWC: anchor 连续 */
+            /* 先用 logit 阈值筛（sigmoid 单调），过筛才算 DFL */
             int hit = 0;
             for (int c = 0; c < NUM_CLASS; c++)
-                if (cp[c] >= thr_i8) { hit = 1; break; }
+                if (cls[s][c * hw + i] >= thr_logit) { hit = 1; break; }
             if (!hit) continue;
 
-            /* DFL: 反量化后 softmax 期望（仅过筛 anchor） */
-            const signed char* rp = reg[s] + (size_t)i * 4 * (REG_MAX + 1);
+            /* DFL: 4 边 × 17 bin softmax 期望（每 anchor 只算一次） */
             float d[4];
             for (int k = 0; k < 4; k++) {
-                const signed char* r = rp + k * (REG_MAX + 1);
-                int mx = r[0];
+                const float* r = reg[s] + (k * (REG_MAX + 1)) * hw + i;
+                float mx = r[0];
                 for (int j = 1; j <= REG_MAX; j++)
-                    if (r[j] > mx) mx = r[j];
+                    if (r[j * hw] > mx) mx = r[j * hw];
                 float sum = 0, acc = 0;
                 for (int j = 0; j <= REG_MAX; j++) {
-                    float e = expf((r[j] - mx) * rsc);
+                    float e = expf(r[j * hw] - mx);
                     sum += e;
                     acc += j * e;
                 }
@@ -225,10 +220,11 @@ static int decode(signed char* const cls[3], signed char* const reg[3], const fl
             if (y2 > oh) y2 = oh;
 
             for (int c = 0; c < NUM_CLASS; c++) {
-                if (cp[c] < thr_i8) continue;
+                float lg = cls[s][c * hw + i];
+                if (lg < thr_logit) continue;
                 det_t* t = &cand[nc++];
                 t->x1 = x1; t->y1 = y1; t->x2 = x2; t->y2 = y2;
-                t->score = 1.0f / (1.0f + expf(-cp[c] * csc));
+                t->score = 1.0f / (1.0f + expf(-lg));
                 t->cls = c;
             }
         }
@@ -339,18 +335,17 @@ int main(int argc, char** argv) {
     in_t.size = INPUT_SIZE * INPUT_SIZE * 3;
     in_t.data = input_buf;
 
-    /* 输出取 HWC INT8 (NPU 原生排布): 传输 2.45MB→0.61MB, 免 layout 转换; 用 tensor_scale 反量化 */
     awnn_tensor_desc_t out_t[6];
-    signed char* out_buf[6];
+    float* out_buf[6];
     for (int j = 0; j < 6; j++) {
         memset(&out_t[j], 0, sizeof(out_t[j]));
-        out_t[j].layout = AWNN_C_LAYOUT_HWC;
-        out_t[j].data_type = AWNN_C_DATA_TYPE_INT8;
+        out_t[j].layout = AWNN_C_LAYOUT_CHW;
+        out_t[j].data_type = AWNN_C_DATA_TYPE_FP32;
         int c = (j % 2 == 0) ? NUM_CLASS : 4 * (REG_MAX + 1);
         int g = GRIDS[j / 2];
-        out_buf[j] = (signed char*)malloc((size_t)c * g * g); /* 常驻复用 */
+        out_buf[j] = (float*)malloc((size_t)c * g * g * sizeof(float)); /* 常驻复用 */
         out_t[j].data = out_buf[j];
-        out_t[j].size = (uint32_t)c * g * g;
+        out_t[j].size = (uint32_t)c * g * g * sizeof(float);
     }
 
     const char* in_names[1] = {"image"};
@@ -371,16 +366,6 @@ int main(int argc, char** argv) {
         return 1;
     }
     printf("precompile %.0fms (一次性)\n", now_ms() - t0);
-
-    float oscale[6];
-    for (int j = 0; j < 6; j++) {
-        if (awnn_instance_get_tensor_scale_by_name(inst, OUT_NAMES[j], &oscale[j]) != 0) {
-            fprintf(stderr, "get_tensor_scale(%s) 失败\n", OUT_NAMES[j]);
-            return 1;
-        }
-    }
-    printf("scales: %.5f %.5f %.5f %.5f %.5f %.5f\n", oscale[0], oscale[1], oscale[2], oscale[3],
-           oscale[4], oscale[5]);
 
     FILE* jf = fopen(jsonl_path, "w");
     if (!jf) { fprintf(stderr, "无法写 %s (out_dir 存在吗?)\n", jsonl_path); return 1; }
@@ -456,11 +441,9 @@ int main(int argc, char** argv) {
 
         /* ---- 解码 ---- */
         double t_dec = now_ms();
-        signed char* cls[3] = {out_buf[0], out_buf[2], out_buf[4]};
-        signed char* reg[3] = {out_buf[1], out_buf[3], out_buf[5]};
-        const float cls_sc[3] = {oscale[0], oscale[2], oscale[4]};
-        const float reg_sc[3] = {oscale[1], oscale[3], oscale[5]};
-        int n = decode(cls, reg, cls_sc, reg_sc, ow, oh, conf, nms_thr, dets);
+        float* cls[3] = {out_buf[0], out_buf[2], out_buf[4]};
+        float* reg[3] = {out_buf[1], out_buf[3], out_buf[5]};
+        int n = decode(cls, reg, ow, oh, conf, nms_thr, dets);
         double dec_ms = now_ms() - t_dec;
 
         /* ---- JSONL ---- */
