@@ -30,8 +30,8 @@ JSONL 每行：
 
 | 路径 | 每帧总耗时 | 分解 |
 |---|---|---|
-| **NV21 1280×720，--no-draw（生产形态）** | **94 ms ≈ 10.6 fps** | NPU 43 + NV21融合转换/缩放 ~45 + 解码/JSONL ~5 |
-| NV21 640×640，--no-draw | 104 ms | |
+| **NV21 1280×720，--no-draw（生产形态）** | **82.9 ms ≈ 12.1 fps** | NV21 定点转换 28.6 + NPU 43.0 + 解码 0.9 |
+| NV21 640×640，--no-draw | 80.2 ms | |
 | JPG + 标框图输出 | 210~360 ms | JPG 解码 + 全幅画框 + imwrite 是大头 |
 | precompile（一次性） | 163 ms | 进程启动时一次 |
 
@@ -62,6 +62,11 @@ adb push ppyoloe_run /tmp/ppf/ && adb push libaw_simpleocv.so /tmp/ppf/lib/
    NV21→RGB 在 CPU 做。本工具用**融合单遍**（NV21 直接采样出 640²RGB，Y 双线性 + UV 最近邻，
    BT.601 定点）：比"全幅转换再缩放"省 ~50ms/帧。全幅转换只在需要画框时做。
 6. 输出缓冲一次分配常驻复用；解码先用 logit 阈值筛 anchor，过筛才算 DFL（softmax 17 bin）。
+
+## 空帧语义（后端对接要点）
+
+**每帧必出一行 JSONL**，无检出时 `"dets":[]`（实测 neg_bg.jpg 验证）——不会丢帧、不会缺行。
+后端只需解析 JSONL：`label` / `score` / `box[x1,y1,x2,y2]`（原图像素坐标），**无需写任何后处理代码**。
 
 ## 与交接包的关系
 
