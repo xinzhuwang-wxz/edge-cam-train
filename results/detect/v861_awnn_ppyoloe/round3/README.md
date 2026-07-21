@@ -1,136 +1,133 @@
-# PP-YOLOE-s @ V861 NPU 板端交接包（round3）
+# PP-YOLOE-s @ V861 NPU 板端交接包（round3 · v2）
 
-> **✅ 已在真板跑通并对拍验证**（2026-07-14）。这是目前**唯一能在 V861 NPU 上跑的检测模型**——nanodet 因 ShuffleNet 的 channel-split 不满足 NPU 16 通道对齐，跑不了（见文末）。
-
----
-
-## 0. 前置：先烧一次固件基座（只烧一次，跟模型无关）
-
-**换模型不用重烧固件。** 新板子先让同事烧一次通用基座：
-👉 **`deploy/v861_firmware_base/`**（固件 `.img` + PhoenixSuit 烧录指引）
-
-烧完 `adb shell 'ls /dev/nna'` 存在 = NPU 就绪，之后所有模型都只是 `adb push` 文件。
+> **✅ 真板跑通 + 93 张等价性验证 + autoresearch 调优收口**（2026-07-14 上板，07-21 升级 v2）。
+> v2 变化：**静态模式（43ms/帧，快 5.3 倍）** + 自带**一体化推理工具 `tools/ppyoloe_run`**（push 即跑，
+> JPG/NV21 输入 → JSONL + 标框图，**后端零后处理**）。
+> 这是目前唯一能上 V861 NPU 的检测模型——NanoDet 因 ShuffleNet channel-split 不满足 16 通道对齐跑不了（§7）。
 
 ---
 
-## 1. 板端 I/O 契约（⚠ 与 nanodet 不同，别搞混）
+## 0. 包内容
 
-| | PP-YOLOE（本包）| nanodet（旧）|
-|---|---|---|
-| 输入 | **RGB** HWC uint8 **0-255**, **640×640** | BGR, 416×416 |
-| 归一化 | `/255` **已折进 NPU**（ImageProcess 层），板端喂原始像素 | mean/std 折进 NPU |
-| 输出 | **6 个 FP32 CHW blob**（见下）| 单个 logits |
+```
+model/    ppyoloe_s_640_ipu.param / .bin   模型（7.5MB，INT8，SPPF 优化版）
+tools/    ppyoloe_run                      ★一体化推理工具（22KB RISC-V 可执行，源码 deploy/v861_ppyoloe_run/）
+          libaw_simpleocv.so               官方图形库（画框/JPEG，固件里没带，需一起 push）
+labels.txt                                 5 类：bird / squirrel / cat / person / other_animal
+config.txt + ref/                          awnn_verify 对拍用（研发调试，见 §6；生产不用它）
+```
 
-**6 个输出**（NPU 出裸 logits，后处理留 CPU）：
+**前置（每块新板只做一次）**：让同事用 `deploy/v861_firmware_base/` 烧固件基座
+（PhoenixSuit + UBOOT 键）。烧完 `adb shell 'ls /dev/nna'` 存在 = NPU 就绪。**换模型永远不用重烧。**
+
+---
+
+## 1. 快速上手（生产集成就用这个）
+
+```bash
+# 布置（板子 /tmp 是 46MB RAM 盘，重启即空，需重推）
+adb shell "mkdir -p /tmp/ppf/model /tmp/ppf/lib /tmp/ppf/res"
+adb push model/ppyoloe_s_640_ipu.param model/ppyoloe_s_640_ipu.bin /tmp/ppf/model/
+adb push tools/ppyoloe_run /tmp/ppf/ && adb push tools/libaw_simpleocv.so /tmp/ppf/lib/
+adb shell "chmod +x /tmp/ppf/ppyoloe_run"
+
+# 跑（JPG / 相机原生 NV21 都行；--no-draw = 生产形态只出 JSONL）
+adb shell "cd /tmp/ppf && LD_LIBRARY_PATH=/tmp/ppf/lib:/usr/lib ./ppyoloe_run -m model -o res \
+    --no-draw --nv21 1280x720 frame1.nv21 frame2.nv21"
+adb shell "cat /tmp/ppf/res/results.jsonl"
+```
+
+**输出契约（后端只消费这个，无需写任何后处理代码）**——每帧一行 JSONL：
+
+```json
+{"image":"frame1.nv21","w":1280,"h":720,"infer_ms":43.0,"dets":[
+  {"label":"bird","score":0.854,"box":[7.8,2.6,1265.2,711.6]}]}
+```
+
+- `box` = 原图像素坐标 `[x1,y1,x2,y2]`；`label` 见 labels.txt；conf 阈值默认 0.45（`-c` 可调）
+- **空帧也必出一行**：无检出时 `"dets":[]`（实测验证）——不丢帧、不缺行
+- 去掉 `--no-draw` 会额外输出 `<name>_det.jpg` 标框图（验证用，每帧 +110~220ms）
+
+---
+
+## 2. 权威指标（2026-07-21 实测，静态模式）
+
+### 延迟（生产形态：NV21 1280×720 → JSONL）
+
+| 阶段 | 耗时 |
+|---|---|
+| precompile（进程启动一次性） | 163 ms |
+| NV21→RGB 转换+缩放（CPU，定点化） | 28.6 ms |
+| **NPU 推理** | **43.0 ms**（恒定，132 帧三轮验证） |
+| 解码+NMS（CPU） | 0.9 ms |
+| **每帧总计** | **82.9 ms ≈ 12.1 fps** |
+
+### 内存
+
+| 方面 | 数值 |
+|---|---|
+| NPU 保留池占用 | **14.43 MB**（blob 7.23 + weight 7.20；池 20MB 余 5.6MB；**串行任意帧数恒定零增长**） |
+| CPU 进程峰值 | VmHWM 25.8 MB（工具退出时自报） |
+| 存储 | 模型 7.5MB + 工具 22KB + 库 399KB ≈ 8MB |
+
+### 精度（板端 INT8 ≡ 上游 FP32，93 张同字节输入对拍）
+
+框匹配 **94.9%** · 平均 IoU **0.9728** · 置信度差 **0.034** · cls 头余弦 **0.9993~0.9996** ⇒ 量化几乎无损。
+精度权威数字 = round3 训练评估：**部署域（feeder）AP50 90.5**。
+
+---
+
+## 3. ★必须知道的四条（都是真板血泪，v2 有一条大反转）
+
+1. **★生产必须用静态模式**（`ppyoloe_run` 已内置，`precompiler_enable=true`）。
+   **v1 说"static 会死锁别用"是错的**——那是 NanoDet 时代的记录（栽的是模型不是模式）。
+   官方文档明确：dynamic 是给动态 shape（OCR 类）的，每帧重建计算图；固定 shape 就该 static。
+   实测：**43ms vs 226ms（快 5.3 倍）+ 内存恒定 + 串行任意帧数**。
+   dynamic 模式下推第 2 帧就 `dma_mem_alloc fail`，硬砸会挂内核到 USB 消失（只能断电）。
+2. **NPU 出错立即停，绝不重试**；进程 **segfault 崩溃会泄漏 NPU 池**（正常退出会还）→
+   之后建实例全失败，`adb reboot` 软重启即可恢复（无需断电）。
+3. **别用混合精度**（cls 头 FP32 → 回退 CPU +282ms）；**别降输入到 416**（整类漏检）。
+   INT8 掉的 ~0.05 分用 conf 0.50→0.45 补偿（已是默认）。
+4. **输出必须 FP32**（v2 实测论证）：输出张量改 INT8 后 cls 量化 scale=10.45（背景 logit 极端负值
+   撑爆动态范围），分数只剩 0.5/1.0 两档、框吸附 8px 网格。这是量化物理，不是习惯。
+
+---
+
+## 4. I/O 契约（自己写集成时才需要；用 tools/ppyoloe_run 可跳过）
+
+输入：**RGB** HWC uint8 0-255，**640×640**（`/255` 已折进 NPU ImageProcess 层，喂原始像素）。
+输出：6 个 FP32 CHW blob（NPU 出裸 logits，后处理留 CPU）：
 
 | blob | shape | 含义 |
 |---|---|---|
-| `conv2d_81.tmp_0` | `[5, 80, 80]` | cls logits, stride 8 |
-| `conv2d_84.tmp_0` | `[68, 80, 80]` | reg DFL logits, stride 8 |
-| `conv2d_74.tmp_0` | `[5, 40, 40]` | cls, stride 16 |
-| `conv2d_77.tmp_0` | `[68, 40, 40]` | reg, stride 16 |
-| `conv2d_67.tmp_0` | `[5, 20, 20]` | cls, stride 32 |
-| `conv2d_70.tmp_0` | `[68, 20, 20]` | reg, stride 32 |
+| `conv2d_81.tmp_0` / `conv2d_84.tmp_0` | `[5,80,80]` / `[68,80,80]` | cls / reg-DFL，stride 8 |
+| `conv2d_74.tmp_0` / `conv2d_77.tmp_0` | `[5,40,40]` / `[68,40,40]` | stride 16 |
+| `conv2d_67.tmp_0` / `conv2d_70.tmp_0` | `[5,20,20]` / `[68,20,20]` | stride 32 |
 
-`reg` 的 68 通道 = **4 边 × 17 个 DFL bin**（reg_max=16）。类别顺序见 `labels.txt`：`bird / squirrel / cat / person / other_animal`。
-
-**CPU 后处理** = `../decode_ref.py`（自包含，只依赖 numpy）：sigmoid(cls) + DFL(softmax+积分) + anchor 解码 + 逐类 NMS。
+reg 68 通道 = 4 边 × 17 DFL bin。解码参考实现：C 版 = `deploy/v861_ppyoloe_run/ppyoloe_run.c` 的
+`decode()`；Python 版 = `../decode_ref.py`（numpy 自包含）。二者输出对齐。
+**AWNN 不支持 YUV 输入**（`color_space` 仅 RGB 系）→ NV21 转换在 CPU 做（工具已内置定点化实现）。
 
 ---
-
-## 2. 上板怎么跑
-
-```bash
-# 1) 推模型 + 输入 + config（板子已烧好基座固件）
-adb push round3/ /tmp/ppyoloe
-
-# 2) 推板端验证工具 awnn_verify（在编译机上单独交叉编译, 见 §5）
-adb push awnn_verify /tmp/ppyoloe/awnn_verify
-adb shell 'chmod +x /tmp/ppyoloe/awnn_verify'
-
-# 3) 跑
-adb shell 'cd /tmp/ppyoloe && ./awnn_verify config.txt'
-```
-
-### ⚠⚠ 必须用动态模式 `use_static_mode=0`
-`config.txt` 里已设好。**`use_static_mode=1`（静态预编译）会死锁 NPU 硬件、把板子搞挂**（软重启救不回，要冷断电）——血的教训，别改。
-
----
-
-## 3. 真板实测（2026-07-14，V861M3 PER2）—— 本包 = 已优化的 SPPF 版
-
-```
-AWNN Test Pass        EXIT=0
-```
-
-| 指标 | 实测 |
-|---|---|
-| **层落点** | **152 层全部在 NPU，零 CPU 回退** ✅ |
-| **推理耗时** | **240 ms** @640×640（≈4.2 fps）|
-| **NPU 内存** | **18.02 MB**（blob 10.6 + weight 7.2）—— 板子 NPU 预留池 20MB |
-| 模型 | PP-YOLOE-s 640 + **SPPF 改写**，全 INT8，21 张校准 |
-
-### 精度（板端 INT8 vs FP32 ONNX 真值，demo_bird.jpg，**conf=0.45**）
-
-| | FP32 ONNX | 板端 NPU INT8 |
-|---|---|---|
-| bird #1 | 0.800 `[4.4, 2.3, 633.9, 625.8]` | **0.782 `[5.4, 1.5, 630.1, 626.9]`** ✓ |
-| bird #2 | 0.600 `[147.6, 503.5, 207.5, 557.4]` | **0.566 `[144.4, 503.3, 208.0, 559.3]`** ✓ |
-| bird #3 | 0.508 `[293.1, 139.6, 353.7, 211.7]` | **0.456 `[289.0, 139.2, 353.3, 211.9]`** ✓ |
-
-**3/3 全中，框误差仅几像素。** INT8 分数系统性低约 0.05 → **`decode_ref.py` 默认 conf 已设 0.45 补偿**（免费，别用混合精度，见下）。
-
----
-
-## 4. ★三条实测出来的优化结论（都经过真板验证，别踩坑）
-
-### ✅ 优化1：SPP → SPPF（白赚 24% 速度，零精度损失）
-NPU 只支持 **5×5 MaxPool**；SPP 的 **9×9/13×13 会回退 CPU**（吃掉 44ms）。
-**把 9×9 换成 2 串 5×5、13×13 换成 3 串 5×5**——stride=1 same-pad 下**数学完全等价**（实测输出误差 **0.000e+00，逐位相同**），但全部能上 NPU。
-→ **315ms → 240ms，CPU 回退 3→0。不用重训。**（脚本见 `_build/round3/`）
-
-### ❌ 优化2：**千万别用混合精度（cls 头 FP32）**——真板上是灾难
-**V861 的 NPU 是 INT8-only（不支持 FP32）**。把 cls 头设成 FP32 → **NPU 跑不了，强制回退 CPU**，而 80×80 的 head 卷积在 RISC-V 上奇慢：
-```
-CPU Layer Conv.81  134.5 ms
-CPU Layer Conv.74   96.2 ms
-CPU Layer Conv.67   51.5 ms   ← 合计 +282ms!
-总耗时 240ms → 545ms（慢一倍多）
-```
-> ⚠ **离线模拟器会骗你**：nanodet 那轮"cls头保FP32"的结论是在**模拟器**里得的（模拟器 FP32 免费），**真板上完全相反**。这就是必须上板验证的原因。
-> **INT8 掉分改用「降低置信阈值」补偿**（0.50→0.45），免费且有效（3/3 全中）。
-
-### ❌ 优化3：**别降输入尺寸到 416**（模型是 640 训的，会严重掉精度）
-实测 416（FP32 ONNX，排除量化因素）：
-| 图 | 640 | 416 |
-|---|---|---|
-| other_animal | 0.90 / 0.79 | **完全漏检** |
-| person | 0.72 | **完全漏检** |
-| cat | 0.82 | 0.67 + **误检 other_animal** |
-| bird | 3 个检出 | 只剩 1 个 |
-
-→ **不重训就别降尺寸。**
-
-### 💡 级联内存怎么办（检测 18MB / NPU 池 20MB，分类器塞不下）
-**NPU 预留池 20MB 是我们自己在固件 DTS 里定的**（`size_pool_mem`）——**固件是我们编的，直接调大即可**（板子 128MB，Linux 现用 95MB，可让出一部分）。**不用牺牲模型精度换内存。**
-
-### 其它
-- 校准集目前 21 张（本机可得）；用完整校准集重转可能再提升一点。
 
 ## 5. 复现 / 重建
 
-- **转换工程**：`../_build/round3/`（`configs/config_ppyoloe.yml` + `awnn.sh` + `calib/`）。
-  `cd _build/round3 && ./awnn.sh build configs/config_ppyoloe.yml` → 出 `_ipu`（需 docker `awnn:1.0.2`）。
-- **裸 ONNX**：`_build/round3/onnx/ppyoloe_s_640_logits.onnx`（从 `ppyoloe_s_640.onnx` 用 `onnx.utils.extract_model` 切掉后处理，只留 `image` 输入 + 6 个 head 输出）。
-- **awnn_verify**：编译机 `/home/yechen/build_awnn_verify.sh`（openwrt musl rv32 工具链）。
-  ⚠ 已打补丁修 vendor 的 **FP32 dump bug**（原代码把"元素数"当"字节数"写，FP32 输出被截断到 1/4）。
+- **工具源码**：`deploy/v861_ppyoloe_run/`（`ppyoloe_run.c` + `build.sh`，编译机 openwrt musl rv32 工具链）
+- **转换工程**：`../_build/round3/`（`awnn.sh build configs/config_ppyoloe_sppf.yml`，docker `awnn:1.0.2`）
+- **裸 ONNX**：`_build/round3/onnx/ppyoloe_s_640_sppf_logits.onnx`（SPPF 改写 + 切后处理）
 
-## 6. ★为什么是 PP-YOLOE 不是 nanodet
+## 6. awnn_verify 对拍（研发调试用，生产不用）
 
-**V861 的 VIP9000PICO NPU 按 16 通道分块，`slice`(channel-split) 要求通道 ÷16。**
-- **nanodet 的 ShuffleNetV2** channel split 半分出 **58/116/232** 通道——全不是 16 倍数 → 板端报 `slice_ipu inplace requires the number of channels to be divisible by 16`，**静态/动态都跑不了**。
-- **PP-YOLOE 的 CSPRepResNet** 全是标准 Conv+Concat，**backbone 里没有 channel-split**（ONNX 里那 2 个 Split 在后处理，已被切掉）→ **一次通过**。
+`config.txt` + `ref/` 供官方 `awnn_verify` 逐层 profile / 与 FP32 对拍。
+⚠ 对拍/逐层 profile **必须 `use_static_mode=0`**（官方 FAQ 要求 dynamic）——这与生产用 static 不矛盾，
+是两个场景。批量对拍用 `deploy/v861_awnn_batch/`（带熔断）。
 
-**★项目级铁律：上 V861 NPU 的模型必须 16 通道对齐、避开 channel-split。** 分类段的 EfficientNet-Lite（MBConv/SE，无 split）应天然安全。
+## 7. 为什么是 PP-YOLOE 不是 NanoDet
 
-完整上板实录见 `vs861/V861真板部署实录.md`。
+**VIP9000PICO 按 16 通道分块，channel-split 要求通道 ÷16**。NanoDet 的 ShuffleNetV2 半分出
+58/116/232 通道 → 板端 `slice_ipu inplace requires channels divisible by 16`，跑不了。
+PP-YOLOE 的 CSPRepResNet 无 channel-split → 一次通过。
+（同理：**PicoDet 的 ESNet 预计同坑**；分类段 backbone 定 **MobileNetV2/RepVGG-A0**，
+EfficientNet 在这颗 NPU 上慢 19 倍，见飞书候选清单。）
+
+完整过程与 know-how：`docs/detect/05-V861-真板部署.md`（含 §7.5 指标表、§9 增量实验记录）。
