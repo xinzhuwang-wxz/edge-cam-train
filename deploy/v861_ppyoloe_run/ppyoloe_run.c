@@ -281,6 +281,7 @@ int main(int argc, char** argv) {
     float conf = 0.45f, nms_thr = 0.50f;
     int draw = 1, nv21_w = 0, nv21_h = 0;
     int ot = -1; /* --ot 0..5 → LOWEST..MAXIMUM 带宽档位, -1=默认 */
+    int use_stdin = 0; /* --stdin: 常驻服务模式(路径从 stdin 流入, JSONL 从 stdout 流出) */
     int first_input = 0;
 
     for (int i = 1; i < argc; i++) {
@@ -290,6 +291,7 @@ int main(int argc, char** argv) {
         else if (!strcmp(argv[i], "-n") && i + 1 < argc) nms_thr = atof(argv[++i]);
         else if (!strcmp(argv[i], "--no-draw")) draw = 0;
         else if (!strcmp(argv[i], "--ot") && i + 1 < argc) ot = atoi(argv[++i]);
+        else if (!strcmp(argv[i], "--stdin")) use_stdin = 1;
         else if (!strcmp(argv[i], "--nv21") && i + 1 < argc) {
             if (sscanf(argv[++i], "%dx%d", &nv21_w, &nv21_h) != 2) {
                 fprintf(stderr, "--nv21 格式: WxH (如 640x640)\n");
@@ -297,12 +299,15 @@ int main(int argc, char** argv) {
             }
         } else { first_input = i; break; }
     }
-    if (!first_input) {
+    if (!first_input && !use_stdin) {
         fprintf(stderr,
-                "用法: %s [-m model_dir] [-o out_dir] [-c conf] [-n nms] [--no-draw]\n"
-                "          [--nv21 WxH] img1 [img2 ...]\n", argv[0]);
+                "用法: %s [-m model_dir] [-o out_dir] [-c conf] [-n nms] [--no-draw] [--stdin]\n"
+                "          [--nv21 WxH] img1 [img2 ...]\n"
+                "  --stdin: 常驻服务模式 —— 每行一个输入路径(或 --nv21 WxH 切换尺寸),\n"
+                "           JSONL 逐帧从 stdout 流出(诊断走 stderr), EOF 退出\n", argv[0]);
         return 1;
     }
+    FILE* prog = use_stdin ? stderr : stdout; /* 常驻模式下 stdout 只留给 JSONL */
 
     char param_path[512], model_path[512], jsonl_path[512];
     snprintf(param_path, sizeof(param_path), "%s/ppyoloe_s_640_ipu.param", model_dir);
@@ -375,10 +380,18 @@ int main(int argc, char** argv) {
     int total = 0, ok_cnt = 0;
     double inf_sum = 0, inf_min = 1e9, inf_max = 0;
 
-    for (int ai = first_input; ai < argc; ai++) {
-        const char* path = argv[ai];
-        if (!strcmp(path, "--nv21") && ai + 1 < argc) { /* 中途切换 NV21 尺寸 */
-            sscanf(argv[++ai], "%dx%d", &nv21_w, &nv21_h);
+    int ai = first_input ? first_input : argc;
+    static char tok[512], tok2[64];
+    for (;;) {
+        const char* path;
+        if (ai < argc) path = argv[ai++];
+        else if (use_stdin && scanf("%511s", tok) == 1) path = tok;
+        else break;
+        if (!strcmp(path, "--nv21")) { /* 中途切换 NV21 尺寸 */
+            const char* dim = NULL;
+            if (ai < argc) dim = argv[ai++];
+            else if (use_stdin && scanf("%63s", tok2) == 1) dim = tok2;
+            if (dim) sscanf(dim, "%dx%d", &nv21_w, &nv21_h);
             continue;
         }
         total++;
@@ -446,14 +459,19 @@ int main(int argc, char** argv) {
         int n = decode(cls, reg, ow, oh, conf, nms_thr, dets);
         double dec_ms = now_ms() - t_dec;
 
-        /* ---- JSONL ---- */
-        fprintf(jf, "{\"image\":\"%s\",\"w\":%d,\"h\":%d,\"infer_ms\":%.1f,\"dets\":[", base_name(path), ow, oh, inf_ms);
-        for (int i = 0; i < n; i++)
-            fprintf(jf, "%s{\"label\":\"%s\",\"score\":%.3f,\"box\":[%.1f,%.1f,%.1f,%.1f]}",
-                    i ? "," : "", NAMES[dets[i].cls], dets[i].score, dets[i].x1, dets[i].y1,
-                    dets[i].x2, dets[i].y2);
-        fprintf(jf, "]}\n");
+        /* ---- JSONL(文件恒写; --stdin 时同时流到 stdout) ---- */
+        static char jl[65536];
+        int jn = snprintf(jl, sizeof(jl), "{\"image\":\"%s\",\"w\":%d,\"h\":%d,\"infer_ms\":%.1f,\"dets\":[",
+                          base_name(path), ow, oh, inf_ms);
+        for (int i = 0; i < n && jn < (int)sizeof(jl) - 128; i++)
+            jn += snprintf(jl + jn, sizeof(jl) - jn,
+                           "%s{\"label\":\"%s\",\"score\":%.3f,\"box\":[%.1f,%.1f,%.1f,%.1f]}",
+                           i ? "," : "", NAMES[dets[i].cls], dets[i].score, dets[i].x1, dets[i].y1,
+                           dets[i].x2, dets[i].y2);
+        jn += snprintf(jl + jn, sizeof(jl) - jn, "]}\n");
+        fputs(jl, jf);
         fflush(jf);
+        if (use_stdin) { fputs(jl, stdout); fflush(stdout); }
 
         /* ---- 标框图 ---- */
         if (draw && img) {
@@ -472,16 +490,16 @@ int main(int argc, char** argv) {
         inf_sum += inf_ms;
         if (inf_ms < inf_min) inf_min = inf_ms;
         if (inf_ms > inf_max) inf_max = inf_ms;
-        printf("[%d] %s  %dx%d  load=%.1f infer=%.1f dec=%.1f total=%.1fms  dets=%d", ok_cnt,
-               base_name(path), ow, oh, load_ms, inf_ms, dec_ms, now_ms() - t_all, n);
+        fprintf(prog, "[%d] %s  %dx%d  load=%.1f infer=%.1f dec=%.1f total=%.1fms  dets=%d", ok_cnt,
+                base_name(path), ow, oh, load_ms, inf_ms, dec_ms, now_ms() - t_all, n);
         for (int i = 0; i < n && i < 4; i++)
-            printf("  %s:%.2f", NAMES[dets[i].cls], dets[i].score);
-        printf("\n");
-        fflush(stdout);
+            fprintf(prog, "  %s:%.2f", NAMES[dets[i].cls], dets[i].score);
+        fprintf(prog, "\n");
+        fflush(prog);
     }
 
     fclose(jf);
-    printf("---- %d/%d 张成功  infer min/avg/max = %.1f/%.1f/%.1f ms ----\n", ok_cnt, total,
+    fprintf(prog, "---- %d/%d 张成功  infer min/avg/max = %.1f/%.1f/%.1f ms ----\n", ok_cnt, total,
            ok_cnt ? inf_min : 0, ok_cnt ? inf_sum / ok_cnt : 0, ok_cnt ? inf_max : 0);
     awnn_eval_npu_memory();
     {   /* 进程内存自报 (峰值 VmHWM / 当前 VmRSS) */
