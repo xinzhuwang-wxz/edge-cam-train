@@ -112,27 +112,50 @@ static void nv21_to_bgr(const unsigned char* nv21, int w, int h, unsigned char* 
     }
 }
 
-/* NV21 → 640x640 RGB 一步融合(Y 双线性 + UV 最近邻)——无需全幅中间缓冲, no-draw 生产路径 */
+/* NV21 → 640x640 RGB 一步融合(Y 定点双线性 Q8 + UV 最近邻)——全整数, 预算 x 映射表 */
 static void nv21_resize_to_input(const unsigned char* nv21, int w, int h, unsigned char* dst) {
     const unsigned char* yp = nv21;
     const unsigned char* vu = nv21 + w * h;
-    const float fx = (float)w / INPUT_SIZE, fy = (float)h / INPUT_SIZE;
-    for (int y = 0; y < INPUT_SIZE; y++) {
-        float syf = (y + 0.5f) * fy - 0.5f;
-        if (syf < 0) syf = 0;
-        int sy0 = (int)syf, sy1 = sy0 + 1 < h ? sy0 + 1 : h - 1;
-        float wy = syf - sy0;
+    /* 预计算 x 方向映射(每帧一次, 640 项): sx0/sx1/wx(Q8) + UV 列偏移 */
+    static int t_w = -1;
+    static int sx0t[INPUT_SIZE], sx1t[INPUT_SIZE], wxt[INPUT_SIZE], uvxt[INPUT_SIZE];
+    static int sy0t[INPUT_SIZE], sy1t[INPUT_SIZE], wyt[INPUT_SIZE];
+    static int t_h = -1;
+    if (t_w != w) {
+        t_w = w;
         for (int x = 0; x < INPUT_SIZE; x++) {
-            float sxf = (x + 0.5f) * fx - 0.5f;
-            if (sxf < 0) sxf = 0;
-            int sx0 = (int)sxf, sx1 = sx0 + 1 < w ? sx0 + 1 : w - 1;
-            float wx = sxf - sx0;
-            float Y = yp[sy0 * w + sx0] * (1 - wx) * (1 - wy) + yp[sy0 * w + sx1] * wx * (1 - wy) +
-                      yp[sy1 * w + sx0] * (1 - wx) * wy + yp[sy1 * w + sx1] * wx * wy;
-            const unsigned char* uvp = vu + (sy0 / 2) * w + (sx0 / 2) * 2; /* [V,U] 最近邻 */
-            int C = 298 * ((int)(Y + 0.5f) - 16);
+            int fxq = ((2 * x + 1) * w * 128) / INPUT_SIZE - 128; /* Q8 源坐标 */
+            if (fxq < 0) fxq = 0;
+            sx0t[x] = fxq >> 8;
+            sx1t[x] = sx0t[x] + 1 < w ? sx0t[x] + 1 : w - 1;
+            wxt[x] = fxq & 255;
+            uvxt[x] = (sx0t[x] / 2) * 2;
+        }
+    }
+    if (t_h != h) {
+        t_h = h;
+        for (int y = 0; y < INPUT_SIZE; y++) {
+            int fyq = ((2 * y + 1) * h * 128) / INPUT_SIZE - 128;
+            if (fyq < 0) fyq = 0;
+            sy0t[y] = fyq >> 8;
+            sy1t[y] = sy0t[y] + 1 < h ? sy0t[y] + 1 : h - 1;
+            wyt[y] = fyq & 255;
+        }
+    }
+    for (int y = 0; y < INPUT_SIZE; y++) {
+        const unsigned char* r0 = yp + sy0t[y] * w;
+        const unsigned char* r1 = yp + sy1t[y] * w;
+        const unsigned char* uvr = vu + (sy0t[y] / 2) * w;
+        const int wy = wyt[y], iwy = 256 - wy;
+        unsigned char* d = dst + (size_t)y * INPUT_SIZE * 3;
+        for (int x = 0; x < INPUT_SIZE; x++, d += 3) {
+            const int sx0 = sx0t[x], sx1 = sx1t[x], wx = wxt[x], iwx = 256 - wx;
+            /* Y 双线性 Q16 → 整数 */
+            int Y = (r0[sx0] * iwx + r0[sx1] * wx) * iwy + (r1[sx0] * iwx + r1[sx1] * wx) * wy;
+            Y = (Y + 32768) >> 16;
+            const unsigned char* uvp = uvr + uvxt[x]; /* [V,U] 最近邻 */
+            int C = 298 * (Y - 16);
             int E = (int)uvp[0] - 128, D = (int)uvp[1] - 128;
-            unsigned char* d = dst + (y * INPUT_SIZE + x) * 3;
             d[0] = clamp_u8((C + 409 * E + 128) >> 8);           /* R */
             d[1] = clamp_u8((C - 100 * D - 208 * E + 128) >> 8); /* G */
             d[2] = clamp_u8((C + 516 * D + 128) >> 8);           /* B */
@@ -257,6 +280,7 @@ int main(int argc, char** argv) {
     const char* out_dir = "out";
     float conf = 0.45f, nms_thr = 0.50f;
     int draw = 1, nv21_w = 0, nv21_h = 0;
+    int ot = -1; /* --ot 0..5 → LOWEST..MAXIMUM 带宽档位, -1=默认 */
     int first_input = 0;
 
     for (int i = 1; i < argc; i++) {
@@ -265,6 +289,7 @@ int main(int argc, char** argv) {
         else if (!strcmp(argv[i], "-c") && i + 1 < argc) conf = atof(argv[++i]);
         else if (!strcmp(argv[i], "-n") && i + 1 < argc) nms_thr = atof(argv[++i]);
         else if (!strcmp(argv[i], "--no-draw")) draw = 0;
+        else if (!strcmp(argv[i], "--ot") && i + 1 < argc) ot = atoi(argv[++i]);
         else if (!strcmp(argv[i], "--nv21") && i + 1 < argc) {
             if (sscanf(argv[++i], "%dx%d", &nv21_w, &nv21_h) != 2) {
                 fprintf(stderr, "--nv21 格式: WxH (如 640x640)\n");
@@ -292,6 +317,12 @@ int main(int argc, char** argv) {
     config.model_path = model_path;
 
     if (awnn_init() != 0) { fprintf(stderr, "awnn_init 失败\n"); return 1; }
+    if (ot >= 0) {
+        static const awnn_ot_type_t OTS[6] = {AWNN_C_OT_LOWEST, AWNN_C_OT_LOW, AWNN_C_OT_MEDIUM,
+                                              AWNN_C_OT_HIGH, AWNN_C_OT_HIGHEST, AWNN_C_OT_MAXIMUM};
+        int r = awnn_set_npu_ot(OTS[ot > 5 ? 5 : ot]);
+        printf("set_npu_ot(%d) -> %d\n", ot, r);
+    }
     awnn_instance_t* inst = awnn_instance_create(&config);
     if (!inst) { fprintf(stderr, "instance_create 失败(检查模型路径 %s)\n", model_dir); return 1; }
 
@@ -352,6 +383,7 @@ int main(int argc, char** argv) {
         }
         total++;
         double t_all = now_ms();
+        double t_load0 = t_all;
         int ow = 0, oh = 0;
         awcv_mat_t* img = NULL;
         int is_nv21 = nv21_w > 0 && strstr(path, ".nv21") != NULL;
@@ -387,6 +419,8 @@ int main(int argc, char** argv) {
             resize_to_input(awcv_mat_data(img), ow, oh, 1, input_buf); /* BGR→RGB */
         }
 
+        double load_ms = now_ms() - t_load0;
+
         /* ---- 推理 ---- */
         if (awnn_instance_set_in_tensors(inst, &sess) != 0) {
             fprintf(stderr, "[%s] set_in_tensors 失败\n", path);
@@ -406,9 +440,11 @@ int main(int argc, char** argv) {
         }
 
         /* ---- 解码 ---- */
+        double t_dec = now_ms();
         float* cls[3] = {out_buf[0], out_buf[2], out_buf[4]};
         float* reg[3] = {out_buf[1], out_buf[3], out_buf[5]};
         int n = decode(cls, reg, ow, oh, conf, nms_thr, dets);
+        double dec_ms = now_ms() - t_dec;
 
         /* ---- JSONL ---- */
         fprintf(jf, "{\"image\":\"%s\",\"w\":%d,\"h\":%d,\"infer_ms\":%.1f,\"dets\":[", base_name(path), ow, oh, inf_ms);
@@ -436,8 +472,8 @@ int main(int argc, char** argv) {
         inf_sum += inf_ms;
         if (inf_ms < inf_min) inf_min = inf_ms;
         if (inf_ms > inf_max) inf_max = inf_ms;
-        printf("[%d] %s  %dx%d  infer=%.1fms  total=%.1fms  dets=%d", ok_cnt, base_name(path), ow,
-               oh, inf_ms, now_ms() - t_all, n);
+        printf("[%d] %s  %dx%d  load=%.1f infer=%.1f dec=%.1f total=%.1fms  dets=%d", ok_cnt,
+               base_name(path), ow, oh, load_ms, inf_ms, dec_ms, now_ms() - t_all, n);
         for (int i = 0; i < n && i < 4; i++)
             printf("  %s:%.2f", NAMES[dets[i].cls], dets[i].score);
         printf("\n");
@@ -448,6 +484,15 @@ int main(int argc, char** argv) {
     printf("---- %d/%d 张成功  infer min/avg/max = %.1f/%.1f/%.1f ms ----\n", ok_cnt, total,
            ok_cnt ? inf_min : 0, ok_cnt ? inf_sum / ok_cnt : 0, ok_cnt ? inf_max : 0);
     awnn_eval_npu_memory();
+    {   /* 进程内存自报 (峰值 VmHWM / 当前 VmRSS) */
+        FILE* st = fopen("/proc/self/status", "r");
+        if (st) {
+            char ln[128];
+            while (fgets(ln, sizeof(ln), st))
+                if (!strncmp(ln, "VmHWM", 5) || !strncmp(ln, "VmRSS", 5)) printf("%s", ln);
+            fclose(st);
+        }
+    }
 
     awnn_instance_destroy(inst);
     awnn_deinit();
