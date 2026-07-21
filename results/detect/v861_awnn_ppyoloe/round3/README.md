@@ -48,6 +48,16 @@ adb shell "cat /tmp/ppf/res/results.jsonl"
 - **空帧也必出一行**：无检出时 `"dets":[]`（实测验证）——不丢帧、不缺行
 - 去掉 `--no-draw` 会额外输出 `<name>_det.jpg` 标框图（验证用，每帧 +110~220ms）
 
+**常驻服务模式（相机循环推荐）**：`--stdin` —— 路径逐行喂 stdin，**JSONL 逐帧从 stdout 流出**
+（诊断走 stderr），模型常驻，precompile 只付一次，之后每帧 43ms；EOF 退出。
+
+```bash
+# 后端进程管道对接示例：写路径进去、读 JSONL 出来
+mkfifo /tmp/ppf/in.pipe
+LD_LIBRARY_PATH=/tmp/ppf/lib:/usr/lib ./ppyoloe_run -m model -o res --no-draw --stdin     < /tmp/ppf/in.pipe > /tmp/ppf/out.jsonl.stream 2>/dev/null &
+echo "--nv21 1280x720" > /tmp/ppf/in.pipe   # 之后每来一帧写一行路径
+```
+
 ---
 
 ## 2. 权威指标（2026-07-21 实测，静态模式）
