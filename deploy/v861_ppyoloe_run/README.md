@@ -19,6 +19,8 @@ LD_LIBRARY_PATH=/tmp/ppf/lib:/usr/lib ./ppyoloe_run -m model -o res \
     --nv21 1280x720 frame1.nv21 frame2.nv21     # --nv21 可中途切换尺寸
 
 # 选项: -c conf(0.45)  -n nms(0.50)  --no-draw(不出标框图)
+#       --stdin 常驻服务模式: 路径逐行喂 stdin → JSONL 逐帧流出 stdout(诊断走 stderr),
+#               模型常驻免重复 precompile, EOF 退出 —— 相机循环/后端管道对接用这个
 ```
 
 JSONL 每行：
