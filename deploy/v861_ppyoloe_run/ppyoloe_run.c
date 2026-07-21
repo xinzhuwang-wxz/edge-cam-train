@@ -112,27 +112,50 @@ static void nv21_to_bgr(const unsigned char* nv21, int w, int h, unsigned char* 
     }
 }
 
-/* NV21 → 640x640 RGB 一步融合(Y 双线性 + UV 最近邻)——无需全幅中间缓冲, no-draw 生产路径 */
+/* NV21 → 640x640 RGB 一步融合(Y 定点双线性 Q8 + UV 最近邻)——全整数, 预算 x 映射表 */
 static void nv21_resize_to_input(const unsigned char* nv21, int w, int h, unsigned char* dst) {
     const unsigned char* yp = nv21;
     const unsigned char* vu = nv21 + w * h;
-    const float fx = (float)w / INPUT_SIZE, fy = (float)h / INPUT_SIZE;
-    for (int y = 0; y < INPUT_SIZE; y++) {
-        float syf = (y + 0.5f) * fy - 0.5f;
-        if (syf < 0) syf = 0;
-        int sy0 = (int)syf, sy1 = sy0 + 1 < h ? sy0 + 1 : h - 1;
-        float wy = syf - sy0;
+    /* 预计算 x 方向映射(每帧一次, 640 项): sx0/sx1/wx(Q8) + UV 列偏移 */
+    static int t_w = -1;
+    static int sx0t[INPUT_SIZE], sx1t[INPUT_SIZE], wxt[INPUT_SIZE], uvxt[INPUT_SIZE];
+    static int sy0t[INPUT_SIZE], sy1t[INPUT_SIZE], wyt[INPUT_SIZE];
+    static int t_h = -1;
+    if (t_w != w) {
+        t_w = w;
         for (int x = 0; x < INPUT_SIZE; x++) {
-            float sxf = (x + 0.5f) * fx - 0.5f;
-            if (sxf < 0) sxf = 0;
-            int sx0 = (int)sxf, sx1 = sx0 + 1 < w ? sx0 + 1 : w - 1;
-            float wx = sxf - sx0;
-            float Y = yp[sy0 * w + sx0] * (1 - wx) * (1 - wy) + yp[sy0 * w + sx1] * wx * (1 - wy) +
-                      yp[sy1 * w + sx0] * (1 - wx) * wy + yp[sy1 * w + sx1] * wx * wy;
-            const unsigned char* uvp = vu + (sy0 / 2) * w + (sx0 / 2) * 2; /* [V,U] 最近邻 */
-            int C = 298 * ((int)(Y + 0.5f) - 16);
+            int fxq = ((2 * x + 1) * w * 128) / INPUT_SIZE - 128; /* Q8 源坐标 */
+            if (fxq < 0) fxq = 0;
+            sx0t[x] = fxq >> 8;
+            sx1t[x] = sx0t[x] + 1 < w ? sx0t[x] + 1 : w - 1;
+            wxt[x] = fxq & 255;
+            uvxt[x] = (sx0t[x] / 2) * 2;
+        }
+    }
+    if (t_h != h) {
+        t_h = h;
+        for (int y = 0; y < INPUT_SIZE; y++) {
+            int fyq = ((2 * y + 1) * h * 128) / INPUT_SIZE - 128;
+            if (fyq < 0) fyq = 0;
+            sy0t[y] = fyq >> 8;
+            sy1t[y] = sy0t[y] + 1 < h ? sy0t[y] + 1 : h - 1;
+            wyt[y] = fyq & 255;
+        }
+    }
+    for (int y = 0; y < INPUT_SIZE; y++) {
+        const unsigned char* r0 = yp + sy0t[y] * w;
+        const unsigned char* r1 = yp + sy1t[y] * w;
+        const unsigned char* uvr = vu + (sy0t[y] / 2) * w;
+        const int wy = wyt[y], iwy = 256 - wy;
+        unsigned char* d = dst + (size_t)y * INPUT_SIZE * 3;
+        for (int x = 0; x < INPUT_SIZE; x++, d += 3) {
+            const int sx0 = sx0t[x], sx1 = sx1t[x], wx = wxt[x], iwx = 256 - wx;
+            /* Y 双线性 Q16 → 整数 */
+            int Y = (r0[sx0] * iwx + r0[sx1] * wx) * iwy + (r1[sx0] * iwx + r1[sx1] * wx) * wy;
+            Y = (Y + 32768) >> 16;
+            const unsigned char* uvp = uvr + uvxt[x]; /* [V,U] 最近邻 */
+            int C = 298 * (Y - 16);
             int E = (int)uvp[0] - 128, D = (int)uvp[1] - 128;
-            unsigned char* d = dst + (y * INPUT_SIZE + x) * 3;
             d[0] = clamp_u8((C + 409 * E + 128) >> 8);           /* R */
             d[1] = clamp_u8((C - 100 * D - 208 * E + 128) >> 8); /* G */
             d[2] = clamp_u8((C + 516 * D + 128) >> 8);           /* B */
